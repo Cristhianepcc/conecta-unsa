@@ -142,9 +142,11 @@ class LandingTests(TestCase):
         self.assertContains(resp, "Ingenierías")
 
     def test_ca4__semaforo_explicado(self):
+        """CA-4: la landing explica el semáforo de transparencia (alta/media/baja)."""
         resp = self.client.get(reverse("core:home"))
-        self.assertContains(resp, "🟢")
-        self.assertContains(resp, "🔴")
+        self.assertContains(resp, "nivel de transparencia")
+        self.assertContains(resp, "Alta")
+        self.assertContains(resp, "Baja")
 
     def test_ca5__footer_institucional(self):
         """CA-5: footer con privacidad, términos y contacto."""
