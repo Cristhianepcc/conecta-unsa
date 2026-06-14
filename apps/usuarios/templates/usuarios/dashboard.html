@@ -21,7 +21,7 @@
       <h3 class="text-lg font-semibold text-slate-800">Convocatorias para ti</h3>
       <div class="mt-4 space-y-4">
         {% for conv, puntaje, motivos in items %}
-          {% include "convocatorias/_tarjeta.html" with conv=conv motivos=motivos %}
+          {% include "convocatorias/_tarjeta.html" with conv=conv motivos=motivos guardadas_ids=guardadas_ids %}
         {% empty %}
           <p class="text-sm text-slate-400">
             Por ahora no hay convocatorias pertinentes. Revisa tus preferencias o vuelve pronto.

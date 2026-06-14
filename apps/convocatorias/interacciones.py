@@ -41,6 +41,17 @@ def historial_de(usuario):
     return _convocatorias_por_interaccion(usuario, INTERACCION_VISTA)
 
 
+def ids_guardadas(usuario) -> set:
+    """IDs de convocatorias guardadas por el usuario (para marcar tarjetas en lote)."""
+    if not usuario.is_authenticated:
+        return set()
+    return set(
+        InteraccionConvocatoria.objects.filter(
+            usuario=usuario, tipo=INTERACCION_GUARDADA
+        ).values_list("convocatoria_id", flat=True)
+    )
+
+
 def esta_guardada(usuario, convocatoria) -> bool:
     if not usuario.is_authenticated:
         return False

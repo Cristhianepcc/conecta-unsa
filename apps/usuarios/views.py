@@ -148,6 +148,8 @@ def dashboard(request):
     """Dashboard del egresado: feed pertinente ordenado + resumen + campana (feature 10)."""
     from apps.matching.services import feed as matching_feed
 
+    from apps.convocatorias.interacciones import ids_guardadas
+
     items = matching_feed(request.user)  # [(conv, puntaje, motivos)]
     talento = asegurar_perfil_talento(request.user)
     return render(
@@ -157,25 +159,36 @@ def dashboard(request):
             "items": items,
             "talento": talento,
             "resumen": [conv for conv, _p, _m in items[:5]],
+            "guardadas_ids": ids_guardadas(request.user),
         },
     )
 
 
 @egresado_required
 def guardadas(request):
-    from apps.convocatorias.interacciones import guardadas_de
+    from apps.convocatorias.interacciones import guardadas_de, ids_guardadas
 
     return render(
-        request, "usuarios/guardadas.html", {"convocatorias": guardadas_de(request.user)}
+        request,
+        "usuarios/guardadas.html",
+        {
+            "convocatorias": guardadas_de(request.user),
+            "guardadas_ids": ids_guardadas(request.user),
+        },
     )
 
 
 @egresado_required
 def historial(request):
-    from apps.convocatorias.interacciones import historial_de
+    from apps.convocatorias.interacciones import historial_de, ids_guardadas
 
     return render(
-        request, "usuarios/historial.html", {"convocatorias": historial_de(request.user)}
+        request,
+        "usuarios/historial.html",
+        {
+            "convocatorias": historial_de(request.user),
+            "guardadas_ids": ids_guardadas(request.user),
+        },
     )
 
 

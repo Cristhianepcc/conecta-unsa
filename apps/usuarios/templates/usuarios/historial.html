@@ -6,7 +6,7 @@
 {% block dashboard_content %}
 <div class="max-w-3xl space-y-4">
   {% for conv in convocatorias %}
-    {% include "convocatorias/_tarjeta.html" with conv=conv %}
+    {% include "convocatorias/_tarjeta.html" with conv=conv guardadas_ids=guardadas_ids %}
   {% empty %}
     <p class="text-sm text-slate-400">Todavía no viste convocatorias.</p>
   {% endfor %}

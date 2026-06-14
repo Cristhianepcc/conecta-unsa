@@ -1,34 +1,73 @@
-{% comment %}Tarjeta de convocatoria. Contexto: conv, (opcional) motivos.{% endcomment %}
-<article class="rounded-xl border border-slate-200 p-5 hover:shadow-sm transition">
+{% comment %}Tarjeta de convocatoria. Contexto: conv, (opc) motivos, (opc) guardadas_ids.{% endcomment %}
+<article class="rounded-xl border border-slate-200 bg-white p-5 hover:shadow-sm hover:border-granate-200 transition">
   <div class="flex items-start justify-between gap-3">
-    <div>
+    <div class="min-w-0">
       <a href="{% url 'convocatorias:detalle' conv.id %}" class="font-semibold text-granate-700 hover:underline">
         {{ conv.titulo }}
       </a>
-      <p class="text-sm text-slate-500">
+      <p class="text-sm text-slate-500 truncate">
         {{ conv.empresa }}
-        {% if conv.empresa.verificada %}<span class="text-exito" title="Empresa verificada">✓</span>{% endif %}
-        · {{ conv.get_tipo_display }}{% if conv.modalidad %} · {{ conv.get_modalidad_display }}{% endif %}
+        {% if conv.empresa.verificada %}<i data-lucide="badge-check" class="inline w-3.5 h-3.5 text-exito align-text-bottom" title="Empresa verificada"></i>{% endif %}
       </p>
     </div>
     {% with et=conv.etiqueta_transparencia %}
-    <span class="shrink-0 text-xs font-medium rounded-full px-2 py-1
-      {% if et == 'alta' %}bg-exito/10 text-exito{% elif et == 'media' %}bg-alerta/10 text-alerta{% else %}bg-peligro/10 text-peligro{% endif %}">
-      {% if et == 'alta' %}🟢{% elif et == 'media' %}🟡{% else %}🔴{% endif %} {{ conv.transparencia_pct }}%
+    <span title="Transparencia {{ conv.transparencia_pct }}%"
+          class="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-2.5 py-1
+          {% if et == 'alta' %}bg-exito/10 text-exito{% elif et == 'media' %}bg-alerta/10 text-alerta{% else %}bg-peligro/10 text-peligro{% endif %}">
+      <span class="h-2 w-2 rounded-full {% if et == 'alta' %}bg-exito{% elif et == 'media' %}bg-alerta{% else %}bg-peligro{% endif %}"></span>
+      {{ conv.transparencia_pct }}%
     </span>
     {% endwith %}
   </div>
 
-  {% if conv.ubicacion or conv.fecha_limite %}
-  <p class="mt-2 text-xs text-slate-400">
-    {% if conv.ubicacion %}{{ conv.ubicacion }}{% endif %}
-    {% if conv.fecha_limite %}· postula hasta {{ conv.fecha_limite }}{% endif %}
+  <!-- Meta -->
+  <div class="mt-3 flex flex-wrap gap-2 text-xs">
+    <span class="rounded-full bg-granate-50 text-granate-700 px-2 py-0.5">{{ conv.get_tipo_display }}</span>
+    {% if conv.modalidad %}<span class="rounded-full bg-slate-100 text-slate-600 px-2 py-0.5">{{ conv.get_modalidad_display }}</span>{% endif %}
+    {% if conv.ubicacion %}<span class="inline-flex items-center gap-1 text-slate-500"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i>{{ conv.ubicacion }}</span>{% endif %}
+  </div>
+
+  <!-- Sueldo + fecha límite (datos decisivos) -->
+  <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+    {% if conv.banda_salarial_min and conv.banda_salarial_max and not conv.salario_confidencial %}
+      <span class="inline-flex items-center gap-1.5 font-medium text-slate-700">
+        <i data-lucide="wallet" class="w-4 h-4 text-granate-700"></i> S/ {{ conv.banda_salarial_min }} – {{ conv.banda_salarial_max }}
+      </span>
+    {% elif conv.salario_confidencial %}
+      <span class="text-slate-400 text-xs">Salario confidencial</span>
+    {% endif %}
+    {% if conv.fecha_limite %}
+      <span class="inline-flex items-center gap-1.5 text-slate-500">
+        <i data-lucide="calendar-clock" class="w-4 h-4"></i> Postula hasta {{ conv.fecha_limite }}
+      </span>
+    {% endif %}
+  </div>
+
+  {% if motivos %}
+  <p class="mt-3 inline-flex items-start gap-1.5 text-xs text-granate-700 bg-granate-50 rounded-lg px-3 py-2">
+    <i data-lucide="sparkles" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i>
+    <span>Recomendado: {{ motivos|join:" · " }}</span>
   </p>
   {% endif %}
 
-  {% if motivos %}
-  <p class="mt-3 text-xs text-granate-700 bg-granate-50 rounded-lg px-3 py-2">
-    Recomendado porque {{ motivos|join:", " }}.
-  </p>
-  {% endif %}
+  <!-- Acciones -->
+  <div class="mt-4 flex items-center gap-2">
+    <a href="{% url 'convocatorias:detalle' conv.id %}"
+       class="inline-flex items-center gap-1.5 rounded-lg bg-granate-700 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-granate-800">
+      Ver detalle <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+    </a>
+    <form method="post" action="{% url 'convocatorias:guardar' conv.id %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}">
+      {% if conv.id in guardadas_ids %}
+      <button class="inline-flex items-center gap-1.5 rounded-lg border border-granate-700 px-3.5 py-1.5 text-sm font-medium text-granate-700 hover:bg-granate-50" title="Quitar de guardadas">
+        <i data-lucide="bookmark-check" class="w-4 h-4"></i> Guardada
+      </button>
+      {% else %}
+      <button class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50" title="Guardar">
+        <i data-lucide="bookmark" class="w-4 h-4"></i> Guardar
+      </button>
+      {% endif %}
+    </form>
+  </div>
 </article>

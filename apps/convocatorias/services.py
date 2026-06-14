@@ -214,6 +214,39 @@ def calcular_transparencia(conv: Convocatoria) -> int:
     return round(presente / total * 100)
 
 
+def desglose_transparencia(conv: Convocatoria) -> list[dict]:
+    """Desglose por criterio para coaching (CA-6): cuánto suma cada uno y si está presente.
+
+    Ordena ausentes primero y por impacto (puntos) descendente, para responder
+    "qué te falta y cuánto subiría tu % de transparencia".
+    """
+    pesos = list(PesoTransparencia.objects.all())
+    if not pesos:
+        pesos = [
+            PesoTransparencia(criterio=c, etiqueta=e, peso=p)
+            for c, e, p in constants.CRITERIOS_TRANSPARENCIA
+        ]
+    total = sum(p.peso for p in pesos) or 1
+    items = []
+    for p in pesos:
+        check = CHECKS_TRANSPARENCIA.get(p.criterio)
+        items.append(
+            {
+                "criterio": p.criterio,
+                "etiqueta": p.etiqueta,
+                "puntos": round(p.peso / total * 100),
+                "presente": bool(check and check(conv)),
+            }
+        )
+    items.sort(key=lambda i: (i["presente"], -i["puntos"]))
+    return items
+
+
+def faltantes_transparencia(conv: Convocatoria) -> list[dict]:
+    """Criterios de transparencia ausentes, mayor impacto primero."""
+    return [i for i in desglose_transparencia(conv) if not i["presente"]]
+
+
 # --- Publicación ------------------------------------------------------------
 def faltantes_nivel_1(conv: Convocatoria) -> list[str]:
     """Campos Nivel 1 que faltan para poder publicar (CA-2)."""
