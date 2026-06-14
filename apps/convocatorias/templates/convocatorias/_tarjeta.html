@@ -3,7 +3,7 @@
   <div class="flex items-start justify-between gap-3">
     <div class="flex items-start gap-3 min-w-0">
       {% if conv.empresa.logo_url %}
-      <img src="{{ conv.empresa.logo_url }}" alt="" class="h-10 w-10 shrink-0 rounded-lg object-cover border border-slate-100">
+      <img src="{{ conv.empresa.logo_url }}" alt="" class="h-14 w-14 shrink-0 rounded-lg object-cover border border-slate-200">
       {% endif %}
       <div class="min-w-0">
         <a href="{% url 'convocatorias:detalle' conv.id %}" class="font-semibold text-granate-700 hover:underline">

@@ -1,0 +1,10 @@
+{% comment %}Ítem de confianza sobre fondo granate. Contexto: icono, titulo, texto.{% endcomment %}
+<div class="flex items-start gap-3">
+  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-white">
+    <i data-lucide="{{ icono }}" class="w-5 h-5"></i>
+  </span>
+  <div>
+    <dt class="font-semibold text-white">{{ titulo }}</dt>
+    <dd class="mt-0.5 text-sm text-white/75">{{ texto }}</dd>
+  </div>
+</div>

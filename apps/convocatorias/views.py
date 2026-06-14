@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
-from apps.matching.services import puntuar
+from apps.matching.services import compatibilidad, puntuar
 
 from .interacciones import alternar_guardada, esta_guardada, registrar_vista
 from .models import ESTADO_PUBLICADA, Convocatoria
@@ -14,10 +14,17 @@ def detalle(request, pk):
     conv = get_object_or_404(Convocatoria, pk=pk)
     registrar_vista(request.user, conv)
     _puntaje, motivos = puntuar(request.user, conv)
+    match, chips = compatibilidad(request.user, conv)
     return render(
         request,
         "convocatorias/detalle.html",
-        {"conv": conv, "motivos": motivos, "guardada": esta_guardada(request.user, conv)},
+        {
+            "conv": conv,
+            "motivos": motivos,
+            "match": match,
+            "chips": chips,
+            "guardada": esta_guardada(request.user, conv),
+        },
     )
 
 

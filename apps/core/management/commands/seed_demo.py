@@ -8,6 +8,7 @@ NO siembra perfiles de egresado: cada quien entra con su propio Gmail.
 from datetime import timedelta
 from decimal import Decimal
 
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
@@ -41,16 +42,18 @@ ADMIN_DEMO = "bolsa.trabajo@unsa.edu.pe"
 # Usuarios por defecto para la demo (uno por rol). Contraseña común para mostrar los flujos.
 PASSWORD_DEMO = "demo12345"
 
-# (ruc, razón social, nombre comercial, registrada?) — mezcla registradas y referenciales.
+# (ruc, razón social, nombre comercial, registrada?) — empresas reales (Arequipa/Perú).
+# La identidad final (nombre, logo, banner, web) la fija `seed_imagenes`; aquí solo
+# se crean los registros para que las convocatorias de muestra tengan a quién colgar.
 EMPRESAS = [
-    ("20100000011", "Altiplano Tech S.A.C.", "Altiplano Tech", True),
-    ("20100000012", "Constructora del Misti S.A.", "Constructora del Misti", True),
-    ("20100000013", "AgroSur Arequipa S.A.C.", "AgroSur", True),
-    ("20100000014", "Clínica Vida Sana S.A.C.", "Vida Sana", True),
-    ("20100000015", "Estudio Jurídico Yanahuara S.C.R.L.", "EJ Yanahuara", False),
-    ("20100000016", "Minera Cerro Verde Servicios S.A.", "CV Servicios", False),
-    ("20100000017", "EduFuturo ONG", "EduFuturo", False),
-    ("20100000018", "Consultora Andina S.A.C.", "Consultora Andina", True),
+    ("20100000011", "Globant Perú S.A.C.", "Globant", True),
+    ("20100000012", "Unión Andina de Cementos S.A.A.", "UNACEM", True),
+    ("20100000013", "Danper Trujillo S.A.C.", "Danper", True),
+    ("20100000014", "Clínica Internacional S.A.", "Clínica Internacional", True),
+    ("20100000015", "Estudio Echecopar S.R.L.", "Estudio Echecopar", False),
+    ("20100000016", "Sociedad Minera Cerro Verde S.A.A.", "Cerro Verde", False),
+    ("20100000017", "Programa Nacional de Becas y Crédito Educativo", "Pronabec", False),
+    ("20100000018", "PricewaterhouseCoopers S.C.R.L.", "PwC Perú", True),
 ]
 
 # (empresa_idx, tipo, titulo, carreras, transparencia_alta?, estado)
@@ -196,6 +199,10 @@ class Command(BaseCommand):
 
         self._crear_usuarios_demo()
 
+        # Cuentas de empresa (login por email) e imágenes realistas (logo + banner).
+        call_command("seed_cuentas")
+        call_command("seed_imagenes")
+
         self.stdout.write(self.style.SUCCESS(
             f"Demo sembrada: {Empresa.objects.count()} empresas, "
             f"{Convocatoria.objects.count()} convocatorias, 1 administrativo en allowlist."
@@ -204,6 +211,15 @@ class Command(BaseCommand):
             "Usuarios por defecto (contraseña «demo12345»): "
             "demo_egresado · demo_admin · demo_empresa."
         ))
+
+    @staticmethod
+    def _email_login(user):
+        """Registra el email del usuario como verificado/primario (login por email)."""
+        if not user.email:
+            return
+        EmailAddress.objects.update_or_create(
+            user=user, email=user.email, defaults={"verified": True, "primary": True}
+        )
 
     def _crear_usuarios_demo(self):
         """Crea un usuario por rol (egresado, administrador, empresa) con datos completos. Idempotente."""
@@ -214,6 +230,7 @@ class Command(BaseCommand):
         egresado.last_name = "Quispe Mamani"
         egresado.set_password(PASSWORD_DEMO)
         egresado.save()
+        self._email_login(egresado)
 
         perfil = asegurar_perfil(egresado)
         perfil.rol = ROL_EGRESADO
@@ -258,6 +275,7 @@ class Command(BaseCommand):
         admin.last_name = "Herrera Paredes"
         admin.set_password(PASSWORD_DEMO)
         admin.save()
+        self._email_login(admin)
         perfil_admin = asegurar_perfil(admin)
         perfil_admin.rol = ROL_ADMIN
         perfil_admin.perfil_completo = True

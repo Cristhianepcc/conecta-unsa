@@ -20,7 +20,7 @@
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
       <div class="flex items-start gap-4 min-w-0">
         {% if conv.empresa.logo_url %}
-        <img src="{{ conv.empresa.logo_url }}" alt="" class="h-14 w-14 shrink-0 rounded-xl object-cover border border-slate-100 {% if conv.empresa.banner_url %}-mt-12 ring-4 ring-white bg-white{% endif %}">
+        <img src="{{ conv.empresa.logo_url }}" alt="" class="h-20 w-20 shrink-0 rounded-xl object-cover border border-slate-200 {% if conv.empresa.banner_url %}-mt-12 ring-4 ring-white bg-white{% endif %}">
         {% endif %}
         <div class="min-w-0">
         <h2 class="text-xl sm:text-2xl font-bold text-slate-800">{{ conv.titulo }}</h2>
@@ -36,11 +36,22 @@
       </span>
     </div>
 
-    {% if motivos %}
-    <p class="mt-4 inline-flex items-start gap-2 text-sm text-granate-700 bg-granate-50 rounded-lg px-4 py-3">
-      <i data-lucide="sparkles" class="w-4 h-4 mt-0.5 shrink-0"></i>
-      <span>Recomendado porque {{ motivos|join:", " }}.</span>
-    </p>
+    <!-- Compatibilidad + por qué te la recomendamos -->
+    {% if chips %}
+    <div class="mt-5 rounded-xl bg-granate-50/60 p-4">
+      <div class="flex items-center justify-between text-sm">
+        <span class="font-semibold {% if match >= 80 %}text-exito{% elif match >= 60 %}text-granate-700{% else %}text-slate-500{% endif %}">{{ match }}% compatible con tu perfil</span>
+      </div>
+      <div class="mt-1.5 h-2 rounded-full bg-white overflow-hidden" role="img" aria-label="Compatibilidad {{ match }} por ciento">
+        <div class="h-full rounded-full {% if match >= 80 %}bg-exito{% elif match >= 60 %}bg-granate-600{% else %}bg-slate-400{% endif %}" style="width: {{ match }}%"></div>
+      </div>
+      <p class="mt-3 text-xs font-medium text-granate-700 flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ¿Por qué te la recomendamos?</p>
+      <div class="mt-2 flex flex-wrap gap-1.5">
+        {% for chip in chips %}
+        <span class="rounded-full bg-white border border-granate-100 text-granate-700 text-xs px-2.5 py-1">{{ chip }}</span>
+        {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
     <!-- Datos decisivos destacados -->

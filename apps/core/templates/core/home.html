@@ -1,156 +1,234 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}CONECTA UNSA — Oportunidades relevantes para egresados{% endblock %}
+{% block title %}CONECTA UNSA — Encuentra tu oportunidad laboral ideal{% endblock %}
 
 {% block content %}
-<!-- ===== HERO (imagen de fondo a sangre) ===== -->
-<section class="relative bg-granate-50 overflow-hidden">
-  <!-- Foto del campus como fondo, full-bleed en la mitad derecha -->
-  <div class="hidden lg:block absolute inset-y-0 right-0 w-[52%]" aria-hidden="true">
-    <img src="{% static 'img/landing-pabello.jpg' %}" alt="" class="absolute inset-0 h-full w-full object-cover">
-    <!-- Funde el borde izquierdo de la foto con el fondo (sin "caja") -->
-    <div class="absolute inset-0 bg-gradient-to-r from-granate-50 via-granate-50/40 to-transparent"></div>
-    <!-- Cuña granate diagonal con el claim institucional -->
-    <div class="absolute inset-y-0 right-0 w-[55%] bg-granate-700/92 text-white pr-10 pl-16 flex flex-col justify-center items-end text-right"
-         style="clip-path: polygon(40% 0, 100% 0, 100% 100%, 0% 100%);">
-      <p class="text-xl font-semibold leading-snug max-w-[13rem]">Comprometidos con tu desarrollo profesional</p>
-    </div>
+
+<!-- ===================================================================== -->
+<!-- HERO — foto institucional a sangre + dos puertas de acceso             -->
+<!-- ===================================================================== -->
+<section class="relative isolate">
+  <!-- Foto de fondo + overlay granate para legibilidad -->
+  <img src="{% static 'img/landing-pabello.jpg' %}" alt=""
+       class="absolute inset-0 -z-10 h-full w-full object-cover">
+  <div class="absolute inset-0 -z-10 bg-gradient-to-r from-granate-900/95 via-granate-900/80 to-granate-800/55"></div>
+
+  <div class="shell pt-14 pb-28 sm:pt-20 sm:pb-32 lg:pt-24">
+    <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/20 backdrop-blur">
+      <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+      Servicio oficial de la Universidad Nacional de San Agustín
+    </span>
+
+    <h1 class="mt-5 max-w-2xl text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl">
+      Encuentra tu <span class="text-dorado">oportunidad ideal</span>
+    </h1>
+    <p class="mt-4 max-w-xl text-base text-white/85 sm:text-lg">
+      Convocatorias <strong class="font-semibold text-white">verificadas por tu universidad</strong>,
+      organizadas por tu carrera y sin saturación. Los mejores buscan a los mejores, y ese eres tú.
+    </p>
+
+    <!-- Buscador principal -->
+    <form action="{% url 'usuarios:login' %}" method="get" role="search"
+          class="mt-7 max-w-2xl rounded-2xl bg-white p-2 shadow-2xl">
+      <div class="flex flex-col gap-2 sm:flex-row">
+        <label class="sr-only" for="q">Buscar por cargo, empresa o carrera</label>
+        <div class="flex flex-1 items-center gap-2 px-3">
+          <i data-lucide="search" class="w-5 h-5 shrink-0 text-slate-400"></i>
+          <input id="q" name="q" type="search" autocomplete="off"
+                 placeholder="Cargo, empresa o carrera (ej. prácticas de ingeniería)"
+                 class="w-full border-0 py-2.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0">
+        </div>
+        <button type="submit"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800">
+          Buscar <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </form>
   </div>
 
-  <div class="relative shell py-12 sm:py-16 lg:py-28">
-    <div class="lg:max-w-[48%]">
-      <h1 class="text-3xl sm:text-4xl lg:text-[2.7rem] font-bold tracking-tight text-slate-800 leading-[1.12]">
-        Oportunidades laborales relevantes para
-        <span class="text-granate-700">egresados UNSA</span>
-      </h1>
-      <p class="mt-4 sm:mt-5 max-w-xl text-base sm:text-lg text-slate-600">
-        CONECTA UNSA organiza y difunde convocatorias laborales de forma pertinente,
-        transparente y confiable, para que encuentres oportunidades relacionadas a tu formación.
-      </p>
-      <div class="mt-7 flex flex-col sm:flex-row gap-3">
-        <a href="{% url 'usuarios:login' %}"
-           class="inline-flex items-center justify-center gap-2 rounded-lg bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800">
-          Ver convocatorias <i data-lucide="search" class="w-4 h-4"></i>
-        </a>
-        <a href="{% url 'core:como_funciona' %}"
-           class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 hover:bg-slate-50">
-          ¿Cómo funciona? <i data-lucide="info" class="w-4 h-4"></i>
-        </a>
-      </div>
+  <!-- Dos puertas de acceso, flotando sobre el borde inferior del hero -->
+  <div class="shell relative -mb-16 translate-y-16">
+    <div class="grid gap-5 sm:grid-cols-2">
+      <!-- Egresado -->
+      <a href="{% url 'usuarios:login' %}"
+         class="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-2xl">
+        <span class="absolute inset-y-0 left-0 w-1.5 bg-granate-700" aria-hidden="true"></span>
+        <div class="flex items-start gap-4">
+          <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-granate-700 text-white shadow-sm">
+            <i data-lucide="graduation-cap" class="w-7 h-7"></i>
+          </span>
+          <div class="min-w-0">
+            <span class="text-xs font-semibold uppercase tracking-wide text-granate-700">Egresado / Estudiante</span>
+            <h3 class="text-lg font-bold leading-tight text-slate-800">Busca tu oportunidad</h3>
+            <p class="mt-1 text-sm text-slate-500">Convocatorias verificadas y alineadas con tu carrera.</p>
+          </div>
+        </div>
+        <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-granate-700">
+          Ver convocatorias <i data-lucide="arrow-right" class="w-4 h-4 transition group-hover:translate-x-1"></i>
+        </span>
+      </a>
 
-      <!-- 2 puertas (la entrada según quién eres) -->
-      <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-        <span class="text-slate-400">Ingresa como:</span>
-        <a href="{% url 'usuarios:login' %}" class="inline-flex items-center gap-1.5 font-medium text-granate-700 hover:underline">
-          <i data-lucide="graduation-cap" class="w-4 h-4"></i> Soy egresado
-        </a>
-        <a href="{% url 'empresas:registro' %}" class="inline-flex items-center gap-1.5 font-medium text-granate-700 hover:underline">
-          <i data-lucide="building-2" class="w-4 h-4"></i> Soy empresa
-        </a>
-      </div>
-
-      <!-- Imagen del campus en móvil (en desktop va a sangre a la derecha) -->
-      <div class="lg:hidden mt-8 relative rounded-2xl overflow-hidden h-48">
-        <img src="{% static 'img/landing-pabello.jpg' %}" alt="Campus de la UNSA, Arequipa"
-             class="absolute inset-0 h-full w-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-granate-900/75 via-granate-900/20 to-transparent"></div>
-        <p class="absolute bottom-3 left-4 right-4 text-white font-semibold text-sm">
-          Comprometidos con tu desarrollo profesional
-        </p>
-      </div>
+      <!-- Empresa -->
+      <a href="{% url 'empresas:registro' %}"
+         class="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-2xl">
+        <span class="absolute inset-y-0 left-0 w-1.5 bg-slate-800" aria-hidden="true"></span>
+        <div class="flex items-start gap-4">
+          <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-800 text-white shadow-sm">
+            <i data-lucide="building-2" class="w-7 h-7"></i>
+          </span>
+          <div class="min-w-0">
+            <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Empresa / Reclutador</span>
+            <h3 class="text-lg font-bold leading-tight text-slate-800">Encuentra talento UNSA</h3>
+            <p class="mt-1 text-sm text-slate-500">Publica tu convocatoria y llega a egresados calificados.</p>
+          </div>
+        </div>
+        <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+          Publicar convocatoria <i data-lucide="arrow-right" class="w-4 h-4 transition group-hover:translate-x-1"></i>
+        </span>
+      </a>
     </div>
   </div>
 </section>
 
-<!-- ===== MÉTRICAS (reales) ===== -->
-<section class="shell">
-  <div class="mt-8 lg:-mt-16 relative z-10 rounded-2xl bg-white shadow-xl ring-1 ring-slate-100 px-6 sm:px-10 py-8">
-    <dl class="grid grid-cols-2 md:grid-cols-5 gap-6 lg:gap-8 text-center">
-      {% with m=metricas %}
+<!-- ===================================================================== -->
+<!-- BANDA DE MÉTRICAS — granate sólido, cifras grandes (estilo Bolsa UNI)   -->
+<!-- ===================================================================== -->
+<section class="bg-granate-700 pt-36 text-white">
+  <div class="shell pb-12">
+    <dl class="grid grid-cols-2 gap-x-6 gap-y-8 text-center sm:grid-cols-3 lg:grid-cols-5">
       <div>
-        <div class="mx-auto h-12 w-12 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center"><i data-lucide="briefcase"></i></div>
-        <dd class="mt-3 text-2xl font-bold text-granate-700">{{ m.convocatorias_activas }}</dd>
-        <dt class="text-xs text-slate-500">convocatorias activas</dt>
+        <i data-lucide="briefcase" class="mx-auto h-7 w-7 text-white/70"></i>
+        <dd class="mt-2 text-3xl font-bold sm:text-4xl">{{ metricas.convocatorias_activas }}</dd>
+        <dt class="text-xs text-white/70">convocatorias activas</dt>
       </div>
       <div>
-        <div class="mx-auto h-12 w-12 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center"><i data-lucide="building-2"></i></div>
-        <dd class="mt-3 text-2xl font-bold text-granate-700">{{ m.empresas_participantes }}</dd>
-        <dt class="text-xs text-slate-500">empresas participantes</dt>
+        <i data-lucide="building-2" class="mx-auto h-7 w-7 text-white/70"></i>
+        <dd class="mt-2 text-3xl font-bold sm:text-4xl">{{ metricas.empresas_participantes }}</dd>
+        <dt class="text-xs text-white/70">empresas participantes</dt>
       </div>
       <div>
-        <div class="mx-auto h-12 w-12 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center"><i data-lucide="graduation-cap"></i></div>
-        <dd class="mt-3 text-2xl font-bold text-granate-700">{{ m.carreras_cubiertas }}</dd>
-        <dt class="text-xs text-slate-500">carreras cubiertas</dt>
+        <i data-lucide="graduation-cap" class="mx-auto h-7 w-7 text-white/70"></i>
+        <dd class="mt-2 text-3xl font-bold sm:text-4xl">{{ metricas.carreras_cubiertas }}</dd>
+        <dt class="text-xs text-white/70">carreras cubiertas</dt>
       </div>
       <div>
-        <div class="mx-auto h-12 w-12 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center"><i data-lucide="file-check-2"></i></div>
-        <dd class="mt-3 text-2xl font-bold text-granate-700">{{ m.indice_transparencia }}%</dd>
-        <dt class="text-xs text-slate-500">con información transparente</dt>
+        <i data-lucide="file-check-2" class="mx-auto h-7 w-7 text-white/70"></i>
+        <dd class="mt-2 text-3xl font-bold sm:text-4xl">{{ metricas.indice_transparencia }}%</dd>
+        <dt class="text-xs text-white/70">información transparente</dt>
       </div>
-      <div>
-        <div class="mx-auto h-12 w-12 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center"><i data-lucide="line-chart"></i></div>
-        <dd class="mt-3 text-2xl font-bold text-granate-700">{{ m.vistas }}</dd>
-        <dt class="text-xs text-slate-500">visualizaciones</dt>
+      <div class="col-span-2 sm:col-span-1">
+        <i data-lucide="eye" class="mx-auto h-7 w-7 text-white/70"></i>
+        <dd class="mt-2 text-3xl font-bold sm:text-4xl">{{ metricas.vistas }}</dd>
+        <dt class="text-xs text-white/70">visualizaciones</dt>
       </div>
-      {% endwith %}
     </dl>
   </div>
+  <!-- Divisor curvo: granate → blanco -->
+  <svg class="block w-full" style="height:clamp(40px,6vw,90px)" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#ffffff" d="M0,80 C360,0 1080,0 1440,80 L1440,90 L0,90 Z"></path>
+  </svg>
 </section>
 
-<!-- ===== CATEGORÍAS (taxonomía real) ===== -->
-<section class="shell py-14">
+<!-- ===================================================================== -->
+<!-- CATEGORÍAS — explora por tu área profesional                           -->
+<!-- ===================================================================== -->
+<section class="shell pb-14">
   <div class="flex items-end justify-between gap-4">
-    <h2 class="text-2xl font-bold text-slate-800">Convocatorias por categoría profesional</h2>
-    <a href="{% url 'usuarios:login' %}" class="text-sm text-granate-700 font-medium hover:underline whitespace-nowrap">
-      Ver todas las categorías →
-    </a>
+    <div>
+      <h2 class="text-2xl font-bold text-slate-800">Explora por tu área profesional</h2>
+      <p class="mt-1 text-slate-500">Oportunidades organizadas según tu formación en la UNSA.</p>
+    </div>
+    <a href="{% url 'usuarios:login' %}" class="whitespace-nowrap text-sm font-medium text-granate-700 hover:underline">Ver todas →</a>
   </div>
-  <div class="mt-7 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4 lg:gap-5">
+  <div class="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
     {% for c in categorias %}
     <a href="{% url 'usuarios:login' %}"
-       class="rounded-xl border border-slate-200 p-4 text-center hover:shadow-sm hover:border-granate-200 transition">
-      <div class="mx-auto h-11 w-11 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center">
+       class="group rounded-2xl border border-slate-200 p-4 text-center transition hover:-translate-y-0.5 hover:border-granate-200 hover:shadow-md">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-granate-100 text-granate-700 transition group-hover:bg-granate-700 group-hover:text-white">
         <i data-lucide="{{ c.icono }}" class="w-5 h-5"></i>
       </div>
-      <p class="mt-3 text-sm font-semibold text-slate-800 leading-snug">{{ c.label }}</p>
-      <p class="text-xs text-slate-500 mt-0.5">{{ c.conteo }} oportunidad{{ c.conteo|pluralize:"es" }}</p>
+      <p class="mt-3 text-sm font-semibold leading-snug text-slate-800">{{ c.label }}</p>
+      <p class="mt-0.5 text-xs text-slate-500">{{ c.conteo }} oportunidad{{ c.conteo|pluralize:"es" }}</p>
     </a>
     {% endfor %}
   </div>
 </section>
 
-<!-- ===== CONVOCATORIAS DESTACADAS (reales) ===== -->
+<!-- ===================================================================== -->
+<!-- OFERTAS RECIENTES — tabs + tarjetas con jerarquía y urgencia            -->
+<!-- ===================================================================== -->
 {% if destacadas %}
-<section class="bg-white border-t border-slate-100">
-  <div class="shell py-14">
-    <div class="flex items-end justify-between gap-4">
+<section class="bg-slate-50 py-14">
+  <div class="shell">
+    <div class="text-center">
       <h2 class="text-2xl font-bold text-slate-800">Convocatorias destacadas</h2>
-      <a href="{% url 'usuarios:login' %}" class="text-sm text-granate-700 font-medium hover:underline whitespace-nowrap">Ver todas →</a>
+      <p class="mt-1 text-slate-500">Las oportunidades más completas y vigentes. Ingresa para ver todas.</p>
     </div>
-    <div class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+    <!-- Tabs (visuales; el listado completo requiere ingresar) -->
+    <div class="mx-auto mt-6 flex w-max max-w-full flex-wrap justify-center gap-2 rounded-full bg-white p-1.5 shadow-sm ring-1 ring-slate-100">
+      <span class="rounded-full bg-granate-700 px-4 py-1.5 text-sm font-medium text-white">Todas</span>
+      <a href="{% url 'usuarios:login' %}" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100">Prácticas</a>
+      <a href="{% url 'usuarios:login' %}" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100">Tiempo completo</a>
+      <a href="{% url 'usuarios:login' %}" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100">Remoto</a>
+    </div>
+
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {% for c in destacadas %}
-      <article class="rounded-xl bg-white border border-slate-200 p-5 flex flex-col hover:shadow-sm transition">
-        <div class="flex items-center gap-3">
-          {% if c.empresa.logo_url %}
-          <img src="{{ c.empresa.logo_url }}" alt="" class="h-9 w-9 rounded object-contain">
-          {% else %}
-          <span class="h-9 w-9 rounded bg-granate-100 text-granate-700 font-bold flex items-center justify-center">
-            {{ c.empresa.nombre_comercial|default:c.empresa.razon_social|slice:":1" }}
-          </span>
-          {% endif %}
-          <span class="text-sm text-slate-500 truncate">{{ c.empresa }}
-            {% if c.empresa.verificada %}<i data-lucide="badge-check" class="inline w-4 h-4 text-exito align-text-bottom"></i>{% endif %}
-          </span>
+      <article class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex min-w-0 items-center gap-3">
+            {% if c.empresa.logo_url %}
+            <img src="{{ c.empresa.logo_url }}" alt="" class="h-12 w-12 shrink-0 rounded-lg border border-slate-200 object-cover">
+            {% else %}
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-granate-100 text-lg font-bold text-granate-700">{{ c.empresa.nombre_comercial|default:c.empresa.razon_social|slice:":1" }}</span>
+            {% endif %}
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium text-slate-600">{{ c.empresa }}</p>
+              {% if c.empresa.verificada %}
+              <span class="inline-flex items-center gap-1 text-xs text-exito"><i data-lucide="badge-check" class="w-3.5 h-3.5"></i> Empresa verificada</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="flex shrink-0 flex-col items-end gap-1">
+            {% if forloop.first %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-dorado/15 px-2 py-0.5 text-[11px] font-semibold text-dorado"><i data-lucide="star" class="w-3 h-3"></i> Recomendada</span>
+            {% endif %}
+            {% if c.cierra_pronto %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-peligro/10 px-2 py-0.5 text-[11px] font-semibold text-peligro"><i data-lucide="flame" class="w-3 h-3"></i> Urgente</span>
+            {% endif %}
+          </div>
         </div>
-        <h3 class="mt-3 font-semibold text-slate-800 leading-snug">{{ c.titulo }}</h3>
+
+        <h3 class="mt-3 font-semibold leading-snug text-slate-800">{{ c.titulo }}</h3>
+
         <div class="mt-3 flex flex-wrap gap-2 text-xs">
-          <span class="rounded-full bg-granate-50 text-granate-700 px-2 py-0.5">{{ c.get_tipo_display }}</span>
-          {% if c.modalidad %}<span class="rounded-full bg-slate-100 text-slate-600 px-2 py-0.5">{{ c.get_modalidad_display }}</span>{% endif %}
+          <span class="rounded-full bg-granate-50 px-2 py-0.5 text-granate-700">{{ c.get_tipo_display }}</span>
+          {% if c.modalidad %}<span class="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">{{ c.get_modalidad_display }}</span>{% endif %}
+          {% if c.ubicacion %}<span class="inline-flex items-center gap-1 text-slate-500"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i>{{ c.ubicacion }}</span>{% endif %}
         </div>
-        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span class="inline-flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i>{{ c.ubicacion|default:"—" }}</span>
-          <span>Publicado hace {{ c.creada_en|timesince }}</span>
+
+        <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+          {% if c.banda_salarial_min and c.banda_salarial_max and not c.salario_confidencial %}
+            <span class="inline-flex items-center gap-1.5 font-medium text-slate-700"><i data-lucide="wallet" class="w-4 h-4 text-granate-700"></i> S/ {{ c.banda_salarial_min }} – {{ c.banda_salarial_max }}</span>
+          {% elif c.salario_confidencial %}
+            <span class="text-xs text-slate-400">Salario confidencial</span>
+          {% endif %}
+          {% if c.fecha_limite %}
+            <span class="inline-flex items-center gap-1.5 {% if c.cierra_pronto %}font-medium text-peligro{% else %}text-slate-500{% endif %}">
+              <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+              {% with d=c.dias_para_cierre %}{% if d == 0 %}Cierra hoy{% elif d == 1 %}Cierra mañana{% elif d > 1 %}Cierra en {{ d }} días{% else %}Cerrada{% endif %}{% endwith %}
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+          <span class="text-xs text-slate-400">Publicado hace {{ c.creada_en|timesince }}</span>
+          <a href="{% url 'usuarios:login' %}"
+             class="inline-flex items-center gap-1.5 rounded-lg bg-granate-700 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-granate-800">
+            Ver oportunidad <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </a>
         </div>
       </article>
       {% endfor %}
@@ -159,67 +237,175 @@
 </section>
 {% endif %}
 
-<!-- ===== TRANSPARENCIA ===== -->
+<!-- ===================================================================== -->
+<!-- CÓMO FUNCIONA — 3 pasos                                                 -->
+<!-- ===================================================================== -->
 <section class="shell py-14">
-  <h2 class="text-2xl font-bold text-slate-800">Transparencia en cada convocatoria</h2>
-  <div class="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
-    {% include "core/_valor.html" with icono="shield-check" titulo="Información verificada" texto="Validamos los datos básicos antes de su publicación." %}
-    {% include "core/_valor.html" with icono="file-text" titulo="Datos completos" texto="Priorizamos convocatorias con información clara y detallada." %}
-    {% include "core/_valor.html" with icono="target" titulo="Categorización pertinente" texto="Organizamos las oportunidades por áreas relacionadas." %}
-    {% include "core/_valor.html" with icono="megaphone" titulo="Difusión responsable" texto="Controlamos la frecuencia para evitar saturación informativa." %}
-    {% include "core/_valor.html" with icono="lock" titulo="Datos institucionales" texto="Tu información está protegida y no se comparte con terceros." %}
+  <h2 class="text-center text-2xl font-bold text-slate-800">Tu próxima oportunidad en 3 pasos</h2>
+  <div class="mt-9 grid gap-6 sm:grid-cols-3">
+    <div class="relative rounded-2xl border border-slate-200 p-6">
+      <span class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-granate-700 text-sm font-bold text-white">1</span>
+      <i data-lucide="user-plus" class="w-6 h-6 text-granate-700"></i>
+      <h3 class="mt-3 font-semibold text-slate-800">Crea tu perfil</h3>
+      <p class="mt-1 text-sm text-slate-500">Indica tu carrera y áreas de interés con tu cuenta UNSA.</p>
+    </div>
+    <div class="relative rounded-2xl border border-slate-200 p-6">
+      <span class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-granate-700 text-sm font-bold text-white">2</span>
+      <i data-lucide="filter" class="w-6 h-6 text-granate-700"></i>
+      <h3 class="mt-3 font-semibold text-slate-800">Recibe lo relevante</h3>
+      <p class="mt-1 text-sm text-slate-500">Convocatorias verificadas y filtradas según tu formación, sin saturación.</p>
+    </div>
+    <div class="relative rounded-2xl border border-slate-200 p-6">
+      <span class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-granate-700 text-sm font-bold text-white">3</span>
+      <i data-lucide="send" class="w-6 h-6 text-granate-700"></i>
+      <h3 class="mt-3 font-semibold text-slate-800">Decide y postula</h3>
+      <p class="mt-1 text-sm text-slate-500">Con información completa y transparente decides, y te conectamos con el canal oficial de la empresa para postular.</p>
+    </div>
   </div>
 </section>
 
-<!-- ===== BENEFICIOS + RESUMEN SEMANAL ===== -->
+<!-- ===================================================================== -->
+<!-- MISIÓN / CONFIANZA — bloque granate intenso con divisores curvos        -->
+<!-- ===================================================================== -->
+<div class="bg-white">
+  <svg class="block w-full" style="height:clamp(40px,6vw,90px)" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#52151E" d="M0,10 C360,90 1080,90 1440,10 L1440,90 L0,90 Z"></path>
+  </svg>
+</div>
+<section class="bg-granate-800 text-white">
+  <div class="shell py-12">
+    <div class="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+      <div class="relative mx-auto max-w-sm">
+        <div class="absolute -inset-3 rounded-3xl bg-white/5" aria-hidden="true"></div>
+        <img src="{% static 'img/campus.jpg' %}" alt="Campus de la Universidad Nacional de San Agustín"
+             class="relative rounded-2xl shadow-2xl ring-1 ring-white/10">
+      </div>
+      <div>
+        <h2 class="text-2xl font-bold sm:text-3xl">¿Por qué confiar en CONECTA UNSA?</h2>
+        <p class="mt-2 max-w-2xl text-white/80">
+          No somos un portal comercial: somos un servicio de tu universidad. La UNSA responde por cada
+          convocatoria que publicamos.
+        </p>
+        <dl class="mt-7 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+          {% include "core/_valor_granate.html" with icono="shield-check" titulo="Convocatorias verificadas" texto="Validamos los datos de cada oferta antes de publicarla." %}
+          {% include "core/_valor_granate.html" with icono="building-2" titulo="Empresas validadas" texto="Las empresas se registran y son revisadas por la institución." %}
+          {% include "core/_valor_granate.html" with icono="lock" titulo="Protección de datos" texto="Tu información está protegida y no se comparte con terceros." %}
+          {% include "core/_valor_granate.html" with icono="landmark" titulo="Supervisión institucional" texto="Reglas transparentes y auditables, bajo respaldo de la UNSA." %}
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="bg-white">
+  <svg class="block w-full rotate-180" style="height:clamp(40px,6vw,90px)" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#52151E" d="M0,10 C360,90 1080,90 1440,10 L1440,90 L0,90 Z"></path>
+  </svg>
+</div>
+
+<!-- ===================================================================== -->
+<!-- TESTIMONIOS — historias de la comunidad                                 -->
+<!-- DEMO: contenido representativo. Reemplazar por casos reales con          -->
+<!-- consentimiento antes de producción (política de cifras honestas).        -->
+<!-- ===================================================================== -->
 <section class="shell pb-14">
-  <div class="grid gap-8 lg:grid-cols-2">
+  <h2 class="text-2xl font-bold text-slate-800">Historias de la comunidad UNSA</h2>
+  <p class="mt-1 text-slate-500">Egresados que encontraron su oportunidad a través del servicio.</p>
+  {# DEMO: testimonios representativos. Reemplazar por casos reales con consentimiento. #}
+  <div class="mt-8 grid gap-5 md:grid-cols-3">
+    <figure class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6">
+      <div class="flex text-dorado" aria-hidden="true">
+        <i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i>
+      </div>
+      <blockquote class="mt-3 flex-1 text-sm text-slate-600">“Encontré mis prácticas en una empresa local en menos de dos semanas. Saber que la convocatoria estaba verificada por la UNSA me dio mucha tranquilidad.”</blockquote>
+      <figcaption class="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4">
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-granate-100 font-bold text-granate-700">LM</span>
+        <span class="min-w-0">
+          <span class="block truncate text-sm font-semibold text-slate-800">Lucía Mamani</span>
+          <span class="block truncate text-xs text-slate-500">Ing. de Sistemas · Practicante en TI</span>
+        </span>
+      </figcaption>
+    </figure>
+    <figure class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6">
+      <div class="flex text-dorado" aria-hidden="true">
+        <i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i>
+      </div>
+      <blockquote class="mt-3 flex-1 text-sm text-slate-600">“Recibía demasiados correos en otros portales. Aquí solo me llegan oportunidades de mi área, con condiciones claras desde el inicio.”</blockquote>
+      <figcaption class="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4">
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-granate-100 font-bold text-granate-700">JQ</span>
+        <span class="min-w-0">
+          <span class="block truncate text-sm font-semibold text-slate-800">Jorge Quispe</span>
+          <span class="block truncate text-xs text-slate-500">Contabilidad · Analista junior</span>
+        </span>
+      </figcaption>
+    </figure>
+    <figure class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6">
+      <div class="flex text-dorado" aria-hidden="true">
+        <i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i>
+      </div>
+      <blockquote class="mt-3 flex-1 text-sm text-slate-600">“El resumen semanal me mantiene al día sin entrar todos los días. Encontré mi primer empleo formal por una de esas convocatorias.”</blockquote>
+      <figcaption class="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4">
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-granate-100 font-bold text-granate-700">AC</span>
+        <span class="min-w-0">
+          <span class="block truncate text-sm font-semibold text-slate-800">Andrea Choque</span>
+          <span class="block truncate text-xs text-slate-500">Psicología · Egresada contratada</span>
+        </span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- BENEFICIOS + NEWSLETTER (resumen semanal premium)                       -->
+<!-- ===================================================================== -->
+<section class="bg-slate-50 py-14">
+  <div class="shell grid gap-8 lg:grid-cols-2">
     <div>
       <h2 class="text-2xl font-bold text-slate-800">Beneficios para ti</h2>
       <div class="mt-6 space-y-5">
-        {% include "core/_beneficio.html" with icono="sparkles" titulo="Información más relevante" texto="Recibe oportunidades relacionadas a tu formación y preferencias." %}
-        {% include "core/_beneficio.html" with icono="clock" titulo="Ahorro de tiempo" texto="Resúmenes periódicos y menos correos innecesarios." %}
-        {% include "core/_beneficio.html" with icono="building" titulo="Acompañamiento institucional" texto="Un servicio de la UNSA pensado para tu desarrollo profesional." %}
+        {% include "core/_beneficio.html" with icono="target" titulo="Oportunidades relevantes" texto="Solo lo relacionado con tu carrera y preferencias." %}
+        {% include "core/_beneficio.html" with icono="clock" titulo="Menos tiempo buscando empleo" texto="Resúmenes periódicos y filtros que evitan el ruido." %}
+        {% include "core/_beneficio.html" with icono="shield-check" titulo="Convocatorias verificadas" texto="Información validada antes de llegar a ti." %}
+        {% include "core/_beneficio.html" with icono="building" titulo="Conexión con empresas" texto="Acceso directo a empleadores que confían en la UNSA." %}
       </div>
     </div>
 
-    <!-- Panel granate -->
-    <div class="rounded-2xl bg-granate-700 text-white p-8">
+    <div class="rounded-3xl bg-granate-700 p-8 text-white shadow-xl">
       <div class="flex items-center gap-3">
-        <i data-lucide="calendar-days" class="w-6 h-6"></i>
-        <h3 class="text-xl font-bold">Resumen semanal de oportunidades</h3>
+        <span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/15"><i data-lucide="mail" class="w-6 h-6"></i></span>
+        <div>
+          <h3 class="text-xl font-bold">Recibe oportunidades seleccionadas para tu perfil</h3>
+          <p class="text-sm text-white/70">Un resumen semanal, sin spam. Del {{ resumen.desde|date:"j" }} al {{ resumen.hasta|date:"j \d\e F" }}.</p>
+        </div>
       </div>
-      <p class="mt-1 text-white/70 text-sm">Del {{ resumen.desde|date:"j" }} al {{ resumen.hasta|date:"j \d\e F" }}</p>
-      <p class="mt-3 text-white/80 text-sm">
-        Cada semana te acercamos las oportunidades más relevantes según tu área de interés.
-      </p>
-      <dl class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-        <div><i data-lucide="briefcase" class="w-5 h-5 mx-auto text-white/80"></i><dd class="mt-1 text-2xl font-bold">{{ resumen.nuevas }}</dd><dt class="text-xs text-white/70">nuevas convocatorias</dt></div>
-        <div><i data-lucide="building-2" class="w-5 h-5 mx-auto text-white/80"></i><dd class="mt-1 text-2xl font-bold">{{ resumen.empresas }}</dd><dt class="text-xs text-white/70">empresas publicaron</dt></div>
-        <div><i data-lucide="layers" class="w-5 h-5 mx-auto text-white/80"></i><dd class="mt-1 text-2xl font-bold">{{ resumen.areas }}</dd><dt class="text-xs text-white/70">áreas profesionales</dt></div>
-        <div><i data-lucide="eye" class="w-5 h-5 mx-auto text-white/80"></i><dd class="mt-1 text-2xl font-bold">{{ resumen.vistas }}</dd><dt class="text-xs text-white/70">visualizaciones</dt></div>
+      <dl class="mt-6 grid grid-cols-2 gap-4 text-center sm:grid-cols-4">
+        <div><dd class="text-2xl font-bold">{{ resumen.nuevas }}</dd><dt class="text-xs text-white/70">nuevas convocatorias</dt></div>
+        <div><dd class="text-2xl font-bold">{{ resumen.empresas }}</dd><dt class="text-xs text-white/70">empresas publicaron</dt></div>
+        <div><dd class="text-2xl font-bold">{{ resumen.areas }}</dd><dt class="text-xs text-white/70">áreas profesionales</dt></div>
+        <div><dd class="text-2xl font-bold">{{ resumen.vistas }}</dd><dt class="text-xs text-white/70">visualizaciones</dt></div>
       </dl>
       <a href="{% url 'usuarios:login' %}"
-         class="mt-6 inline-flex items-center gap-2 rounded-lg bg-white text-granate-700 px-5 py-2.5 font-medium hover:bg-white/90">
-        Ver resumen semanal <i data-lucide="arrow-right" class="w-4 h-4"></i>
+         class="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 font-medium text-granate-700 hover:bg-white/90 sm:w-auto">
+        Configurar mis preferencias <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
       </a>
+      <p class="mt-3 text-xs text-white/60">Eliges tus áreas de interés al crear tu cuenta. Cancelas cuando quieras.</p>
     </div>
   </div>
 </section>
 
-<!-- ===== CTA CORREO ===== -->
-<section class="bg-granate-50 border-t border-granate-100">
-  <div class="shell py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-    <div class="flex items-center gap-4">
-      <span class="h-12 w-12 rounded-full bg-white text-granate-700 flex items-center justify-center shadow-sm"><i data-lucide="mail"></i></span>
-      <div>
-        <p class="font-semibold text-slate-800">Recibe un resumen semanal en tu correo</p>
-        <p class="text-sm text-slate-500">Selecciona tus áreas de interés y recibe oportunidades relevantes, sin saturación.</p>
-      </div>
-    </div>
+<!-- ===================================================================== -->
+<!-- CTA FINAL                                                                -->
+<!-- ===================================================================== -->
+<section class="shell py-16 text-center">
+  <h2 class="text-2xl font-bold text-slate-800 sm:text-3xl">Tu próxima oportunidad te está esperando</h2>
+  <p class="mx-auto mt-3 max-w-xl text-slate-500">Únete a la comunidad de egresados UNSA y accede a convocatorias verificadas alineadas con tu carrera.</p>
+  <div class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
     <a href="{% url 'usuarios:login' %}"
-       class="inline-flex items-center gap-2 rounded-lg bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800 whitespace-nowrap">
-      Configurar mis preferencias <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+       class="inline-flex items-center justify-center gap-2 rounded-lg bg-granate-700 px-7 py-3 font-medium text-white hover:bg-granate-800">
+      <i data-lucide="graduation-cap" class="w-4 h-4"></i> Crear mi cuenta de egresado
+    </a>
+    <a href="{% url 'empresas:registro' %}"
+       class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-7 py-3 font-medium text-slate-700 hover:bg-slate-50">
+      <i data-lucide="building-2" class="w-4 h-4"></i> Soy una empresa
     </a>
   </div>
 </section>

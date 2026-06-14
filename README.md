@@ -29,6 +29,7 @@ operativa para la Bolsa de Trabajo — sin IA, con software público.
 | [deploy.md](deploy.md) | Railway (manual, Hobby), Postgres, env vars, dominio grellox.com |
 | [proyecto.md](proyecto.md) | Equipo, integrantes, entregables de la hackathon |
 | [paginas.md](paginas.md) | Especificación de las 4 pantallas + mockups en `paginas/` |
+| [SEED.md](SEED.md) | **Siembra de datos**: `seed_demo`, empresas reales + logos/banners, cuentas y credenciales de demo |
 
 ---
 

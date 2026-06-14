@@ -198,6 +198,17 @@ def dashboard(request):
     )
 
 
+def _items_con_match(usuario, convocatorias):
+    """Construye items {conv, match, chips} para reusar la tarjeta de oportunidad."""
+    from apps.matching.services import compatibilidad
+
+    items = []
+    for conv in convocatorias:
+        pct, chips = compatibilidad(usuario, conv)
+        items.append({"conv": conv, "match": pct, "chips": chips})
+    return items
+
+
 @egresado_required
 def guardadas(request):
     from apps.convocatorias.interacciones import guardadas_de, ids_guardadas
@@ -206,7 +217,7 @@ def guardadas(request):
         request,
         "usuarios/guardadas.html",
         {
-            "convocatorias": guardadas_de(request.user),
+            "items": _items_con_match(request.user, guardadas_de(request.user)),
             "guardadas_ids": ids_guardadas(request.user),
         },
     )
@@ -220,7 +231,7 @@ def historial(request):
         request,
         "usuarios/historial.html",
         {
-            "convocatorias": historial_de(request.user),
+            "items": _items_con_match(request.user, historial_de(request.user)),
             "guardadas_ids": ids_guardadas(request.user),
         },
     )
