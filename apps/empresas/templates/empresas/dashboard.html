@@ -3,12 +3,86 @@
 {% block title %}Panel de empresa — CONECTA UNSA{% endblock %}
 
 {% block nav %}
-  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Cerrar sesión</a>
+  {% if empresa.puede_publicar %}<a href="{% url 'empresas:publicar' %}" class="hover:underline">Publicar</a>{% endif %}
+  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Salir</a>
 {% endblock %}
 
 {% block content %}
-<section class="max-w-6xl mx-auto px-4 py-12">
-  <h1 class="text-2xl font-bold text-granate-700">Panel de empresa</h1>
-  <p class="mt-6 text-sm text-slate-400">Aquí gestionarás tus convocatorias (feature 11).</p>
+<section class="max-w-5xl mx-auto px-4 py-10">
+  <div class="flex items-center justify-between gap-4">
+    <h1 class="text-2xl font-bold text-granate-700">{{ empresa.razon_social|default:"Mi empresa" }}</h1>
+    {% if empresa.verificada %}
+      <span class="text-sm rounded-full bg-exito/10 text-exito px-3 py-1">✓ Verificada</span>
+    {% else %}
+      <span class="text-sm rounded-full bg-alerta/10 text-alerta px-3 py-1">En verificación</span>
+    {% endif %}
+  </div>
+
+  {% if not puede_publicar %}
+  <!-- CA-3: dashboard limitado -->
+  <div class="mt-8 rounded-xl border border-alerta/30 bg-alerta/5 p-6">
+    <h2 class="font-semibold text-alerta">Tu cuenta está en verificación</h2>
+    <p class="mt-2 text-sm text-slate-600">
+      Una vez que la universidad active tu empresa podrás publicar convocatorias.
+      Mientras tanto, revisa las guías de buenas prácticas para preparar tus ofertas.
+    </p>
+  </div>
+  {% else %}
+
+  <!-- Métricas propias (calculadas) -->
+  <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.activas }}</p><p class="text-xs text-slate-500">activas</p></div>
+    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.alcance }}</p><p class="text-xs text-slate-500">alcance (egresados)</p></div>
+    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.vistas }}</p><p class="text-xs text-slate-500">vistas</p></div>
+    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.publicadas }}</p><p class="text-xs text-slate-500">publicadas</p></div>
+  </div>
+
+  <div class="mt-8 flex items-center justify-between">
+    <h2 class="text-lg font-semibold text-slate-800">Mis convocatorias</h2>
+    <a href="{% url 'empresas:publicar' %}" class="rounded-lg bg-granate-700 px-4 py-2 text-white text-sm hover:bg-granate-800">+ Publicar</a>
+  </div>
+
+  <div class="mt-4 overflow-x-auto">
+    <table class="w-full text-sm border border-slate-200 rounded-lg">
+      <thead class="bg-slate-50 text-slate-500 text-left">
+        <tr><th class="px-3 py-2">Título</th><th class="px-3 py-2">Estado</th>
+            <th class="px-3 py-2">Transparencia</th><th class="px-3 py-2">Fecha límite</th><th class="px-3 py-2"></th></tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for c in convocatorias %}
+        <tr class="{% if c.estado == 'observada' %}bg-alerta/5{% endif %}">
+          <td class="px-3 py-2 font-medium">{{ c.titulo }}</td>
+          <td class="px-3 py-2">{{ c.get_estado_display }}</td>
+          <td class="px-3 py-2">{{ c.transparencia_pct }}%</td>
+          <td class="px-3 py-2">{{ c.fecha_limite|default:"—" }}</td>
+          <td class="px-3 py-2 text-right">
+            <a href="{% url 'empresas:editar' c.id %}" class="text-granate-700 hover:underline">
+              {% if c.estado == 'observada' %}Corregir{% else %}Editar{% endif %}
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="px-3 py-6 text-center text-slate-400">Aún no publicas convocatorias.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Estado de la empresa + guías (CA-6) -->
+  <div class="mt-10 grid gap-6 sm:grid-cols-2">
+    <div class="rounded-xl border border-slate-200 p-5">
+      <h3 class="font-semibold text-slate-800">Estado de tu empresa</h3>
+      <p class="text-sm text-slate-500 mt-1">Estado: <strong>{{ empresa.get_estado_display }}</strong></p>
+    </div>
+    <div class="rounded-xl border border-slate-200 p-5">
+      <h3 class="font-semibold text-slate-800">Transparencia y buenas prácticas</h3>
+      <ul class="mt-2 text-sm text-slate-600 list-disc pl-5 space-y-1">
+        <li>Publica la banda salarial: es lo que más sube tu transparencia (30%).</li>
+        <li>Completa descripción, beneficios y vacantes para mayor visibilidad.</li>
+        <li>Marca si la convocatoria es abierta a personas con discapacidad.</li>
+      </ul>
+    </div>
+  </div>
 </section>
 {% endblock %}

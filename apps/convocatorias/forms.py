@@ -12,7 +12,11 @@ class ConvocatoriaForm(forms.ModelForm):
 
     class Meta:
         model = Convocatoria
-        exclude = ["estado", "transparencia_pct", "creada_en", "actualizada_en"]
+        # empresa, creada_por y estado los fija la vista; los calculados no se editan.
+        exclude = [
+            "empresa", "creada_por", "estado", "transparencia_pct",
+            "comentario_revision", "fecha_publicacion", "creada_en", "actualizada_en",
+        ]
         widgets = {
             "fecha_limite": forms.DateInput(attrs={"type": "date"}),
             "descripcion": forms.Textarea(attrs={"rows": 5}),

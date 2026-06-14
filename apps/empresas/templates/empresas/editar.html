@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Editar convocatoria — CONECTA UNSA{% endblock %}
+
+{% block extra_head %}
+<style>
+  .campo input, .campo select, .campo textarea { width:100%; border:1px solid #cbd5e1;
+    border-radius:.5rem; padding:.5rem .7rem; margin-top:.2rem; }
+  .campo label { font-size:.85rem; font-weight:500; color:#334155; }
+</style>
+{% endblock %}
+
+{% block nav %}
+  <a href="{% url 'empresas:dashboard' %}" class="hover:underline">Panel</a>
+  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Salir</a>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-2xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-bold text-granate-700">Editar convocatoria</h1>
+
+  {% if observada %}
+  <div class="mt-4 rounded-lg border border-alerta/40 bg-alerta/5 p-4">
+    <p class="font-semibold text-alerta">Requiere corrección</p>
+    <p class="mt-1 text-sm text-slate-700">{{ conv.comentario_revision }}</p>
+  </div>
+  {% endif %}
+
+  <form method="post" class="mt-6" novalidate>
+    {% csrf_token %}
+    {% include "convocatorias/_form.html" %}
+    <button type="submit" class="mt-8 rounded-lg bg-granate-700 px-8 py-3 font-medium text-white hover:bg-granate-800">
+      {% if observada %}Corregir y reenviar{% else %}Guardar y reenviar{% endif %}
+    </button>
+  </form>
+</section>
+{% endblock %}
