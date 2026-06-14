@@ -99,6 +99,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.notificaciones.context_processors.notificaciones",
             ],
         },
     },
@@ -208,9 +209,18 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "CONECTA UNSA <no-reply@conecta-unsa.pe>"
 )
 # En dev (sin RESEND_API_KEY) los correos —incluido el reset de empresa— van a consola.
-EMAIL_BACKEND = os.environ.get(
-    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
-)
+# Con RESEND_API_KEY se envía vía SMTP de Resend (feature 08). Override explícito con EMAIL_BACKEND.
+if "EMAIL_BACKEND" in os.environ:
+    EMAIL_BACKEND = os.environ["EMAIL_BACKEND"]
+elif RESEND_API_KEY:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp.resend.com"
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = "resend"
+    EMAIL_HOST_PASSWORD = RESEND_API_KEY
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

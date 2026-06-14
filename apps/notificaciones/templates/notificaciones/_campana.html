@@ -1,0 +1,9 @@
+{% comment %}Campana de notificaciones para el header. Incluir con {% include 'notificaciones/_campana.html' %}.{% endcomment %}
+<a href="{% url 'notificaciones:lista' %}" class="relative inline-flex items-center" aria-label="Notificaciones">
+  <span aria-hidden="true">🔔</span>
+  {% if notificaciones_no_leidas %}
+  <span class="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-dorado text-granate-900 text-[10px] font-bold h-4 min-w-4 px-1">
+    {{ notificaciones_no_leidas }}
+  </span>
+  {% endif %}
+</a>

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Notificaciones — CONECTA UNSA{% endblock %}
+
+{% block nav %}
+  <a href="{% url 'usuarios:dashboard' %}" class="hover:underline">Panel</a>
+  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Cerrar sesión</a>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-2xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-bold text-granate-700">Notificaciones</h1>
+  <ul class="mt-6 divide-y divide-slate-100 border border-slate-200 rounded-lg">
+    {% for n in notificaciones %}
+    <li class="px-4 py-3 text-sm {% if not n.leido %}bg-granate-50{% endif %}">
+      {% if n.url %}<a href="{{ n.url }}" class="text-slate-700 hover:underline">{{ n.mensaje }}</a>
+      {% else %}<span class="text-slate-700">{{ n.mensaje }}</span>{% endif %}
+      <div class="text-xs text-slate-400 mt-1">{{ n.creado_en|date:"d/m/Y H:i" }}</div>
+    </li>
+    {% empty %}
+    <li class="px-4 py-6 text-sm text-slate-400 text-center">No tienes notificaciones.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+CONECTA UNSA — Resumen semanal de oportunidades
+
+Hola{% if usuario.first_name %} {{ usuario.first_name }}{% endif %}:
+
+Convocatorias pertinentes para tu perfil esta semana:
+{% for c in convocatorias %}
+- {{ c.titulo }} | {{ c.empresa }} | {{ c.get_tipo_display }} | Transparencia {{ c.transparencia_pct }}%{% if c.fecha_limite %} | Postula hasta {{ c.fecha_limite }}{% endif %}
+{% endfor %}
+
+Ajusta tus preferencias desde tu perfil en CONECTA UNSA.

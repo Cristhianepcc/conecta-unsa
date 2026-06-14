@@ -3,6 +3,8 @@
 {% block title %}Mi panel — CONECTA UNSA{% endblock %}
 
 {% block nav %}
+  <a href="{% url 'usuarios:perfil' %}" class="hover:underline">Mi perfil</a>
+  {% include "notificaciones/_campana.html" %}
   <a href="{% url 'usuarios:logout' %}" class="hover:underline">Cerrar sesión</a>
 {% endblock %}
 
