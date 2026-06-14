@@ -1,0 +1,37 @@
+{% comment %}Formulario de convocatoria en 3 bloques. Contexto: form. Alpine muestra Nivel 2 según tipo.{% endcomment %}
+<div x-data="{ tipo: '{{ form.tipo.value|default:"" }}' }">
+  {% if form.non_field_errors %}<div class="text-sm text-peligro">{{ form.non_field_errors }}</div>{% endif %}
+
+  <fieldset class="space-y-4">
+    <legend class="text-lg font-semibold text-slate-800">1 · Esencial</legend>
+    <div class="campo"><label for="{{ form.tipo.id_for_label }}">Tipo de convocatoria</label>
+      <select name="tipo" id="{{ form.tipo.id_for_label }}" x-model="tipo">
+        {% for value, label in form.tipo.field.choices %}
+        <option value="{{ value }}" {% if form.tipo.value == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>{{ form.tipo.errors }}
+    </div>
+    {% for f in form %}{% if f.name in "titulo,descripcion,modalidad,ubicacion,duracion_estimada,fecha_limite,medio_postulacion,email_contacto,carreras_objetivo" %}
+    <div class="campo"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>
+    {% endif %}{% endfor %}
+    <label class="flex items-start gap-2 text-sm">{{ form.no_discriminacion }}
+      <span>{{ form.no_discriminacion.label }} (Ley 26772)</span></label>
+    {{ form.no_discriminacion.errors }}
+  </fieldset>
+
+  <fieldset class="space-y-4 mt-8" x-show="tipo">
+    <legend class="text-lg font-semibold text-slate-800">2 · Según el tipo</legend>
+    <p class="text-xs text-slate-400">Completa lo que aplique a tu tipo de convocatoria (algunos son obligatorios por ley).</p>
+    {% for f in form %}{% if f.name in "subvencion_remuneracion,jornada_horas,requiere_convenio,ciclo_minimo,tiempo_egreso_meses,regimen,bases_url,cronograma,entidad_otorgante,no_vinculo,incluye_seguro" %}
+    <div class="campo"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>
+    {% endif %}{% endfor %}
+  </fieldset>
+
+  <fieldset class="space-y-4 mt-8">
+    <legend class="text-lg font-semibold text-slate-800">3 · Mejora (opcional, sube tu transparencia)</legend>
+    {% for f in form %}{% if f.name in "banda_salarial_min,banda_salarial_max,salario_confidencial,vacantes,beneficios,discapacidad" %}
+    <div class="campo"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>
+    {% endif %}{% endfor %}
+    <p class="text-xs text-slate-500">💡 La banda salarial visible es lo que más sube tu % de transparencia.</p>
+  </fieldset>
+</div>
