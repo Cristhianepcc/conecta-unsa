@@ -8,7 +8,14 @@
   {% for conv in convocatorias %}
     {% include "convocatorias/_tarjeta.html" with conv=conv guardadas_ids=guardadas_ids %}
   {% empty %}
-    <p class="text-sm text-slate-400">Todavía no viste convocatorias.</p>
+    <div class="rounded-xl border border-dashed border-slate-300 p-10 text-center">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-granate-50 text-granate-700">
+        <i data-lucide="history" class="w-6 h-6"></i>
+      </div>
+      <p class="mt-3 font-medium text-slate-700">Todavía no ves convocatorias</p>
+      <p class="mt-1 text-sm text-slate-500">Las que abras aparecerán aquí.</p>
+      <a href="{% url 'usuarios:dashboard' %}" class="mt-3 inline-block text-sm text-granate-700 underline">Explorar convocatorias</a>
+    </div>
   {% endfor %}
 </div>
 {% endblock %}

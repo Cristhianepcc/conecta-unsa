@@ -7,25 +7,66 @@
 
 {% block dashboard_content %}
 <div class="max-w-5xl">
+  <!-- Encabezado con resumen accionable -->
   <h2 class="text-xl font-bold text-slate-800">
     Hola, {{ request.user.get_full_name|default:request.user.email }}
   </h2>
   <p class="mt-1 text-sm text-slate-500">
-    {% if talento.carrera %}{{ talento.carrera }} · {{ talento.get_estado_academico_display }}{% else %}
-    Completa tu perfil para mejores recomendaciones.{% endif %}
+    {% if talento.carrera %}{{ talento.carrera }} · {{ talento.get_estado_academico_display }} · {% endif %}
+    <strong class="text-slate-700">{{ total }}</strong> convocatoria{{ total|pluralize }} para ti ·
+    perfil <strong class="text-granate-700">{{ completitud.pct }}%</strong> completo
   </p>
+  {% if completitud.pct < 100 %}
+  <a href="{% url 'usuarios:perfil' %}" class="mt-2 inline-flex items-center gap-1.5 text-sm text-granate-700 font-medium hover:underline">
+    <i data-lucide="sparkles" class="w-4 h-4"></i> Completa tu perfil para mejores recomendaciones
+  </a>
+  {% endif %}
 
-  <div class="mt-8 grid gap-8 lg:grid-cols-3">
+  <div class="mt-6 grid gap-8 lg:grid-cols-3">
     <!-- Feed -->
     <div class="lg:col-span-2">
-      <h3 class="text-lg font-semibold text-slate-800">Convocatorias para ti</h3>
+      <div class="flex items-center justify-between gap-3">
+        <h3 class="text-lg font-semibold text-slate-800">Convocatorias para ti</h3>
+        <form method="get" class="flex items-center gap-2">
+          {% if tipo %}<input type="hidden" name="tipo" value="{{ tipo }}">{% endif %}
+          <label class="text-xs text-slate-400">Ordenar</label>
+          <select name="orden" onchange="this.form.submit()"
+                  class="text-sm border border-slate-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-granate-200">
+            <option value="afinidad" {% if orden == 'afinidad' %}selected{% endif %}>Afinidad</option>
+            <option value="reciente" {% if orden == 'reciente' %}selected{% endif %}>Más recientes</option>
+            <option value="transparencia" {% if orden == 'transparencia' %}selected{% endif %}>Transparencia</option>
+          </select>
+        </form>
+      </div>
+
+      <!-- Chips de filtro por tipo -->
+      {% if tipos_presentes %}
+      <div class="mt-3 flex flex-wrap gap-2 text-sm">
+        <a href="?orden={{ orden }}"
+           class="rounded-full px-3 py-1 {% if not tipo %}bg-granate-700 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+          Todas
+        </a>
+        {% for t in tipos_presentes %}
+        <a href="?tipo={{ t.value }}&orden={{ orden }}"
+           class="rounded-full px-3 py-1 {% if tipo == t.value %}bg-granate-700 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+          {{ t.label }} · {{ t.n }}
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
       <div class="mt-4 space-y-4">
         {% for conv, puntaje, motivos in items %}
           {% include "convocatorias/_tarjeta.html" with conv=conv motivos=motivos guardadas_ids=guardadas_ids %}
         {% empty %}
-          <p class="text-sm text-slate-400">
-            Por ahora no hay convocatorias pertinentes. Revisa tus preferencias o vuelve pronto.
-          </p>
+          <div class="rounded-xl border border-dashed border-slate-300 p-10 text-center">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-granate-50 text-granate-700">
+              <i data-lucide="search-x" class="w-6 h-6"></i>
+            </div>
+            <p class="mt-3 font-medium text-slate-700">No hay convocatorias{% if tipo %} de este tipo{% endif %}</p>
+            <p class="mt-1 text-sm text-slate-500">Ajusta tus preferencias o quita el filtro.</p>
+            {% if tipo %}<a href="?orden={{ orden }}" class="mt-3 inline-block text-sm text-granate-700 underline">Ver todas</a>{% endif %}
+          </div>
         {% endfor %}
       </div>
     </div>
@@ -33,7 +74,7 @@
     <!-- Lateral -->
     <aside class="space-y-6">
       <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <h3 class="font-semibold text-slate-800">Resumen semanal</h3>
+        <h3 class="font-semibold text-slate-800 flex items-center gap-2"><i data-lucide="calendar-days" class="w-4 h-4 text-granate-700"></i> Resumen semanal</h3>
         <p class="text-xs text-slate-400 mt-1">Lo que llegaría a tu correo:</p>
         <ul class="mt-3 space-y-2 text-sm">
           {% for c in resumen %}
@@ -44,7 +85,7 @@
         </ul>
       </div>
       <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <h3 class="font-semibold text-slate-800">Tus preferencias</h3>
+        <h3 class="font-semibold text-slate-800 flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-granate-700"></i> Tus preferencias</h3>
         <p class="text-sm text-slate-500 mt-1">Ajusta carreras de interés, tipos y frecuencia.</p>
         <a href="{% url 'usuarios:perfil' %}" class="mt-3 inline-block text-sm text-granate-700 underline">Editar preferencias →</a>
       </div>

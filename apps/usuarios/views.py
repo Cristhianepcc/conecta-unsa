@@ -149,17 +149,41 @@ def dashboard(request):
     """Dashboard del egresado: feed pertinente ordenado + resumen + campana (feature 10)."""
     from apps.matching.services import feed as matching_feed
 
-    from apps.convocatorias.interacciones import ids_guardadas
+    from collections import Counter
 
-    items = matching_feed(request.user)  # [(conv, puntaje, motivos)]
+    from apps.convocatorias.interacciones import ids_guardadas
+    from apps.core import constants
+
     talento = asegurar_perfil_talento(request.user)
+    full = matching_feed(request.user)  # [(conv, puntaje, motivos)] ordenado por afinidad
+
+    # Filtro por tipo + orden (CA-feed): chips estables sobre el conjunto completo.
+    labels = dict(constants.TIPOS_CONVOCATORIA)
+    conteo = Counter(it[0].tipo for it in full)
+    tipos_presentes = [
+        {"value": v, "label": labels.get(v, v), "n": n} for v, n in conteo.most_common()
+    ]
+
+    tipo = request.GET.get("tipo") or ""
+    orden = request.GET.get("orden") or "afinidad"
+    items = [it for it in full if it[0].tipo == tipo] if tipo else list(full)
+    if orden == "reciente":
+        items.sort(key=lambda it: it[0].creada_en, reverse=True)
+    elif orden == "transparencia":
+        items.sort(key=lambda it: it[0].transparencia_pct, reverse=True)
+
     return render(
         request,
         "usuarios/dashboard.html",
         {
             "items": items,
             "talento": talento,
-            "resumen": [conv for conv, _p, _m in items[:5]],
+            "total": len(items),
+            "tipo": tipo,
+            "orden": orden,
+            "tipos_presentes": tipos_presentes,
+            "completitud": completitud_perfil(talento),
+            "resumen": [conv for conv, _p, _m in full[:4]],
             "guardadas_ids": ids_guardadas(request.user),
         },
     )
