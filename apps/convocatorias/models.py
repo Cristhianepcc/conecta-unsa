@@ -1,3 +1,139 @@
+"""Convocatoria: entidad central (8 tipos, 3 niveles). modelo-datos.md §1-§6.
+
+Una sola tabla con todos los campos; Nivel 2 y 3 son nullable. El formulario decide
+qué mostrar/exigir según `tipo` (feature 11/12). Aquí viven el modelo, los estados
+y el % de transparencia.
+"""
+
 from django.db import models
 
-# Create your models here.
+from apps.core import constants
+from apps.empresas.models import Empresa
+from apps.taxonomia.models import Carrera
+
+# --- Enumeraciones ----------------------------------------------------------
+MODALIDAD_PRESENCIAL = "presencial"
+MODALIDAD_REMOTO = "remoto"
+MODALIDAD_HIBRIDO = "hibrido"
+MODALIDADES = [
+    (MODALIDAD_PRESENCIAL, "Presencial"),
+    (MODALIDAD_REMOTO, "Remoto"),
+    (MODALIDAD_HIBRIDO, "Híbrido"),
+]
+
+CREADA_POR_EMPRESA = "empresa"
+CREADA_POR_ADMIN = "admin"
+CREADA_POR = [
+    (CREADA_POR_EMPRESA, "Empresa"),
+    (CREADA_POR_ADMIN, "Administrativo"),
+]
+
+ESTADO_BORRADOR = "borrador"
+ESTADO_PENDIENTE = "pendiente"
+ESTADO_PUBLICADA = "publicada"
+ESTADO_OBSERVADA = "observada"
+ESTADO_RECHAZADA = "rechazada"
+ESTADO_CADUCADA = "caducada"
+ESTADOS = [
+    (ESTADO_BORRADOR, "Borrador"),
+    (ESTADO_PENDIENTE, "Pendiente de revisión"),
+    (ESTADO_PUBLICADA, "Publicada"),
+    (ESTADO_OBSERVADA, "Observada"),
+    (ESTADO_RECHAZADA, "Rechazada"),
+    (ESTADO_CADUCADA, "Caducada"),
+]
+
+# Etiquetas del semáforo de transparencia (modelo-datos.md §6).
+TRANSPARENCIA_ALTA = "alta"
+TRANSPARENCIA_MEDIA = "media"
+TRANSPARENCIA_BAJA = "baja"
+
+
+class Convocatoria(models.Model):
+    empresa = models.ForeignKey(
+        Empresa, on_delete=models.PROTECT, related_name="convocatorias", verbose_name="empresa"
+    )
+    creada_por = models.CharField(
+        "creada por", max_length=10, choices=CREADA_POR, default=CREADA_POR_EMPRESA
+    )
+    tipo = models.CharField("tipo", max_length=40, choices=constants.TIPOS_CONVOCATORIA)
+
+    # --- Nivel 1 — Fundamentales ---
+    titulo = models.CharField("título del puesto", max_length=255)
+    descripcion = models.TextField("descripción y requisitos", blank=True)
+    modalidad = models.CharField("modalidad", max_length=20, choices=MODALIDADES, blank=True)
+    ubicacion = models.CharField("ubicación", max_length=160, blank=True)
+    duracion_estimada = models.CharField("duración estimada", max_length=120, blank=True)
+    fecha_limite = models.DateField("fecha límite de postulación", null=True, blank=True)
+    medio_postulacion = models.CharField("cómo postular (URL o email)", max_length=255, blank=True)
+    email_contacto = models.EmailField("email de contacto", blank=True)
+    no_discriminacion = models.BooleanField("declaración de no discriminación", default=False)
+
+    # --- Nivel 2 — Obligatorios según tipo (nullable) ---
+    subvencion_remuneracion = models.DecimalField(
+        "subvención / remuneración / honorario (S/)", max_digits=10, decimal_places=2,
+        null=True, blank=True,
+    )
+    jornada_horas = models.PositiveIntegerField("jornada (h/sem)", null=True, blank=True)
+    requiere_convenio = models.BooleanField("requiere convenio UNSA", null=True, blank=True)
+    ciclo_minimo = models.PositiveIntegerField("ciclo/semestre mínimo", null=True, blank=True)
+    tiempo_egreso_meses = models.PositiveIntegerField(
+        "tiempo máx. de egreso (meses)", null=True, blank=True
+    )
+    regimen = models.CharField("régimen laboral", max_length=120, blank=True)
+    bases_url = models.URLField("bases + cronograma (URL)", blank=True)
+    cronograma = models.TextField("cronograma", blank=True)
+    entidad_otorgante = models.CharField("entidad otorgante", max_length=160, blank=True)
+    no_vinculo = models.BooleanField('disclaimer "no genera vínculo laboral"', default=False)
+    incluye_seguro = models.BooleanField("incluye EsSalud / seguro", null=True, blank=True)
+
+    # --- Nivel 3 — Opcionales (mejora progresiva, nullable) ---
+    banda_salarial_min = models.DecimalField(
+        "banda salarial mín. (S/)", max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    banda_salarial_max = models.DecimalField(
+        "banda salarial máx. (S/)", max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    salario_confidencial = models.BooleanField("salario confidencial", default=False)
+    vacantes = models.PositiveIntegerField("n.º de vacantes", null=True, blank=True)
+    beneficios = models.TextField("beneficios", blank=True)
+    discapacidad = models.BooleanField("abierta a personas con discapacidad", default=False)
+
+    # --- Segmentación / estado / transparencia ---
+    carreras_objetivo = models.ManyToManyField(
+        Carrera, related_name="convocatorias", verbose_name="carreras objetivo", blank=True
+    )
+    estado = models.CharField("estado", max_length=20, choices=ESTADOS, default=ESTADO_BORRADOR)
+    transparencia_pct = models.PositiveIntegerField("transparencia (%)", default=0)
+
+    creada_en = models.DateTimeField("creada", auto_now_add=True)
+    actualizada_en = models.DateTimeField("actualizada", auto_now=True)
+
+    class Meta:
+        verbose_name = "convocatoria"
+        verbose_name_plural = "convocatorias"
+        ordering = ["-creada_en"]
+
+    def __str__(self):
+        return f"{self.titulo} ({self.get_tipo_display()})"
+
+    @property
+    def etiqueta_transparencia(self) -> str:
+        if self.transparencia_pct >= 80:
+            return TRANSPARENCIA_ALTA
+        if self.transparencia_pct >= 50:
+            return TRANSPARENCIA_MEDIA
+        return TRANSPARENCIA_BAJA
+
+    @property
+    def es_voluntariado(self) -> bool:
+        return self.tipo == constants.TIPO_VOLUNTARIADO
+
+    def recalcular_transparencia(self, guardar: bool = True) -> int:
+        """Recalcula y (opcionalmente) persiste `transparencia_pct`."""
+        from .services import calcular_transparencia
+
+        self.transparencia_pct = calcular_transparencia(self)
+        if guardar and self.pk:
+            super().save(update_fields=["transparencia_pct"])
+        return self.transparencia_pct
