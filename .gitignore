@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Entorno / secretos (NFR-SEC-2)
+.env
+*.env
+!.env.example
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+
+# Pruebas / cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editores / SO
+.DS_Store
+.idea/
+.vscode/
