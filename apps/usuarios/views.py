@@ -282,7 +282,15 @@ def credencial_config(request):
             revocar_credencial_publica(talento)
             messages.info(request, "Credencial pública revocada.")
         return redirect("usuarios:credencial_config")
-    return render(request, "usuarios/credencial_config.html", {"talento": talento})
+    return render(
+        request,
+        "usuarios/credencial_config.html",
+        {
+            "talento": talento,
+            "visibles": talento.credenciales.filter(visible_para_empresas=True),
+            "ocultas": talento.credenciales.filter(visible_para_empresas=False).count(),
+        },
+    )
 
 
 def credencial_publica(request, slug):

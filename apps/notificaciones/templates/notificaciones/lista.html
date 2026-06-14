@@ -6,12 +6,13 @@
 
 {% block dashboard_content %}
 <div class="max-w-2xl">
-  <ul class="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white">
+  <ul class="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white overflow-hidden">
     {% for n in notificaciones %}
-    <li class="px-4 py-3 text-sm {% if not n.leido %}bg-granate-50{% endif %}">
-      {% if n.url %}<a href="{{ n.url }}" class="text-slate-700 hover:underline">{{ n.mensaje }}</a>
-      {% else %}<span class="text-slate-700">{{ n.mensaje }}</span>{% endif %}
-      <div class="text-xs text-slate-400 mt-1">{{ n.creado_en|date:"d/m/Y H:i" }}</div>
+    <li>
+      <a href="{{ n.url|default:'#' }}"
+         class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 {% if not n.leido %}bg-granate-50{% endif %}">
+        {% include "notificaciones/_fila.html" with n=n %}
+      </a>
     </li>
     {% empty %}
     <li class="px-4 py-10 text-sm text-slate-400 text-center">
