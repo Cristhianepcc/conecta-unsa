@@ -33,3 +33,6 @@ htmlcov/
 
 # Trabajo temporal (screenshots, scripts de apoyo)
 tmp/
+
+# Archivos subidos por usuarios (logos/banners) — persisten en volumen, no en git
+media/

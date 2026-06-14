@@ -188,6 +188,12 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 
+# --- Media subida por usuarios (logos/banners de empresa) ------------------
+# Persistencia en un volumen de Railway: define MEDIA_ROOT con la ruta montada
+# (p. ej. /data/media) para que los archivos sobrevivan a los despliegues.
+MEDIA_URL = "media/"
+MEDIA_ROOT = os.environ.get("MEDIA_ROOT", str(BASE_DIR / "media"))
+
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {
