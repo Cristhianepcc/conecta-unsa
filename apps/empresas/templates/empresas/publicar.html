@@ -5,7 +5,7 @@
 {% block sidebar_items %}{% include "empresas/_sidebar_empresa.html" with seccion="publicar" %}{% endblock %}
 
 {% block dashboard_content %}
-<section class="mx-auto max-w-5xl">
+<section class="mx-auto max-w-6xl">
   {# Encabezado #}
   <div class="mb-7">
     <a href="{% url 'empresas:dashboard' %}" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-granate-700">
@@ -21,7 +21,12 @@
   <form method="post" novalidate
         x-data="formConvocatoria()" @input="recalc()" @change="recalc()">
     {% csrf_token %}
-    {% include "convocatorias/_form.html" %}
+    <div class="grid gap-6 lg:grid-cols-3 items-start">
+      <div class="lg:col-span-2 min-w-0">
+        {% include "convocatorias/_form.html" %}
+      </div>
+      {% include "convocatorias/_panel_transparencia.html" %}
+    </div>
 
     {# Barra de acciones #}
     <div class="mt-7 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
