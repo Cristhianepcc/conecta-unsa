@@ -1,21 +1,17 @@
-{% extends "base.html" %}
+{% extends "dashboard_base.html" %}
 
 {% block title %}Mi perfil — CONECTA UNSA{% endblock %}
+{% block dashboard_title %}Mi perfil de talento{% endblock %}
+{% block sidebar_items %}{% include "usuarios/_sidebar_egresado.html" with seccion="perfil" %}{% endblock %}
 
-{% block nav %}
-  <a href="{% url 'usuarios:dashboard' %}" class="hover:underline">Panel</a>
-  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Cerrar sesión</a>
-{% endblock %}
-
-{% block content %}
-<section class="max-w-3xl mx-auto px-4 py-10 space-y-12">
-  <div>
-    <h1 class="text-2xl font-bold text-granate-700">Mi perfil de talento</h1>
-    <p class="mt-1 text-sm text-slate-600">
+{% block dashboard_content %}
+<div class="max-w-3xl space-y-10">
+  <div class="rounded-xl border border-slate-200 bg-white p-5">
+    <p class="text-sm text-slate-600">
       Carrera: <strong>{{ talento.carrera|default:"—" }}</strong> ·
       Estado: <strong>{{ talento.get_estado_academico_display|default:"—" }}</strong>
     </p>
-    <a href="{% url 'usuarios:credencial_config' %}" class="text-sm text-granate-700 underline">
+    <a href="{% url 'usuarios:credencial_config' %}" class="mt-1 inline-block text-sm text-granate-700 underline">
       Configurar mi credencial pública →
     </a>
   </div>
@@ -23,7 +19,7 @@
   <!-- Credenciales -->
   <div>
     <h2 class="text-lg font-semibold text-slate-800">Mis credenciales</h2>
-    <ul class="mt-3 divide-y divide-slate-100 border border-slate-200 rounded-lg">
+    <ul class="mt-3 divide-y divide-slate-100 border border-slate-200 rounded-lg bg-white">
       {% for c in credenciales %}
       <li class="flex items-center justify-between px-4 py-3 text-sm">
         <span>
@@ -47,8 +43,8 @@
 
     <form method="post" class="mt-4 flex flex-wrap items-end gap-3">
       {% csrf_token %}
-      <div>{{ cred_form.tipo.label_tag }} {{ cred_form.tipo }}</div>
-      <div>{{ cred_form.detalle.label_tag }} {{ cred_form.detalle }}</div>
+      <div class="campo">{{ cred_form.tipo.label_tag }} {{ cred_form.tipo }}</div>
+      <div class="campo">{{ cred_form.detalle.label_tag }} {{ cred_form.detalle }}</div>
       <label class="text-sm flex items-center gap-2">{{ cred_form.visible_para_empresas }} visible</label>
       <button name="agregar_credencial" value="1"
               class="rounded-lg bg-granate-700 px-4 py-2 text-white text-sm hover:bg-granate-800">
@@ -69,5 +65,5 @@
       </button>
     </form>
   </div>
-</section>
+</div>
 {% endblock %}

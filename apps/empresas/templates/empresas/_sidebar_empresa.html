@@ -1,0 +1,4 @@
+{% comment %}Sidebar de empresa. Contexto: seccion (dashboard|publicar|notificaciones).{% endcomment %}
+{% include "partials/_sidebar_link.html" with url="/empresas/dashboard/" icono="layout-dashboard" label="Panel" key="dashboard" seccion=seccion %}
+{% include "partials/_sidebar_link.html" with url="/empresas/publicar/" icono="plus-circle" label="Publicar convocatoria" key="publicar" seccion=seccion %}
+{% include "partials/_sidebar_link.html" with url="/notificaciones/" icono="bell" label="Notificaciones" key="notificaciones" seccion=seccion %}

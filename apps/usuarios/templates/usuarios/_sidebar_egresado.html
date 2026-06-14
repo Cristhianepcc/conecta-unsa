@@ -1,0 +1,6 @@
+{% comment %}Sidebar del egresado. Contexto: seccion (dashboard|perfil|guardadas|historial|notificaciones).{% endcomment %}
+{% include "partials/_sidebar_link.html" with url="/usuarios/dashboard/" icono="layout-dashboard" label="Panel" key="dashboard" seccion=seccion %}
+{% include "partials/_sidebar_link.html" with url="/usuarios/perfil/" icono="user" label="Mi perfil" key="perfil" seccion=seccion %}
+{% include "partials/_sidebar_link.html" with url="/usuarios/guardadas/" icono="bookmark" label="Guardadas" key="guardadas" seccion=seccion %}
+{% include "partials/_sidebar_link.html" with url="/usuarios/historial/" icono="history" label="Historial" key="historial" seccion=seccion %}
+{% include "partials/_sidebar_link.html" with url="/notificaciones/" icono="bell" label="Notificaciones" key="notificaciones" seccion=seccion %}

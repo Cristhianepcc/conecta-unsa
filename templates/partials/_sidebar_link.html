@@ -1,0 +1,6 @@
+{% comment %}Enlace del sidebar. Contexto: url, icono, label, key, seccion (activo si key == seccion).{% endcomment %}
+<a href="{{ url }}"
+   class="flex items-center gap-3 px-3 py-2 rounded-lg
+          {% if key == seccion %}bg-white/15 text-white font-medium{% else %}text-white/80 hover:bg-white/10{% endif %}">
+  <i data-lucide="{{ icono }}" class="w-4 h-4"></i> {{ label }}
+</a>

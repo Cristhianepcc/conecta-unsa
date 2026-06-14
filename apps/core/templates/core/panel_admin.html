@@ -1,17 +1,12 @@
-{% extends "base.html" %}
+{% extends "dashboard_base.html" %}
 
 {% block title %}Panel administrativo — CONECTA UNSA{% endblock %}
+{% block dashboard_title %}Bandeja de revisión{% endblock %}
+{% block sidebar_items %}{% include "core/_sidebar_admin.html" with seccion="panel" %}{% endblock %}
 
-{% block nav %}
-  {% include "notificaciones/_campana.html" %}
-  <a href="/admin/" class="hover:underline">Django Admin</a>
-  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Salir</a>
-{% endblock %}
-
-{% block content %}
-<section class="max-w-6xl mx-auto px-4 py-10">
-  <h1 class="text-2xl font-bold text-granate-700">Panel administrativo</h1>
-  <p class="mt-1 text-sm text-slate-500">Bolsa de Trabajo · revisión y difusión de convocatorias.</p>
+{% block dashboard_content %}
+<section class="max-w-6xl">
+  <p class="text-sm text-slate-500">Bolsa de Trabajo · revisión y difusión de convocatorias.</p>
 
   <!-- Métricas -->
   <div class="mt-8 grid grid-cols-2 sm:grid-cols-5 gap-4 text-center">
@@ -64,4 +59,4 @@
     <a href="/admin/" class="text-granate-700 underline">Django Admin</a>.
   </p>
 </section>
-{% endblock %}
+{% endblock dashboard_content %}

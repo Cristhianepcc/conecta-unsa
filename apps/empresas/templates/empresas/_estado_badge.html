@@ -1,0 +1,17 @@
+{% comment %}Badge de estado de convocatoria. Contexto: estado (slug), label (texto). {% endcomment %}
+<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium
+  {% if estado == 'publicada' %}bg-exito/10 text-exito
+  {% elif estado == 'pendiente' %}bg-info/10 text-info
+  {% elif estado == 'observada' %}bg-alerta/10 text-alerta
+  {% elif estado == 'rechazada' %}bg-peligro/10 text-peligro
+  {% elif estado == 'caducada' %}bg-slate-100 text-slate-500
+  {% else %}bg-slate-100 text-slate-600{% endif %}">
+  <span class="h-1.5 w-1.5 rounded-full
+    {% if estado == 'publicada' %}bg-exito
+    {% elif estado == 'pendiente' %}bg-info
+    {% elif estado == 'observada' %}bg-alerta
+    {% elif estado == 'rechazada' %}bg-peligro
+    {% elif estado == 'caducada' %}bg-slate-400
+    {% else %}bg-slate-400{% endif %}"></span>
+  {{ label }}
+</span>

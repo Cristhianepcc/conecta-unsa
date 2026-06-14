@@ -1,82 +1,163 @@
-{% extends "base.html" %}
+{% extends "dashboard_base.html" %}
 
 {% block title %}Panel de empresa — CONECTA UNSA{% endblock %}
+{% block dashboard_title %}Panel de empresa{% endblock %}
+{% block sidebar_items %}{% include "empresas/_sidebar_empresa.html" with seccion="dashboard" %}{% endblock %}
 
-{% block nav %}
-  {% if empresa.puede_publicar %}<a href="{% url 'empresas:publicar' %}" class="hover:underline">Publicar</a>{% endif %}
-  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Salir</a>
+{% block topbar_actions %}
+  {% if empresa.puede_publicar %}
+    <a href="{% url 'empresas:publicar' %}"
+       class="inline-flex items-center gap-2 rounded-lg bg-granate-700 px-4 py-2 text-sm font-medium text-white hover:bg-granate-800">
+      <i data-lucide="plus" class="w-4 h-4"></i> Publicar
+    </a>
+  {% endif %}
+  {% include "notificaciones/_campana.html" %}
 {% endblock %}
 
-{% block content %}
-<section class="max-w-5xl mx-auto px-4 py-10">
-  <div class="flex items-center justify-between gap-4">
-    <h1 class="text-2xl font-bold text-granate-700">{{ empresa.razon_social|default:"Mi empresa" }}</h1>
+{% block dashboard_content %}
+<section class="max-w-5xl">
+
+  <!-- Encabezado -->
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="min-w-0">
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Panel de empresa</p>
+      <h1 class="text-2xl font-bold text-granate-700 truncate">{{ empresa.razon_social|default:"Mi empresa" }}</h1>
+    </div>
     {% if empresa.verificada %}
-      <span class="text-sm rounded-full bg-exito/10 text-exito px-3 py-1">✓ Verificada</span>
+      <span class="inline-flex items-center gap-1.5 text-sm rounded-full bg-exito/10 text-exito px-3 py-1 font-medium">
+        <i data-lucide="badge-check" class="w-4 h-4"></i> Verificada
+      </span>
     {% else %}
-      <span class="text-sm rounded-full bg-alerta/10 text-alerta px-3 py-1">En verificación</span>
+      <span class="inline-flex items-center gap-1.5 text-sm rounded-full bg-alerta/10 text-alerta px-3 py-1 font-medium">
+        <i data-lucide="clock" class="w-4 h-4"></i> En verificación
+      </span>
     {% endif %}
   </div>
 
   {% if not puede_publicar %}
   <!-- CA-3: dashboard limitado -->
-  <div class="mt-8 rounded-xl border border-alerta/30 bg-alerta/5 p-6">
-    <h2 class="font-semibold text-alerta">Tu cuenta está en verificación</h2>
-    <p class="mt-2 text-sm text-slate-600">
-      Una vez que la universidad active tu empresa podrás publicar convocatorias.
-      Mientras tanto, revisa las guías de buenas prácticas para preparar tus ofertas.
-    </p>
+  <div class="mt-8 rounded-xl border border-alerta/30 bg-alerta/5 p-5 sm:p-6">
+    <div class="flex items-start gap-3">
+      <i data-lucide="shield-alert" class="w-5 h-5 text-alerta shrink-0 mt-0.5"></i>
+      <div>
+        <h2 class="font-semibold text-alerta">Tu cuenta está en verificación</h2>
+        <p class="mt-1 text-sm text-slate-600">
+          Una vez que la universidad active tu empresa podrás publicar convocatorias.
+          Mientras tanto, revisa las guías de buenas prácticas para preparar tus ofertas.
+        </p>
+      </div>
+    </div>
   </div>
   {% else %}
 
   <!-- Métricas propias (calculadas) -->
-  <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.activas }}</p><p class="text-xs text-slate-500">activas</p></div>
-    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.alcance }}</p><p class="text-xs text-slate-500">alcance (egresados)</p></div>
-    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.vistas }}</p><p class="text-xs text-slate-500">vistas</p></div>
-    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.publicadas }}</p><p class="text-xs text-slate-500">publicadas</p></div>
+  <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+    <div class="rounded-xl border border-slate-200 p-4">
+      <div class="flex items-center gap-2 text-slate-400"><i data-lucide="megaphone" class="w-4 h-4"></i><span class="text-xs">activas</span></div>
+      <p class="mt-1 text-2xl font-bold text-granate-700">{{ metricas.activas }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 p-4">
+      <div class="flex items-center gap-2 text-slate-400"><i data-lucide="users" class="w-4 h-4"></i><span class="text-xs">alcance</span></div>
+      <p class="mt-1 text-2xl font-bold text-granate-700">{{ metricas.alcance }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 p-4">
+      <div class="flex items-center gap-2 text-slate-400"><i data-lucide="eye" class="w-4 h-4"></i><span class="text-xs">vistas</span></div>
+      <p class="mt-1 text-2xl font-bold text-granate-700">{{ metricas.vistas }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-200 p-4">
+      <div class="flex items-center gap-2 text-slate-400"><i data-lucide="send" class="w-4 h-4"></i><span class="text-xs">publicadas</span></div>
+      <p class="mt-1 text-2xl font-bold text-granate-700">{{ metricas.publicadas }}</p>
+    </div>
   </div>
 
-  <div class="mt-8 flex items-center justify-between">
+  <div class="mt-8 flex items-center justify-between gap-3">
     <h2 class="text-lg font-semibold text-slate-800">Mis convocatorias</h2>
-    <a href="{% url 'empresas:publicar' %}" class="rounded-lg bg-granate-700 px-4 py-2 text-white text-sm hover:bg-granate-800">+ Publicar</a>
+    <a href="{% url 'empresas:publicar' %}"
+       class="inline-flex items-center gap-1.5 rounded-lg bg-granate-700 px-4 py-2 text-white text-sm hover:bg-granate-800">
+      <i data-lucide="plus" class="w-4 h-4"></i> Publicar
+    </a>
   </div>
 
-  <div class="mt-4 overflow-x-auto">
-    <table class="w-full text-sm border border-slate-200 rounded-lg">
+  {% if convocatorias %}
+  <!-- Escritorio: tabla -->
+  <div class="mt-4 hidden md:block overflow-x-auto rounded-xl border border-slate-200">
+    <table class="w-full text-sm">
       <thead class="bg-slate-50 text-slate-500 text-left">
-        <tr><th class="px-3 py-2">Título</th><th class="px-3 py-2">Estado</th>
-            <th class="px-3 py-2">Transparencia</th><th class="px-3 py-2">Fecha límite</th><th class="px-3 py-2"></th></tr>
+        <tr>
+          <th class="px-4 py-2.5 font-medium">Título</th>
+          <th class="px-4 py-2.5 font-medium">Estado</th>
+          <th class="px-4 py-2.5 font-medium">Transparencia</th>
+          <th class="px-4 py-2.5 font-medium">Fecha límite</th>
+          <th class="px-4 py-2.5"><span class="sr-only">Acciones</span></th>
+        </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
         {% for c in convocatorias %}
-        <tr class="{% if c.estado == 'observada' %}bg-alerta/5{% endif %}">
-          <td class="px-3 py-2 font-medium">{{ c.titulo }}</td>
-          <td class="px-3 py-2">{{ c.get_estado_display }}</td>
-          <td class="px-3 py-2">{{ c.transparencia_pct }}%</td>
-          <td class="px-3 py-2">{{ c.fecha_limite|default:"—" }}</td>
-          <td class="px-3 py-2 text-right">
-            <a href="{% url 'empresas:editar' c.id %}" class="text-granate-700 hover:underline">
-              {% if c.estado == 'observada' %}Corregir{% else %}Editar{% endif %}
+        <tr class="{% if c.estado == 'observada' %}bg-alerta/5{% endif %} hover:bg-slate-50/70">
+          <td class="px-4 py-3 font-medium text-slate-800">{{ c.titulo }}</td>
+          <td class="px-4 py-3">{% include "empresas/_estado_badge.html" with estado=c.estado label=c.get_estado_display %}</td>
+          <td class="px-4 py-3">{% include "empresas/_transparencia.html" with et=c.etiqueta_transparencia pct=c.transparencia_pct %}</td>
+          <td class="px-4 py-3 text-slate-600">{{ c.fecha_limite|default:"—" }}</td>
+          <td class="px-4 py-3 text-right">
+            <a href="{% url 'empresas:editar' c.id %}"
+               class="inline-flex items-center gap-1 font-medium {% if c.estado == 'observada' %}text-alerta{% else %}text-granate-700{% endif %} hover:underline">
+              {% if c.estado == 'observada' %}<i data-lucide="wrench" class="w-4 h-4"></i> Corregir{% else %}<i data-lucide="pencil" class="w-4 h-4"></i> Editar{% endif %}
             </a>
           </td>
         </tr>
-        {% empty %}
-        <tr><td colspan="5" class="px-3 py-6 text-center text-slate-400">Aún no publicas convocatorias.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
+  <!-- Móvil: tarjetas -->
+  <ul class="mt-4 space-y-3 md:hidden">
+    {% for c in convocatorias %}
+    <li class="rounded-xl border p-4 {% if c.estado == 'observada' %}border-alerta/40 bg-alerta/5{% else %}border-slate-200{% endif %}">
+      <div class="flex items-start justify-between gap-3">
+        <p class="font-semibold text-slate-800">{{ c.titulo }}</p>
+        {% include "empresas/_estado_badge.html" with estado=c.estado label=c.get_estado_display %}
+      </div>
+      <div class="mt-3 flex items-center justify-between text-sm">
+        {% include "empresas/_transparencia.html" with et=c.etiqueta_transparencia pct=c.transparencia_pct %}
+        <span class="text-slate-500"><i data-lucide="calendar" class="inline w-3.5 h-3.5 -mt-0.5"></i> {{ c.fecha_limite|default:"Sin fecha" }}</span>
+      </div>
+      <a href="{% url 'empresas:editar' c.id %}"
+         class="mt-3 inline-flex items-center gap-1 text-sm font-medium {% if c.estado == 'observada' %}text-alerta{% else %}text-granate-700{% endif %} hover:underline">
+        {% if c.estado == 'observada' %}<i data-lucide="wrench" class="w-4 h-4"></i> Corregir{% else %}<i data-lucide="pencil" class="w-4 h-4"></i> Editar{% endif %}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+
+  {% else %}
+  <!-- Estado vacío -->
+  <div class="mt-4 rounded-xl border border-dashed border-slate-300 p-10 text-center">
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-granate-50 text-granate-700">
+      <i data-lucide="megaphone" class="w-6 h-6"></i>
+    </div>
+    <p class="mt-3 font-medium text-slate-700">Aún no publicas convocatorias</p>
+    <p class="mt-1 text-sm text-slate-500">Crea tu primera oferta para llegar a egresados de la UNSA.</p>
+    <a href="{% url 'empresas:publicar' %}"
+       class="mt-4 inline-flex items-center gap-2 rounded-lg bg-granate-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-granate-800">
+      <i data-lucide="plus" class="w-4 h-4"></i> Publicar convocatoria
+    </a>
+  </div>
+  {% endif %}
   {% endif %}
 
   <!-- Estado de la empresa + guías (CA-6) -->
-  <div class="mt-10 grid gap-6 sm:grid-cols-2">
+  <div class="mt-10 grid gap-4 sm:gap-6 sm:grid-cols-2">
     <div class="rounded-xl border border-slate-200 p-5">
-      <h3 class="font-semibold text-slate-800">Estado de tu empresa</h3>
-      <p class="text-sm text-slate-500 mt-1">Estado: <strong>{{ empresa.get_estado_display }}</strong></p>
+      <h3 class="flex items-center gap-2 font-semibold text-slate-800">
+        <i data-lucide="building-2" class="w-4 h-4 text-granate-700"></i> Estado de tu empresa
+      </h3>
+      <p class="text-sm text-slate-500 mt-2">Estado: <strong class="text-slate-700">{{ empresa.get_estado_display }}</strong></p>
     </div>
     <div class="rounded-xl border border-slate-200 p-5">
-      <h3 class="font-semibold text-slate-800">Transparencia y buenas prácticas</h3>
+      <h3 class="flex items-center gap-2 font-semibold text-slate-800">
+        <i data-lucide="sparkles" class="w-4 h-4 text-granate-700"></i> Transparencia y buenas prácticas
+      </h3>
       <ul class="mt-2 text-sm text-slate-600 list-disc pl-5 space-y-1">
         <li>Publica la banda salarial: es lo que más sube tu transparencia (30%).</li>
         <li>Completa descripción, beneficios y vacantes para mayor visibilidad.</li>
@@ -85,4 +166,4 @@
     </div>
   </div>
 </section>
-{% endblock %}
+{% endblock dashboard_content %}

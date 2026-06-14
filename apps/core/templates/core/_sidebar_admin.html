@@ -1,0 +1,4 @@
+{% comment %}Sidebar del administrativo. Contexto: seccion (panel|notificaciones).{% endcomment %}
+{% include "partials/_sidebar_link.html" with url="/panel-admin/" icono="inbox" label="Bandeja" key="panel" seccion=seccion %}
+{% include "partials/_sidebar_link.html" with url="/notificaciones/" icono="bell" label="Notificaciones" key="notificaciones" seccion=seccion %}
+{% include "partials/_sidebar_link.html" with url="/admin/" icono="settings" label="Django Admin" key="django" seccion=seccion %}

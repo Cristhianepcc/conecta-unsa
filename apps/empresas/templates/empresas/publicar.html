@@ -1,28 +1,17 @@
-{% extends "base.html" %}
+{% extends "dashboard_base.html" %}
 {% block title %}Publicar convocatoria — CONECTA UNSA{% endblock %}
+{% block dashboard_title %}Publicar convocatoria{% endblock %}
+{% block sidebar_items %}{% include "empresas/_sidebar_empresa.html" with seccion="publicar" %}{% endblock %}
 
-{% block extra_head %}
-<style>
-  .campo input, .campo select, .campo textarea { width:100%; border:1px solid #cbd5e1;
-    border-radius:.5rem; padding:.5rem .7rem; margin-top:.2rem; }
-  .campo label { font-size:.85rem; font-weight:500; color:#334155; }
-</style>
-{% endblock %}
-
-{% block nav %}
-  <a href="{% url 'empresas:dashboard' %}" class="hover:underline">Panel</a>
-  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Salir</a>
-{% endblock %}
-
-{% block content %}
-<section class="max-w-2xl mx-auto px-4 py-10">
-  <h1 class="text-2xl font-bold text-granate-700">Publicar convocatoria</h1>
-  <p class="mt-1 text-sm text-slate-500">Empresa: {{ empresa.razon_social }}</p>
+{% block dashboard_content %}
+<section class="max-w-2xl">
+  <p class="text-sm text-slate-500">Empresa: {{ empresa.razon_social }}</p>
   <form method="post" class="mt-6" novalidate>
     {% csrf_token %}
     {% include "convocatorias/_form.html" %}
-    <button type="submit" class="mt-8 rounded-lg bg-granate-700 px-8 py-3 font-medium text-white hover:bg-granate-800">
-      Publicar
+    <button type="submit"
+            class="mt-8 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-granate-700 px-8 py-3 font-medium text-white hover:bg-granate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-granate-700 focus-visible:ring-offset-2">
+      <i data-lucide="send" class="w-4 h-4"></i> Publicar
     </button>
   </form>
 </section>
