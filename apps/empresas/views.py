@@ -11,6 +11,7 @@ from apps.convocatorias.models import (
 from apps.convocatorias.services import (
     desglose_transparencia,
     faltantes_nivel_1,
+    puntos_por_criterio,
     validar_legal,
 )
 from apps.usuarios.decorators import empresa_required
@@ -133,7 +134,11 @@ def publicar(request):
                 messages.error(request, e)
     else:
         form = ConvocatoriaForm()
-    return render(request, "empresas/publicar.html", {"form": form, "empresa": empresa})
+    return render(
+        request,
+        "empresas/publicar.html",
+        {"form": form, "empresa": empresa, "puntos_transp": puntos_por_criterio()},
+    )
 
 
 @empresa_required
@@ -156,7 +161,12 @@ def editar_convocatoria(request, pk):
         form = ConvocatoriaForm(instance=conv)
     return render(
         request, "empresas/editar.html",
-        {"form": form, "conv": conv, "observada": conv.estado == ESTADO_OBSERVADA},
+        {
+            "form": form,
+            "conv": conv,
+            "observada": conv.estado == ESTADO_OBSERVADA,
+            "puntos_transp": puntos_por_criterio(),
+        },
     )
 
 

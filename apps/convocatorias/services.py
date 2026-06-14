@@ -247,6 +247,23 @@ def faltantes_transparencia(conv: Convocatoria) -> list[dict]:
     return [i for i in desglose_transparencia(conv) if not i["presente"]]
 
 
+def puntos_por_criterio() -> dict[str, int]:
+    """Puntos (%) que aporta cada criterio de transparencia, desde config-as-data.
+
+    Sin convocatoria: alimenta el coaching en vivo del formulario (la barra de
+    transparencia que sube mientras la empresa completa campos). Mismas claves que
+    CHECKS_TRANSPARENCIA, para que el cálculo del cliente sea fiel al del servidor.
+    """
+    pesos = list(PesoTransparencia.objects.all())
+    if not pesos:
+        pesos = [
+            PesoTransparencia(criterio=c, etiqueta=e, peso=p)
+            for c, e, p in constants.CRITERIOS_TRANSPARENCIA
+        ]
+    total = sum(p.peso for p in pesos) or 1
+    return {p.criterio: round(p.peso / total * 100) for p in pesos}
+
+
 # --- Publicación ------------------------------------------------------------
 def faltantes_nivel_1(conv: Convocatoria) -> list[str]:
     """Campos Nivel 1 que faltan para poder publicar (CA-2)."""

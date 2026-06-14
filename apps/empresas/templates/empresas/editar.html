@@ -1,31 +1,42 @@
 {% extends "dashboard_base.html" %}
 {% block title %}Editar convocatoria — CONECTA UNSA{% endblock %}
-{% block dashboard_title %}Editar convocatoria{% endblock %}
+{% block dashboard_title %}{% if observada %}Corregir convocatoria{% else %}Editar convocatoria{% endif %}{% endblock %}
+{% block user_role %}{{ conv.empresa.razon_social|default:"Empresa" }}{% endblock %}
 {% block sidebar_items %}{% include "empresas/_sidebar_empresa.html" with seccion="dashboard" %}{% endblock %}
 
 {% block dashboard_content %}
-<section class="max-w-2xl">
+<section class="max-w-3xl">
   <a href="{% url 'empresas:dashboard' %}" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-granate-700">
     <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al panel
   </a>
 
   {% if observada %}
-  <div class="mt-4 flex items-start gap-3 rounded-lg border border-alerta/40 bg-alerta/5 p-4">
-    <i data-lucide="wrench" class="w-5 h-5 text-alerta shrink-0 mt-0.5"></i>
-    <div>
+  {# CA-4: comentario del admin destacado + CTA de corrección #}
+  <div class="mt-4 flex items-start gap-3 rounded-2xl border border-alerta/40 bg-alerta/5 p-4 sm:p-5 shadow-sm">
+    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-alerta/15 text-alerta">
+      <i data-lucide="message-square-warning" class="w-5 h-5"></i>
+    </span>
+    <div class="min-w-0">
       <p class="font-semibold text-alerta">Requiere corrección</p>
       <p class="mt-1 text-sm text-slate-700">{{ conv.comentario_revision }}</p>
+      <p class="mt-2 text-xs text-slate-500">Corrige lo señalado y reenvía: volverá a revisión de la universidad.</p>
     </div>
   </div>
   {% endif %}
 
-  <form method="post" class="mt-6" novalidate>
+  <form method="post" class="mt-5" novalidate>
     {% csrf_token %}
     {% include "convocatorias/_form.html" %}
-    <button type="submit"
-            class="mt-8 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-granate-700 px-8 py-3 font-medium text-white hover:bg-granate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-granate-700 focus-visible:ring-offset-2">
-      <i data-lucide="refresh-cw" class="w-4 h-4"></i> {% if observada %}Corregir y reenviar{% else %}Guardar y reenviar{% endif %}
-    </button>
+    <div class="mt-6 flex flex-col sm:flex-row gap-3">
+      <button type="submit"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-granate-700 px-8 py-3 font-medium text-white hover:bg-granate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-granate-700 focus-visible:ring-offset-2">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i> {% if observada %}Corregir y reenviar{% else %}Guardar y reenviar{% endif %}
+      </button>
+      <a href="{% url 'empresas:dashboard' %}"
+         class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-6 py-3 font-medium text-slate-600 hover:bg-slate-50">
+        Cancelar
+      </a>
+    </div>
   </form>
 </section>
 {% endblock %}
