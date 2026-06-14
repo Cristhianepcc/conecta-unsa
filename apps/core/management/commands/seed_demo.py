@@ -24,12 +24,15 @@ from apps.core import constants
 from apps.core.models import AdminAllowlist
 from apps.empresas.models import ESTADO_ACTIVA, Empresa, Reclutador
 from apps.taxonomia.models import Carrera
-from apps.usuarios.models import ROL_RECLUTADOR
-from apps.usuarios.services import asegurar_perfil
+from apps.usuarios.models import ROL_ADMIN, ROL_EGRESADO, ROL_RECLUTADOR
+from apps.usuarios.services import asegurar_perfil, asegurar_perfil_talento
 
 User = get_user_model()
 
 ADMIN_DEMO = "bolsa.trabajo@unsa.edu.pe"
+
+# Usuarios por defecto para la demo (uno por rol). Contraseña común para mostrar los flujos.
+PASSWORD_DEMO = "demo12345"
 
 # (ruc, razón social, nombre comercial, registrada?) — mezcla registradas y referenciales.
 EMPRESAS = [
@@ -184,7 +187,72 @@ class Command(BaseCommand):
                 conv.save()
                 n_conv += 1
 
+        self._crear_usuarios_demo()
+
         self.stdout.write(self.style.SUCCESS(
             f"Demo sembrada: {Empresa.objects.count()} empresas, "
             f"{Convocatoria.objects.count()} convocatorias, 1 administrativo en allowlist."
         ))
+        self.stdout.write(self.style.SUCCESS(
+            "Usuarios por defecto (contraseña «demo12345»): "
+            "demo_egresado · demo_admin · demo_empresa."
+        ))
+
+    def _crear_usuarios_demo(self):
+        """Crea un usuario por rol (egresado, administrador, empresa). Idempotente."""
+        # 1) Egresado
+        egresado, creado = User.objects.get_or_create(
+            username="demo_egresado",
+            defaults={"email": "demo.egresado@unsa.edu.pe",
+                      "first_name": "Demo", "last_name": "Egresado"},
+        )
+        egresado.set_password(PASSWORD_DEMO)
+        egresado.save()
+        perfil = asegurar_perfil(egresado)
+        perfil.rol = ROL_EGRESADO
+        perfil.perfil_completo = True
+        perfil.consentimiento_datos = True
+        perfil.save()
+        talento = asegurar_perfil_talento(egresado)
+        if not talento.carrera_id:
+            talento.carrera = (
+                Carrera.objects.filter(nombre="Ingeniería de Sistemas").first()
+                or Carrera.objects.first()
+            )
+            talento.estado_academico = "egresado"
+            talento.save()
+
+        # 2) Administrador (rol por allowlist)
+        AdminAllowlist.objects.get_or_create(
+            email="demo.admin@unsa.edu.pe", defaults={"nota": "Administrativo demo"}
+        )
+        admin, creado = User.objects.get_or_create(
+            username="demo_admin",
+            defaults={"email": "demo.admin@unsa.edu.pe",
+                      "first_name": "Demo", "last_name": "Admin"},
+        )
+        admin.set_password(PASSWORD_DEMO)
+        admin.save()
+        perfil_admin = asegurar_perfil(admin)
+        perfil_admin.rol = ROL_ADMIN
+        perfil_admin.save(update_fields=["rol"])
+
+        # 3) Empresa (reclutador con empresa verificada)
+        empresa, _ = Empresa.objects.get_or_create(
+            ruc="20100000100",
+            defaults={"razon_social": "Empresa Demo S.A.C.",
+                      "nombre_comercial": "Empresa Demo", "estado": ESTADO_ACTIVA},
+        )
+        recl, creado = User.objects.get_or_create(
+            username="demo_empresa",
+            defaults={"email": "demo.empresa@demo.pe", "first_name": "Demo", "last_name": "Empresa"},
+        )
+        recl.set_password(PASSWORD_DEMO)
+        recl.save()
+        perfil_recl = asegurar_perfil(recl)
+        perfil_recl.rol = ROL_RECLUTADOR
+        perfil_recl.save(update_fields=["rol"])
+        Reclutador.objects.get_or_create(
+            usuario=recl,
+            defaults={"empresa": empresa, "nombres": "Demo", "ap_paterno": "Empresa"},
+        )
