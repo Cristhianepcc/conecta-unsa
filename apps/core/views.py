@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.usuarios.decorators import admin_required
@@ -133,8 +134,13 @@ def panel_admin(request):
 
 
 @admin_required
+@transaction.atomic
 def aprobar_lote(request):
-    """Aprueba en lote las convocatorias seleccionadas (solo las sin alertas)."""
+    """Aprueba en lote las convocatorias seleccionadas (solo las sin alertas).
+
+    Se ejecuta como una transacción: el lote se procesa de forma consistente y los
+    fallos por ítem (alertas o transición inválida) no rompen el resto.
+    """
     if request.method != "POST":
         return redirect("core:panel_admin")
 
@@ -149,20 +155,26 @@ def aprobar_lote(request):
     convs = Convocatoria.objects.filter(
         id__in=ids, estado__in=[ESTADO_PENDIENTE, ESTADO_OBSERVADA]
     )
-    aprobadas = 0
+    aprobadas = omitidas = 0
     for conv in convs:
         if flujo.calcular_alertas(conv):  # seguridad: nunca aprobar con alertas en lote
+            omitidas += 1
             continue
         try:
             flujo.aprobar(conv)
             aprobadas += 1
         except flujo.TransicionInvalida:
-            pass
+            omitidas += 1
 
-    if aprobadas:
-        messages.success(request, f"{aprobadas} convocatoria(s) publicada(s).")
+    if aprobadas and omitidas:
+        messages.success(
+            request,
+            f"Se publicaron {aprobadas} convocatoria(s); {omitidas} omitida(s) por alertas.",
+        )
+    elif aprobadas:
+        messages.success(request, f"Se publicaron {aprobadas} convocatoria(s).")
     else:
-        messages.info(request, "No se aprobó ninguna convocatoria.")
+        messages.info(request, "No se aprobó ninguna convocatoria (todas tenían alertas).")
     return redirect(_destino_bandeja(request))
 
 
