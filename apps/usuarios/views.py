@@ -339,14 +339,57 @@ def credencial_config(request):
     )
 
 
+# Ícono Lucide por tipo de credencial (página pública de credencial).
+ICONOS_CREDENCIAL = {
+    "idioma": "languages",
+    "tesis": "file-text",
+    "articulo": "file-text",
+    "voluntariado": "heart-handshake",
+    "representacion": "users",
+    "practica_convalidada": "briefcase",
+    "beca": "award",
+    "olimpiada": "trophy",
+    "intercambio": "globe",
+    "incubadora_jaku": "rocket",
+    "taller": "graduation-cap",
+    "evento": "calendar-days",
+}
+
+
 def credencial_publica(request, slug):
-    """Carta de presentación pública: solo lectura, noindex, sin features sociales (CA-6)."""
+    """Carta de presentación pública verificable: solo lectura, noindex, sin features sociales (CA-6)."""
+    import io
+
+    import segno
+    from django.urls import reverse
+    from django.utils.safestring import mark_safe
+
     talento = get_object_or_404(PerfilTalento, cred_slug=slug, cred_activa=True)
-    credenciales = talento.credenciales.filter(visible_para_empresas=True)
+    credenciales = [
+        {"obj": c, "icono": ICONOS_CREDENCIAL.get(c.tipo, "badge-check")}
+        for c in talento.credenciales.filter(visible_para_empresas=True)
+    ]
+
+    url_abs = request.build_absolute_uri(
+        reverse("usuarios:credencial_publica", args=[slug])
+    )
+    buff = io.BytesIO()
+    segno.make(url_abs, error="m").save(
+        buff, kind="svg", scale=4, border=0, dark="#0F172A", xmldecl=False
+    )
+    qr_svg = mark_safe(buff.getvalue().decode())
+
     response = render(
         request,
         "usuarios/credencial_publica.html",
-        {"talento": talento, "credenciales": credenciales},
+        {
+            "talento": talento,
+            "credenciales": credenciales,
+            "qr_svg": qr_svg,
+            "codigo": slug.upper(),
+            "url_publica": url_abs,
+            "verificada_en": talento.actualizado_en,
+        },
     )
     response["X-Robots-Tag"] = "noindex, nofollow"
     return response

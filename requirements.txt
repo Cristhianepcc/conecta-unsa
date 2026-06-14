@@ -8,6 +8,7 @@ whitenoise==6.12.0
 django-allauth[socialaccount]==65.18.0
 resend==2.30.1
 python-dotenv==1.2.2
+segno==1.6.6
 
 # Pruebas
 pytest==9.1.0

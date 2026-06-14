@@ -1,41 +1,151 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Credencial UNSA — {{ talento.usuario.get_full_name|default:talento.usuario.username }}{% endblock %}
-
+{% block title %}Credencial verificada — {{ talento.usuario.get_full_name|default:talento.usuario.username }} · CONECTA UNSA{% endblock %}
 {% block meta %}<meta name="robots" content="noindex, nofollow">{% endblock %}
 
-{% block header_utilidad %}{% endblock %}
-{% block nav %}{% endblock %}
+{% block extra_head %}
+<style>
+  body { background: #F8FAFC; }
+  [data-qr] svg { width: 100%; height: 100%; display: block; }
+  @media print { .no-print { display: none !important; } }
+</style>
+{% endblock %}
+
+{# Header propio (limpio, blanco, con badge de verificación) #}
+{% block header %}
+<header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
+    <a href="{% url 'core:home' %}" class="flex items-center gap-2.5">
+      <img src="{% static 'img/LOGO_UNSA.png' %}" alt="UNSA" class="h-8 w-auto">
+      <span class="font-bold text-sm text-slate-800">CONECTA <span class="text-granate-700">UNSA</span></span>
+    </a>
+    <span class="ml-auto inline-flex items-center gap-1.5 rounded-full bg-exito/10 text-exito text-sm font-semibold px-3 py-1.5">
+      <i data-lucide="badge-check" class="w-4 h-4"></i> Credencial verificada
+    </span>
+  </div>
+</header>
+{% endblock %}
+
+{% block footer %}
+<footer class="bg-gradient-to-r from-granate-900 to-granate-800 text-white/70 mt-12 no-print">
+  <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+    <p>© 2026 Universidad Nacional de San Agustín de Arequipa · Bolsa de Trabajo</p>
+    <div class="flex items-center gap-4">
+      <a href="{% url 'core:privacidad' %}" class="hover:text-white">Privacidad</a>
+      <a href="{% url 'core:terminos' %}" class="hover:text-white">Términos</a>
+      <a href="{% url 'core:home' %}" class="hover:text-white">CONECTA UNSA</a>
+    </div>
+  </div>
+</footer>
+{% endblock %}
 
 {% block content %}
-<section class="max-w-2xl mx-auto px-4 py-12">
-  <div class="rounded-xl border border-slate-200 shadow-sm p-8">
-    <p class="text-xs uppercase tracking-wide text-granate-700 font-semibold">
-      Credencial verificada · CONECTA UNSA
-    </p>
-    <h1 class="mt-2 text-3xl font-bold text-slate-800">
-      {{ talento.usuario.get_full_name|default:talento.usuario.username }}
-    </h1>
-    <p class="mt-1 text-slate-600">
-      {{ talento.carrera|default:"" }}
-      {% if talento.estado_academico %}· {{ talento.get_estado_academico_display }}{% endif %}
-    </p>
+<main class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8 lg:py-10">
+  <div class="grid gap-6 lg:grid-cols-3 items-start">
 
-    <h2 class="mt-8 text-sm font-semibold text-slate-700 uppercase tracking-wide">Credenciales</h2>
-    <ul class="mt-3 space-y-2">
-      {% for c in credenciales %}
-      <li class="flex items-center gap-2 text-sm text-slate-700">
-        {% if c.verificada %}<span class="text-exito">🟢</span>{% else %}<span class="text-slate-400">⚪</span>{% endif %}
-        <span><strong>{{ c.get_tipo_display }}</strong> — {{ c.detalle }}</span>
-      </li>
-      {% empty %}
-      <li class="text-sm text-slate-400">Sin credenciales públicas.</li>
-      {% endfor %}
-    </ul>
+    <!-- ===== Columna izquierda (perfil + credenciales) ===== -->
+    <section class="lg:col-span-2 space-y-6">
+      <!-- Perfil -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-5">
+          {# Sin foto en el modelo: avatar con inicial (placeholder institucional) #}
+          <span class="h-24 w-24 shrink-0 mx-auto sm:mx-0 rounded-full bg-granate-100 text-granate-700 grid place-items-center text-4xl font-bold ring-4 ring-granate-50">
+            {{ talento.usuario.get_full_name|default:talento.usuario.username|first|upper }}
+          </span>
+          <div class="text-center sm:text-left min-w-0">
+            <h1 class="text-2xl sm:text-3xl font-bold text-[#0F172A]">
+              {{ talento.usuario.get_full_name|default:talento.usuario.username }}
+            </h1>
+            <p class="mt-1 text-lg text-granate-700 font-medium">{{ talento.carrera|default:"—" }}</p>
+            <p class="text-slate-500">{{ talento.get_estado_academico_display|default:"" }}</p>
+            <span class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-exito/10 text-exito text-xs font-semibold px-2.5 py-1">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Identidad verificada por la UNSA
+            </span>
+          </div>
+        </div>
+      </div>
 
-    <p class="mt-8 text-xs text-slate-400">
-      Carta de presentación generada por CONECTA UNSA. Documento de solo lectura.
-    </p>
+      <!-- Credenciales -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+        <h2 class="text-lg font-bold text-[#0F172A]">Credenciales y logros</h2>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          {% for c in credenciales %}
+          <div class="group flex items-start gap-3 rounded-xl border border-slate-200 p-4 transition hover:shadow-md hover:border-granate-200 hover:-translate-y-0.5">
+            <span class="h-10 w-10 shrink-0 rounded-xl bg-granate-50 text-granate-700 grid place-items-center">
+              <i data-lucide="{{ c.icono }}" class="w-5 h-5"></i>
+            </span>
+            <div class="min-w-0">
+              <p class="font-semibold text-slate-800 leading-snug">{{ c.obj.get_tipo_display }}</p>
+              <p class="text-sm text-slate-500">{{ c.obj.detalle }}</p>
+              <span class="mt-1.5 inline-flex items-center gap-1 text-xs {% if c.obj.verificada %}text-exito{% else %}text-slate-400{% endif %}">
+                {% if c.obj.verificada %}<i data-lucide="badge-check" class="w-3.5 h-3.5"></i> Verificada{% else %}Autodeclarada{% endif %}
+                · {{ c.obj.creada_en|date:"Y" }}
+              </span>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-sm text-slate-400 sm:col-span-2">Sin credenciales públicas.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Columna derecha (académico + verificación + acciones) ===== -->
+    <aside class="space-y-6">
+      <!-- Información académica -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="text-sm font-bold text-[#0F172A] uppercase tracking-wide">Información académica</h2>
+        <dl class="mt-4 space-y-3 text-sm">
+          <div class="flex items-center gap-3"><i data-lucide="graduation-cap" class="w-4 h-4 text-granate-700"></i><span class="text-slate-500 w-24">Carrera</span><span class="font-medium text-slate-800">{{ talento.carrera|default:"—" }}</span></div>
+          <div class="flex items-center gap-3"><i data-lucide="user-round" class="w-4 h-4 text-granate-700"></i><span class="text-slate-500 w-24">Estado</span><span class="font-medium text-slate-800">{{ talento.get_estado_academico_display|default:"—" }}</span></div>
+          <div class="flex items-center gap-3"><i data-lucide="landmark" class="w-4 h-4 text-granate-700"></i><span class="text-slate-500 w-24">Universidad</span><span class="font-medium text-slate-800">UNSA</span></div>
+          <div class="flex items-center gap-3"><i data-lucide="map-pin" class="w-4 h-4 text-granate-700"></i><span class="text-slate-500 w-24">Sede</span><span class="font-medium text-slate-800">Arequipa, Perú</span></div>
+        </dl>
+      </div>
+
+      <!-- Verificación -->
+      <div class="rounded-2xl border border-exito/30 bg-exito/5 p-6 shadow-sm text-center">
+        <div class="inline-flex items-center gap-1.5 rounded-full bg-exito text-white text-xs font-semibold px-3 py-1">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i> Activa
+        </div>
+        <div class="mt-4 inline-block rounded-xl bg-white p-3 border border-slate-200">
+          <div data-qr class="h-32 w-32">{{ qr_svg }}</div>
+        </div>
+        <p class="mt-3 text-xs text-slate-500">Código de verificación</p>
+        <p class="font-mono text-sm font-semibold text-[#0F172A] tracking-wider break-all">{{ codigo }}</p>
+        <p class="mt-3 text-xs text-slate-600 leading-relaxed">
+          Esta credencial ha sido validada oficialmente por la
+          <strong>Universidad Nacional de San Agustín de Arequipa</strong>.
+        </p>
+      </div>
+
+      <!-- Fechas -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <ul class="space-y-3 text-sm">
+          <li class="flex items-center gap-3"><i data-lucide="calendar-plus" class="w-4 h-4 text-slate-400"></i><span class="text-slate-500 flex-1">Emitida</span><span class="font-medium text-slate-800">{{ talento.usuario.date_joined|date:"d/m/Y" }}</span></li>
+          <li class="flex items-center gap-3"><i data-lucide="badge-check" class="w-4 h-4 text-exito"></i><span class="text-slate-500 flex-1">Validada</span><span class="font-medium text-slate-800">{{ verificada_en|date:"d/m/Y" }}</span></li>
+          <li class="flex items-center gap-3"><i data-lucide="infinity" class="w-4 h-4 text-slate-400"></i><span class="text-slate-500 flex-1">Vigencia</span><span class="font-medium text-slate-800">Permanente</span></li>
+        </ul>
+      </div>
+
+      <!-- Acciones -->
+      <div class="space-y-2 no-print" x-data="{ copiado: false }">
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ url_publica|urlencode }}" target="_blank" rel="noopener"
+           class="flex items-center justify-center gap-2 w-full rounded-xl bg-[#0A66C2] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90">
+          <i data-lucide="linkedin" class="w-4 h-4"></i> Compartir en LinkedIn
+        </a>
+        <button type="button"
+                @click="navigator.clipboard.writeText('{{ url_publica }}'); copiado=true; setTimeout(()=>copiado=false,1500)"
+                class="flex items-center justify-center gap-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+          <i data-lucide="link" class="w-4 h-4"></i> <span x-text="copiado ? '¡Enlace copiado!' : 'Compartir credencial'"></span>
+        </button>
+        <button type="button" onclick="window.print()"
+                class="flex items-center justify-center gap-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+          <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
+        </button>
+      </div>
+    </aside>
   </div>
-</section>
+</main>
 {% endblock %}
