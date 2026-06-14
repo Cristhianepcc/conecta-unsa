@@ -81,7 +81,7 @@
           <li class="py-2 first:pt-0">
             <a href="{% url 'convocatorias:detalle' c.id %}" class="group block">
               <span class="flex items-center gap-2">
-                <span class="h-1.5 w-1.5 rounded-full {% if c.etiqueta_transparencia == 'alta' %}bg-exito{% elif c.etiqueta_transparencia == 'media' %}bg-alerta{% else %}bg-peligro{% endif %}"></span>
+                {% include "convocatorias/_transparencia.html" with et=c.etiqueta_transparencia pct=c.transparencia_pct variant="dot" %}
                 <span class="text-sm text-slate-700 group-hover:text-granate-700 truncate">{{ c.titulo }}</span>
               </span>
               <span class="ml-3.5 block text-xs text-slate-400 truncate">{{ c.empresa }}</span>

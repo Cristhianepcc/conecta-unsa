@@ -1,0 +1,23 @@
+{% comment %}Semáforo de transparencia unificado (única fuente de verdad).
+Contexto: et (alta|media|baja), pct (int), variant (bar|pill|dot; def. pill).
+  bar  → barra de progreso + % (tablas de empresa/admin)
+  pill → chip con punto + % (tarjetas)
+  dot  → solo punto de color (listas/resúmenes){% endcomment %}
+{% if variant == 'bar' %}
+<div class="flex items-center gap-2 min-w-[7rem]" role="img" aria-label="Transparencia {{ et }}, {{ pct }} por ciento">
+  <div class="h-1.5 flex-1 rounded-full bg-slate-100 overflow-hidden">
+    <div class="h-full rounded-full {% if et == 'alta' %}bg-exito{% elif et == 'media' %}bg-alerta{% else %}bg-peligro{% endif %}" style="width: {{ pct }}%"></div>
+  </div>
+  <span class="text-xs font-semibold tabular-nums {% if et == 'alta' %}text-exito{% elif et == 'media' %}text-alerta{% else %}text-peligro{% endif %}">{{ pct }}%</span>
+</div>
+{% elif variant == 'dot' %}
+<span class="h-1.5 w-1.5 rounded-full {% if et == 'alta' %}bg-exito{% elif et == 'media' %}bg-alerta{% else %}bg-peligro{% endif %}"
+      role="img" aria-label="Transparencia {{ et }}, {{ pct }} por ciento"></span>
+{% else %}
+<span title="Transparencia {{ pct }}%" aria-label="Transparencia {{ et }}, {{ pct }} por ciento"
+      class="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-2.5 py-1
+      {% if et == 'alta' %}bg-exito/10 text-exito{% elif et == 'media' %}bg-alerta/10 text-alerta{% else %}bg-peligro/10 text-peligro{% endif %}">
+  <span class="h-2 w-2 rounded-full {% if et == 'alta' %}bg-exito{% elif et == 'media' %}bg-alerta{% else %}bg-peligro{% endif %}"></span>
+  {{ pct }}%
+</span>
+{% endif %}

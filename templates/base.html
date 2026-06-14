@@ -39,6 +39,15 @@
   <!-- Campos de formulario: estilo único, accesible (NFR-A11Y). Fuente de verdad para .campo -->
   <style>
     [x-cloak] { display: none !important; }
+    /* Contenedor maestro: ancho casi completo en laptops, con tope elegante
+       en monitores grandes y gutters responsivos (UX — aprovecha el viewport
+       sin perder la jerarquía institucional). Reemplaza a max-w-6xl mx-auto px-4. */
+    .shell {
+      width: 100%;
+      max-width: 96rem;            /* ~1536px: amplio pero legible en pantallas grandes */
+      margin-inline: auto;
+      padding-inline: clamp(1rem, 4vw, 2.5rem);
+    }
     .campo { display: block; }
     .campo label { font-size: .85rem; font-weight: 500; color: #334155; display: block; }
     .campo input:not([type="checkbox"]):not([type="radio"]),
@@ -76,7 +85,7 @@
 
   {% block header %}
   <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
+    <div class="shell h-16 flex items-center gap-4">
       <!-- Lockup: logo institucional UNSA + wordmark CONECTA UNSA -->
       <a href="{% url 'core:home' %}" class="flex items-center gap-3">
         <img src="{% static 'img/LOGO_UNSA.png' %}" alt="Universidad Nacional de San Agustín de Arequipa"
@@ -112,7 +121,7 @@
   {% endblock %}
 
   {% if messages %}
-  <div class="max-w-6xl mx-auto px-4 w-full mt-4" role="status" aria-live="polite">
+  <div class="shell w-full mt-4" role="status" aria-live="polite">
     {% for message in messages %}
     <div data-flash class="mb-2 flex items-start gap-3 rounded-lg border px-4 py-3 text-sm transition-opacity duration-500
                 {% if message.tags == 'error' %}border-peligro/30 bg-peligro/5 text-peligro
@@ -134,7 +143,7 @@
 
   {% block footer %}
   <footer class="bg-granate-900 text-white/80 mt-12">
-    <div class="max-w-6xl mx-auto px-4 py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+    <div class="shell py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm">
       <div class="lg:col-span-2">
         <div class="flex items-center gap-3">
           <span class="inline-flex items-center bg-white rounded-md px-2 py-1">
@@ -168,7 +177,7 @@
       </nav>
     </div>
     <div class="border-t border-white/10">
-      <div class="max-w-6xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
+      <div class="shell py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
         <p>© 2026 Universidad Nacional de San Agustín de Arequipa. Todos los derechos reservados.</p>
         {# TODO: reemplazar href por las URLs reales de redes institucionales #}
         <nav class="flex items-center gap-1" aria-label="Redes sociales de la UNSA">
