@@ -1,0 +1,1 @@
+{% comment %}Override intencional: sin mensaje al cerrar sesión (consistente con el logout propio). No mostrar nada en la landing.{% endcomment %}

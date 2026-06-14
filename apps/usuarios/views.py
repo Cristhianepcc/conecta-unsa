@@ -117,7 +117,6 @@ def post_login(request):
 
 def logout_view(request):
     auth_logout(request)
-    messages.info(request, "Cerraste sesión correctamente.")
     return redirect("core:home")
 
 

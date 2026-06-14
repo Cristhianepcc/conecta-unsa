@@ -8,43 +8,49 @@
 <!-- ===================================================================== -->
 <!-- HERO — foto institucional a sangre + dos puertas de acceso             -->
 <!-- ===================================================================== -->
-<section class="relative isolate">
-  <!-- Foto de fondo + overlay granate para legibilidad -->
+<section class="relative isolate bg-granate-800">
+  <!-- Foto de fondo: granate sólido a la izquierda que revela la foto hacia la derecha -->
   <img src="{% static 'img/landing-pabello.jpg' %}" alt=""
        class="absolute inset-0 -z-10 h-full w-full object-cover">
-  <div class="absolute inset-0 -z-10 bg-gradient-to-r from-granate-900/95 via-granate-900/80 to-granate-800/55"></div>
+  <!-- Overlay: opaco a la izquierda (legibilidad), transparente a la derecha (revela imagen) -->
+  <div class="absolute inset-0 -z-10 bg-gradient-to-r from-granate-800 from-5% via-granate-800/70 via-45% to-transparent"></div>
 
-  <div class="shell pt-14 pb-28 sm:pt-20 sm:pb-32 lg:pt-24">
-    <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/20 backdrop-blur">
-      <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-      Servicio oficial de la Universidad Nacional de San Agustín
-    </span>
+  <div class="shell pt-16 pb-32 sm:pt-24 sm:pb-36 lg:pt-28 lg:pb-44">
+    <div class="max-w-3xl">
+      <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-sm font-medium text-white ring-1 ring-white/20 backdrop-blur">
+        <i data-lucide="shield-check" class="w-4 h-4"></i>
+        Servicio oficial de la Universidad Nacional de San Agustín
+      </span>
 
-    <h1 class="mt-5 max-w-2xl text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl">
-      Encuentra tu <span class="text-dorado">oportunidad ideal</span>
-    </h1>
-    <p class="mt-4 max-w-xl text-base text-white/85 sm:text-lg">
-      Convocatorias <strong class="font-semibold text-white">verificadas por tu universidad</strong>,
-      organizadas por tu carrera y sin saturación. Los mejores buscan a los mejores, y ese eres tú.
-    </p>
+      <h1 class="mt-6 text-5xl font-bold leading-[1.04] tracking-tight text-white sm:text-6xl lg:text-7xl">
+        Encuentra tu <span class="text-dorado">oportunidad ideal</span>
+      </h1>
+      <p class="mt-6 max-w-2xl text-lg text-white/85 sm:text-xl">
+        Convocatorias <strong class="font-semibold text-white">verificadas por la UNSA</strong> y
+        filtradas según tu carrera. Menos ruido, más oportunidades reales.
+      </p>
 
-    <!-- Buscador principal -->
-    <form action="{% url 'usuarios:login' %}" method="get" role="search"
-          class="mt-7 max-w-2xl rounded-2xl bg-white p-2 shadow-2xl">
-      <div class="flex flex-col gap-2 sm:flex-row">
-        <label class="sr-only" for="q">Buscar por cargo, empresa o carrera</label>
-        <div class="flex flex-1 items-center gap-2 px-3">
-          <i data-lucide="search" class="w-5 h-5 shrink-0 text-slate-400"></i>
-          <input id="q" name="q" type="search" autocomplete="off"
-                 placeholder="Cargo, empresa o carrera (ej. prácticas de ingeniería)"
-                 class="w-full border-0 py-2.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0">
-        </div>
-        <button type="submit"
-                class="inline-flex items-center justify-center gap-2 rounded-xl bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800">
-          Buscar <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </button>
+      <!-- CTA primario + secundario -->
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <a href="{% url 'usuarios:login' %}"
+           class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-7 py-3.5 text-base font-semibold text-granate-800 shadow-lg hover:bg-white/90">
+          Ver convocatorias <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </a>
+        <a href="{% url 'core:como_funciona' %}"
+           class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/40 px-7 py-3.5 text-base font-medium text-white hover:bg-white/10">
+          <i data-lucide="play-circle" class="w-5 h-5"></i> ¿Cómo funciona?
+        </a>
       </div>
-    </form>
+
+      <!-- Prueba social con métricas reales -->
+      <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-white/80">
+        <span class="inline-flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-dorado"></i><strong class="font-semibold text-white">{{ metricas.convocatorias_activas }}</strong> convocatorias activas</span>
+        <span class="hidden sm:inline text-white/30">·</span>
+        <span class="inline-flex items-center gap-1.5"><strong class="font-semibold text-white">{{ metricas.empresas_participantes }}</strong> empresas participantes</span>
+        <span class="hidden sm:inline text-white/30">·</span>
+        <span class="inline-flex items-center gap-1.5"><strong class="font-semibold text-white">{{ metricas.indice_transparencia }}%</strong> con información transparente</span>
+      </div>
+    </div>
   </div>
 
   <!-- Dos puertas de acceso, flotando sobre el borde inferior del hero -->
