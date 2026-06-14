@@ -1,0 +1,10 @@
+{% comment %}Propuesta de valor del panel de login. Contexto: icono, titulo, texto.{% endcomment %}
+<li class="flex items-start gap-3">
+  <span class="shrink-0 h-9 w-9 rounded-full bg-white/15 flex items-center justify-center">
+    <i data-lucide="{{ icono }}" class="w-5 h-5"></i>
+  </span>
+  <div>
+    <p class="font-semibold">{{ titulo }}</p>
+    <p class="text-sm text-white/70">{{ texto }}</p>
+  </div>
+</li>
