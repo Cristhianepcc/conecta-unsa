@@ -6,10 +6,29 @@ posteriores solo agreguen rutas dentro de su propia app (ver specs/plan-paralelo
 
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
+    # PWA: manifest e instalación. El service worker se sirve desde la raíz
+    # ("/sw.js") para que su alcance (scope) abarque todo el sitio.
+    path(
+        "manifest.webmanifest",
+        TemplateView.as_view(
+            template_name="pwa/manifest.webmanifest",
+            content_type="application/manifest+json",
+        ),
+        name="pwa_manifest",
+    ),
+    path(
+        "sw.js",
+        TemplateView.as_view(
+            template_name="pwa/sw.js",
+            content_type="application/javascript",
+        ),
+        name="pwa_sw",
+    ),
     # Apps del proyecto
     path("taxonomia/", include("apps.taxonomia.urls")),
     path("usuarios/", include("apps.usuarios.urls")),

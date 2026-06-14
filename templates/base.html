@@ -7,6 +7,15 @@
   <title>{% block title %}CONECTA UNSA{% endblock %}</title>
   {% block meta %}{% endblock %}
 
+  <!-- PWA: app instalable (manifest + tema institucional) -->
+  <link rel="manifest" href="{% url 'pwa_manifest' %}">
+  <meta name="theme-color" content="#7A1F2C">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="CONECTA UNSA">
+  <link rel="apple-touch-icon" href="{% static 'img/pwa/icon-192.png' %}">
+  <link rel="icon" type="image/png" sizes="512x512" href="{% static 'img/pwa/icon-512.png' %}">
+
   <!-- Tipografía Inter (branding §3) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -252,6 +261,14 @@
   {% endblock %}
 
   <script>window.addEventListener('load', () => window.lucide && lucide.createIcons());</script>
+  <!-- PWA: registrar el service worker (alcance de todo el sitio) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
   <script>
     (function () {
       function dismiss(el) {

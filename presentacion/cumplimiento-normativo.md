@@ -19,7 +19,7 @@ de la Universidad Nacional de San Agustín de Arequipa y empresas verificadas.
 | 3 | Interoperabilidad | 🟡 Preparado | Arquitectura lista para exponer API REST; sin integración activa a sistemas externos. |
 | 4 | Accesibilidad | 🟢 Cumple | Diseñado a nivel **WCAG 2.1 AA** (NTP-ISO/IEC 40500). |
 | 5 | Idiomas | 🟡 Preparado | Español pleno; infraestructura i18n de Django lista para lenguas originarias (Ley 29735). |
-| 6 | Aplicación móvil | 🟡 Parcial | Web responsive mobile-first; instalable como PWA. |
+| 6 | Aplicación móvil | 🟢 Cumple | Web responsive mobile-first **instalable como PWA** (manifest + service worker). |
 | 7 | Seguridad y datos personales | 🟢 Cumple | Implementa principios de la **Ley 29733**; buenas prácticas de seguridad en producción. |
 
 Leyenda: 🟢 cumple / implementado · 🟡 parcial o preparado para crecer · 🔴 no aplica / no implementado.
@@ -154,13 +154,23 @@ Leyenda: 🟢 cumple / implementado · 🟡 parcial o preparado para crecer · �
 
 **Qué cumple el prototipo**
 - **Diseño responsive mobile-first** (Tailwind), con navegación adaptada a móvil.
-- Puede ofrecerse como **PWA instalable** (sin necesidad de app nativa ni tienda).
+- **PWA instalable**: `manifest.webmanifest` (nombre, íconos 192/512 + maskable, tema
+  institucional, `display: standalone`) y *service worker* con respaldo offline básico.
+  Se instala desde el navegador del celular como una app, **sin pasar por tiendas**.
 
-**Estado actual**
-- 🟡 Web responsive completa; la capa PWA (manifest + service worker) es un quick win opcional.
+**Evidencia en el código**
+- `templates/pwa/manifest.webmanifest` y `templates/pwa/sw.js`.
+- `conecta_unsa/urls.py` — rutas `/manifest.webmanifest` y `/sw.js` (service worker
+  servido desde la raíz para alcanzar todo el sitio).
+- `templates/base.html` — enlace al manifest, `theme-color` y registro del service worker.
+- `static/img/pwa/` — íconos de la app (192, 512 y 512 *maskable*).
+
+**Nota técnica**
+- La instalación PWA requiere HTTPS (o `localhost`). En producción el sitio fuerza HTTPS,
+  por lo que la app es instalable; en desarrollo funciona vía `localhost`.
 
 **Trabajo futuro**
-- Añadir `manifest.json`, icono e *service worker* para instalación y uso offline básico.
+- Estrategia de caché offline más rica y notificaciones push si el caso lo requiere.
 
 ---
 
