@@ -86,31 +86,33 @@ def categorias_con_conteo():
     return datos
 
 
+# Categorías profesionales de la landing (etiquetas cortas tipo mockup), mapeadas a la
+# taxonomía real. Cada una agrupa un área o un conjunto de facultades. (CA-3: conteos reales.)
+CATEGORIAS_PROFESIONALES = [
+    ("Ingenierías", "cpu", {"area": "Ingenierías y Ciencias Básicas"}),
+    ("Ciencias Económicas", "trending-up",
+     {"facultades": ["Administración", "Ciencias Contables, Financieras y Economía"]}),
+    ("Ciencias Sociales", "users",
+     {"facultades": ["Ciencias Histórico Sociales",
+                     "Psicología, Relaciones Industriales y Ciencias de la Comunicación"]}),
+    ("Salud", "heart-pulse", {"area": "Biomédicas"}),
+    ("Educación", "book-open", {"facultades": ["Educación"]}),
+    ("Derecho", "scale", {"facultades": ["Derecho"]}),
+    ("Otras áreas", "shapes",
+     {"facultades": ["Filosofía y Humanidades", "Arquitectura, Urbanismo y Artes"]}),
+]
+
+
 def categorias_profesionales():
-    """Facultades con ≥1 convocatoria activa (tiles de categoría de la landing, CA-3).
-
-    Conteos reales por facultad; si no hay datos, cae a las 3 áreas para no quedar vacío.
-    """
-    from apps.taxonomia.models import Facultad
-
+    """Las 7 categorías profesionales con su conteo real de convocatorias activas (CA-3)."""
     activas = _convocatorias_activas()
     tiles = []
-    for fac in Facultad.objects.select_related("area"):
-        conteo = activas.filter(carreras_objetivo__facultad=fac).distinct().count()
-        if conteo:
-            tiles.append({
-                "label": fac.nombre,
-                "icono": _ICONO_POR_AREA.get(fac.area.nombre, "folder"),
-                "conteo": conteo,
-            })
-    tiles.sort(key=lambda t: -t["conteo"])
-    if not tiles:  # sin convocatorias aún → mostrar las áreas
-        for c in categorias_con_conteo():
-            tiles.append({
-                "label": c["area"].nombre,
-                "icono": _ICONO_POR_AREA.get(c["area"].nombre, "folder"),
-                "conteo": c["conteo"],
-            })
+    for label, icono, filtro in CATEGORIAS_PROFESIONALES:
+        if "area" in filtro:
+            qs = activas.filter(carreras_objetivo__facultad__area__nombre=filtro["area"])
+        else:
+            qs = activas.filter(carreras_objetivo__facultad__nombre__in=filtro["facultades"])
+        tiles.append({"label": label, "icono": icono, "conteo": qs.distinct().count()})
     return tiles
 
 
@@ -129,11 +131,19 @@ def resumen_semanal_landing() -> dict:
 
     from django.utils import timezone
 
-    desde = timezone.now() - timedelta(days=7)
+    from apps.convocatorias.models import INTERACCION_VISTA, InteraccionConvocatoria
+
+    ahora = timezone.now()
+    desde = ahora - timedelta(days=7)
     activas = _convocatorias_activas()
     nuevas = activas.filter(creada_en__gte=desde)
     return {
+        "desde": (ahora - timedelta(days=6)).date(),
+        "hasta": ahora.date(),
         "nuevas": nuevas.count(),
         "empresas": nuevas.values("empresa").distinct().count(),
         "areas": nuevas.values("carreras_objetivo__facultad__area").distinct().count(),
+        "vistas": InteraccionConvocatoria.objects.filter(
+            tipo=INTERACCION_VISTA, creado_en__gte=desde
+        ).count(),
     }

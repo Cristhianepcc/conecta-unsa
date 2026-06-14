@@ -186,13 +186,15 @@
         <i data-lucide="calendar-days" class="w-6 h-6"></i>
         <h3 class="text-xl font-bold">Resumen semanal de oportunidades</h3>
       </div>
+      <p class="mt-1 text-white/70 text-sm">Del {{ resumen.desde|date:"j" }} al {{ resumen.hasta|date:"j \d\e F" }}</p>
       <p class="mt-3 text-white/80 text-sm">
         Cada semana te acercamos las oportunidades más relevantes según tu área de interés.
       </p>
-      <dl class="mt-6 grid grid-cols-3 gap-4 text-center">
+      <dl class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
         <div><dd class="text-2xl font-bold">{{ resumen.nuevas }}</dd><dt class="text-xs text-white/70">nuevas convocatorias</dt></div>
         <div><dd class="text-2xl font-bold">{{ resumen.empresas }}</dd><dt class="text-xs text-white/70">empresas publicaron</dt></div>
         <div><dd class="text-2xl font-bold">{{ resumen.areas }}</dd><dt class="text-xs text-white/70">áreas profesionales</dt></div>
+        <div><dd class="text-2xl font-bold">{{ resumen.vistas }}</dd><dt class="text-xs text-white/70">visualizaciones</dt></div>
       </dl>
       <a href="{% url 'usuarios:login' %}"
          class="mt-6 inline-flex items-center gap-2 rounded-lg bg-white text-granate-700 px-5 py-2.5 font-medium hover:bg-white/90">

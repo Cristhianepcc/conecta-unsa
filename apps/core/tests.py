@@ -130,12 +130,16 @@ class LandingTests(TestCase):
         # Helper a nivel de área (3 áreas).
         self.assertEqual(len(categorias_con_conteo()), 3)
 
-        # Tiles de la landing: facultades reales con ≥1 convocatoria activa.
+        # Tiles de la landing: 7 categorías profesionales con conteos reales.
         tiles = categorias_profesionales()
+        self.assertEqual(len(tiles), 7)
         labels = {t["label"] for t in tiles}
-        self.assertIn("Producción y Servicios", labels)  # facultad de Ing. de Sistemas (seed)
+        self.assertIn("Ingenierías", labels)
+        # La categoría "Ingenierías" agrupa la carrera sembrada (Ing. de Sistemas).
+        ingenierias = next(t for t in tiles if t["label"] == "Ingenierías")
+        self.assertGreaterEqual(ingenierias["conteo"], 1)
         resp = self.client.get(reverse("core:home"))
-        self.assertContains(resp, "Producción y Servicios")
+        self.assertContains(resp, "Ingenierías")
 
     def test_ca4__semaforo_explicado(self):
         resp = self.client.get(reverse("core:home"))

@@ -67,7 +67,8 @@
             <a href="{% url 'usuarios:post_login' %}" class="px-3 py-2 rounded-lg text-slate-600 hover:text-granate-700 hover:bg-granate-50">Mi panel</a>
             <a href="{% url 'usuarios:logout' %}" class="px-3 py-2 rounded-lg text-slate-600 hover:text-granate-700 hover:bg-granate-50">Salir</a>
           {% else %}
-            <a href="{% url 'core:home' %}" class="hidden md:inline-block px-3 py-2 rounded-lg text-granate-700 font-medium">Inicio</a>
+            <a href="{% url 'core:home' %}" class="hidden md:inline-block px-1 py-2 font-medium text-granate-700 border-b-2 border-granate-700">Inicio</a>
+            <a href="{% url 'usuarios:login' %}" class="hidden md:inline-block px-3 py-2 rounded-lg text-slate-600 hover:text-granate-700 hover:bg-granate-50">Convocatorias</a>
             <a href="{% url 'core:como_funciona' %}" class="hidden md:inline-block px-3 py-2 rounded-lg text-slate-600 hover:text-granate-700 hover:bg-granate-50">Sobre CONECTA UNSA</a>
             <a href="{% url 'core:como_funciona' %}" class="hidden md:inline-block px-3 py-2 rounded-lg text-slate-600 hover:text-granate-700 hover:bg-granate-50">Ayuda</a>
             <a href="{% url 'usuarios:login' %}"
