@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Mi credencial pública — CONECTA UNSA{% endblock %}
+
+{% block nav %}
+  <a href="{% url 'usuarios:perfil' %}" class="hover:underline">Mi perfil</a>
+  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Cerrar sesión</a>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-xl mx-auto px-4 py-12">
+  <h1 class="text-2xl font-bold text-granate-700">Carta de presentación pública</h1>
+  <p class="mt-2 text-sm text-slate-600">
+    Es opt-in y <strong>no es una red social</strong>: solo quien tenga el enlace puede verla,
+    no es indexable por buscadores y puedes revocarla cuando quieras (Ley 29733).
+  </p>
+
+  <div class="mt-6 rounded-lg border border-slate-200 p-5">
+    {% if talento.cred_activa %}
+      <p class="text-sm text-exito font-medium">● Activa</p>
+      <p class="mt-2 text-sm">Tu enlace:
+        <a href="{% url 'usuarios:credencial_publica' talento.cred_slug %}"
+           class="text-granate-700 underline break-all">
+          {{ request.scheme }}://{{ request.get_host }}{% url 'usuarios:credencial_publica' talento.cred_slug %}
+        </a>
+      </p>
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        <button name="accion" value="revocar"
+                class="rounded-lg border border-peligro text-peligro px-4 py-2 text-sm hover:bg-peligro/5">
+          Revocar enlace
+        </button>
+      </form>
+    {% else %}
+      <p class="text-sm text-slate-500">● Inactiva — nadie tiene un enlace a tu credencial.</p>
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        <button name="accion" value="activar"
+                class="rounded-lg bg-granate-700 px-4 py-2 text-white text-sm hover:bg-granate-800">
+          Activar mi carta de presentación
+        </button>
+      </form>
+    {% endif %}
+  </div>
+  <p class="mt-4 text-xs text-slate-400">
+    Solo se mostrarán las credenciales que marques como «visibles para empresas» en tu perfil.
+  </p>
+</section>
+{% endblock %}

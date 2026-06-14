@@ -105,12 +105,26 @@ class ControlAccesoRolTests(TestCase):
 
 
 class ConsentimientoTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        from django.core.management import call_command
+
+        call_command("seed_taxonomia")
+
     def test_ca6__captura_consentimiento(self):
-        """CA-6: completar-perfil registra el consentimiento de datos."""
+        """CA-6: completar-perfil registra el consentimiento de datos (con carrera + estado)."""
+        from apps.taxonomia.models import Carrera
+
         user = User.objects.create_user("c", email="c@gmail.com", password="x")
         self.client.force_login(user)
         resp = self.client.post(
-            reverse("usuarios:completar_perfil"), {"consentimiento": "on"}, follow=True
+            reverse("usuarios:completar_perfil"),
+            {
+                "carrera": Carrera.objects.first().id,
+                "estado_academico": "egresado",
+                "consentimiento": "on",
+            },
+            follow=True,
         )
         self.assertRedirects(resp, reverse("usuarios:dashboard"))
         perfil = Perfil.objects.get(user=user)
@@ -138,3 +152,120 @@ class LoginRenderTests(TestCase):
     def test__senal_crea_perfil_automaticamente(self):
         user = User.objects.create_user("auto", email="auto@gmail.com", password="x")
         self.assertTrue(Perfil.objects.filter(user=user).exists())
+
+
+# --- 07 Perfil de talento y credencial pública ------------------------------
+class PerfilTalentoTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        from django.core.management import call_command
+
+        call_command("seed_taxonomia")
+
+    def _login_egresado(self, username="egre"):
+        user = User.objects.create_user(username, email=f"{username}@gmail.com", password="x")
+        self.client.force_login(user)
+        return user
+
+    def test_ca1__completar_perfil_pide_carrera_y_estado(self):
+        """CA-1: el primer ingreso captura carrera y estado académico."""
+        from apps.taxonomia.models import Carrera
+
+        from .models import PerfilTalento
+
+        self._login_egresado()
+        carrera = Carrera.objects.first()
+        resp = self.client.post(
+            reverse("usuarios:completar_perfil"),
+            {"carrera": carrera.id, "estado_academico": "egresado", "consentimiento": "on"},
+            follow=True,
+        )
+        self.assertRedirects(resp, reverse("usuarios:dashboard"))
+        talento = PerfilTalento.objects.get(usuario__username="egre")
+        self.assertEqual(talento.carrera, carrera)
+        self.assertEqual(talento.estado_academico, "egresado")
+
+    def test_ca2__agregar_credencial_autodeclarada(self):
+        """CA-2: el egresado puede agregar credenciales autodeclaradas."""
+        from .models import FUENTE_AUTODECLARADO, Credencial
+
+        self._login_egresado()
+        self.client.post(
+            reverse("usuarios:perfil"),
+            {"agregar_credencial": "1", "tipo": "idioma", "detalle": "Inglés B2"},
+        )
+        cred = Credencial.objects.get(detalle="Inglés B2")
+        self.assertEqual(cred.fuente, FUENTE_AUTODECLARADO)
+        self.assertTrue(cred.editable)
+
+    def test_ca3__credencial_verificada_no_editable(self):
+        """CA-3: una credencial verificada es solo lectura (no se elimina)."""
+        from .models import FUENTE_VERIFICADO, Credencial
+        from .services import asegurar_perfil_talento
+
+        user = self._login_egresado()
+        talento = asegurar_perfil_talento(user)
+        cred = Credencial.objects.create(
+            perfil=talento, tipo="tesis", detalle="Tesis X", fuente=FUENTE_VERIFICADO
+        )
+        self.assertFalse(cred.editable)
+        resp = self.client.post(
+            reverse("usuarios:eliminar_credencial", args=[cred.id]), follow=True
+        )
+        self.assertTrue(Credencial.objects.filter(pk=cred.id).exists())  # no se borró
+        self.assertContains(resp, "no se pueden editar")
+
+    def test_ca4__preferencias_se_guardan(self):
+        """CA-4: preferencias (frecuencia, silenciar, tipos) se persisten."""
+        from apps.taxonomia.models import Carrera
+
+        from .services import asegurar_perfil_talento
+
+        user = self._login_egresado()
+        carrera = Carrera.objects.first()
+        self.client.post(
+            reverse("usuarios:perfil"),
+            {
+                "guardar_preferencias": "1",
+                "carrera": carrera.id,
+                "estado_academico": "egresado",
+                "frecuencia": "semanal",
+                "categorias_silenciadas": ["voluntariado"],
+                "tipos_preferidos": ["practica_preprofesional"],
+            },
+        )
+        talento = asegurar_perfil_talento(user)
+        talento.refresh_from_db()
+        self.assertEqual(talento.frecuencia, "semanal")
+        self.assertIn("voluntariado", talento.categorias_silenciadas)
+        self.assertIn("practica_preprofesional", talento.tipos_preferidos)
+
+    def test_ca5_ca6__activar_genera_url_y_sirve_noindex(self):
+        """CA-5/CA-6: activar genera /credencial/<slug>; se sirve con noindex."""
+        from .services import asegurar_perfil_talento
+
+        user = self._login_egresado()
+        self.client.post(reverse("usuarios:credencial_config"), {"accion": "activar"})
+        talento = asegurar_perfil_talento(user)
+        talento.refresh_from_db()
+        self.assertTrue(talento.cred_activa)
+        self.assertTrue(talento.cred_slug)
+
+        self.client.logout()
+        resp = self.client.get(reverse("usuarios:credencial_publica", args=[talento.cred_slug]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp["X-Robots-Tag"], "noindex, nofollow")
+        self.assertContains(resp, "noindex")
+
+    def test_ca7__revocar_apaga_la_url(self):
+        """CA-7: revocar desactiva el acceso público (404 por el enlace)."""
+        from .services import activar_credencial_publica, asegurar_perfil_talento
+
+        user = self._login_egresado()
+        talento = asegurar_perfil_talento(user)
+        slug = activar_credencial_publica(talento)
+
+        self.client.post(reverse("usuarios:credencial_config"), {"accion": "revocar"})
+        self.client.logout()
+        resp = self.client.get(reverse("usuarios:credencial_publica", args=[slug]))
+        self.assertEqual(resp.status_code, 404)

@@ -69,3 +69,42 @@ def registrar_consentimiento(perfil: Perfil) -> None:
     perfil.consentimiento_datos = True
     perfil.consentimiento_en = timezone.now()
     perfil.save(update_fields=["consentimiento_datos", "consentimiento_en"])
+
+
+# --- 07 Perfil de talento / credencial pública ------------------------------
+def asegurar_perfil_talento(user):
+    """Devuelve (creando si hace falta) el PerfilTalento del usuario."""
+    from .models import PerfilTalento
+
+    perfil_talento, _ = PerfilTalento.objects.get_or_create(usuario=user)
+    return perfil_talento
+
+
+def _slug_unico(base: str) -> str:
+    from django.utils.text import slugify
+
+    from .models import PerfilTalento
+
+    raiz = slugify(base) or "credencial"
+    slug = raiz
+    i = 1
+    while PerfilTalento.objects.filter(cred_slug=slug).exists():
+        i += 1
+        slug = f"{raiz}-{i}"
+    return slug
+
+
+def activar_credencial_publica(perfil_talento) -> str:
+    """Activa la credencial pública y genera (si falta) su slug único (CA-5)."""
+    if not perfil_talento.cred_slug:
+        base = perfil_talento.usuario.get_full_name() or perfil_talento.usuario.username
+        perfil_talento.cred_slug = _slug_unico(base)
+    perfil_talento.cred_activa = True
+    perfil_talento.save(update_fields=["cred_activa", "cred_slug"])
+    return perfil_talento.cred_slug
+
+
+def revocar_credencial_publica(perfil_talento) -> None:
+    """Apaga la URL pública; conserva el slug para no reasignarlo (CA-7)."""
+    perfil_talento.cred_activa = False
+    perfil_talento.save(update_fields=["cred_activa"])
