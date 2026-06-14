@@ -149,3 +149,30 @@ class MetricasTests(BaseEmpresaDash):
         m = metricas_empresa(empresa)
         self.assertEqual(m["activas"], 1)
         self.assertEqual(m["publicadas"], 1)
+
+
+class EditarPerfilTests(BaseEmpresaDash):
+    """Edición del perfil de empresa: cierra el ciclo de la completitud."""
+
+    def test_editar_perfil_sube_completitud(self):
+        from .services import completitud_empresa
+
+        empresa = self._empresa_con_login()
+        self.assertEqual(self.client.get(reverse("empresas:editar_perfil")).status_code, 200)
+        resp = self.client.post(
+            reverse("empresas:editar_perfil"),
+            {
+                "razon_social": "ACME S.A.C.",
+                "tipo": "sac",
+                "telefono": "054-111222",
+                "direccion": "Av. Siempre Viva 123",
+                "web": "https://acme.pe",
+                "logo_url": "https://acme.pe/logo.png",
+                "descripcion": "Empresa de software con sede en Arequipa.",
+            },
+            follow=True,
+        )
+        self.assertRedirects(resp, reverse("empresas:dashboard"))
+        empresa.refresh_from_db()
+        self.assertEqual(empresa.descripcion, "Empresa de software con sede en Arequipa.")
+        self.assertEqual(completitud_empresa(empresa)["pct"], 100)

@@ -1,6 +1,7 @@
-{% comment %}Sidebar de empresa. Contexto: seccion (dashboard|publicar|notificaciones|guia).{% endcomment %}
+{% comment %}Sidebar de empresa. Contexto: seccion (dashboard|publicar|perfil|notificaciones|guia).{% endcomment %}
 {% url 'core:como_funciona' as url_guia %}
 {% include "partials/_sidebar_link.html" with url="/empresas/dashboard/" icono="layout-dashboard" label="Inicio" key="dashboard" seccion=seccion %}
 {% include "partials/_sidebar_link.html" with url="/empresas/publicar/" icono="plus-circle" label="Publicar convocatoria" key="publicar" seccion=seccion %}
+{% include "partials/_sidebar_link.html" with url="/empresas/perfil/" icono="building-2" label="Perfil de empresa" key="perfil" seccion=seccion %}
 {% include "partials/_sidebar_link.html" with url="/notificaciones/" icono="bell" label="Notificaciones" key="notificaciones" seccion=seccion %}
 {% include "partials/_sidebar_link.html" with url=url_guia icono="book-open" label="Guía y plantillas" key="guia" seccion=seccion %}
