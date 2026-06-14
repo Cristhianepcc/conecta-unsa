@@ -8,7 +8,32 @@
 <style>
   body { background: #F8FAFC; }
   [data-qr] svg { width: 100%; height: 100%; display: block; }
-  @media print { .no-print { display: none !important; } }
+  .print-only { display: none; }
+
+  /* ===== PDF / impresión: constancia A4 limpia ===== */
+  @media print {
+    @page { size: A4 portrait; margin: 14mm; }
+    html, body { background: #fff !important; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none !important; }
+    .print-only { display: block !important; }
+
+    /* Membrete fijo y sin sticky/sombra */
+    header { position: static !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+    main { padding: 0 !important; max-width: 100% !important; }
+
+    /* Una sola columna, apilada y compacta */
+    main > .grid { display: block !important; }
+    main > .grid > * { width: 100% !important; }
+    aside { margin-top: 1rem; }
+
+    /* Tarjetas: sin sombra, sin corte entre páginas */
+    [class*="rounded-2xl"], [class*="rounded-xl"] { box-shadow: none !important; }
+    section, aside > div, .group { break-inside: avoid; page-break-inside: avoid; }
+
+    /* QR un poco más chico en papel */
+    [data-qr] { height: 34mm !important; width: 34mm !important; }
+  }
 </style>
 {% endblock %}
 
@@ -42,6 +67,12 @@
 
 {% block content %}
 <main class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8 lg:py-10">
+  <!-- Membrete (solo impresión / PDF) -->
+  <div class="print-only" style="text-align:center; margin-bottom:10mm;">
+    <p style="font-size:11pt; font-weight:700; color:#0F172A;">Constancia de credenciales verificadas</p>
+    <p style="font-size:9pt; color:#475569;">CONECTA UNSA · Universidad Nacional de San Agustín de Arequipa</p>
+  </div>
+
   <div class="grid gap-6 lg:grid-cols-3 items-start">
 
     <!-- ===== Columna izquierda (perfil + credenciales) ===== -->
@@ -141,6 +172,13 @@
         </button>
       </div>
     </aside>
+  </div>
+
+  <!-- Pie de constancia (solo impresión / PDF) -->
+  <div class="print-only" style="margin-top:10mm; padding-top:4mm; border-top:1px solid #e2e8f0; text-align:center; font-size:8pt; color:#64748b;">
+    <p>Verifica la autenticidad de esta credencial escaneando el código QR o ingresando a:</p>
+    <p style="color:#0F172A; word-break:break-all;">{{ url_publica }}</p>
+    <p>Código de verificación: <strong>{{ codigo }}</strong> · Documento generado por CONECTA UNSA.</p>
   </div>
 </main>
 {% endblock %}
