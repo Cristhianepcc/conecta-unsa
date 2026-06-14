@@ -27,7 +27,9 @@ Estilos de input escopados a .form-pro (no alteran el .campo global).{% endcomme
   .form-pro .check-row:hover { border-color:#e2e8f0; background:#fff; }
 </style>
 
-<div x-data="formConvocatoria()" @input="recalc()" @change="recalc()" class="form-pro space-y-6">
+{% comment %}El estado Alpine (x-data="formConvocatoria()") vive en el <form> que incluye
+este parcial, para que el botón "Enviar" —fuera de este div— pueda leer listo/faltan.{% endcomment %}
+<div class="form-pro space-y-6">
   {% if form.non_field_errors %}
   <div class="rounded-xl border border-peligro/30 bg-peligro/5 p-4 text-sm text-peligro">{{ form.non_field_errors }}</div>
   {% endif %}
@@ -201,6 +203,8 @@ Estilos de input escopados a .form-pro (no alteran el .campo global).{% endcomme
       tipo: '{{ form.tipo.value|default:"" }}',
       pct: 0,
       proximo: '',
+      listo: false,   // habilita el botón "Enviar" (Eje 3)
+      faltan: [],     // campos pendientes para el tooltip del botón
       puntos: JSON.parse(document.getElementById('puntos-transp').textContent),
       _etiquetas: {
         banda_salarial: 'la banda salarial visible',
@@ -244,6 +248,26 @@ Estilos de input escopados a .form-pro (no alteran el .campo global).{% endcomme
         }
         this.pct = Math.min(100, s);
         this.proximo = mejor ? `+${this.puntos[mejor]}% si agregas ${this._etiquetas[mejor] || mejor}` : '';
+
+        // --- Validación forzosa para habilitar "Enviar" (Eje 3 · anti-opacidad) ---
+        // Espeja faltantes_nivel_1() del servidor; el servidor sigue siendo la autoridad.
+        const reqStr = {
+          titulo: 'el título', descripcion: 'la descripción', modalidad: 'la modalidad',
+          ubicacion: 'la ubicación', duracion_estimada: 'la duración estimada',
+          fecha_limite: 'la fecha límite', medio_postulacion: 'cómo postular',
+          email_contacto: 'el email de contacto',
+        };
+        const faltan = [];
+        for (const n in reqStr) { if (!this._v(n)) faltan.push(reqStr[n]); }
+        if (!this._chk('no_discriminacion')) faltan.push('la declaración de no discriminación');
+        // Decisión salarial forzada: banda visible o "confidencial". El voluntariado
+        // no admite remuneración por ley, así que queda exento de este requisito.
+        const bandaOk = !!(this._v('banda_salarial_min') && this._v('banda_salarial_max'));
+        const salarioDecidido = this.tipo === 'voluntariado' || bandaOk || this._chk('salario_confidencial');
+        if (!salarioDecidido) faltan.push('el rango salarial (o marcar “confidencial”)');
+        this.faltan = faltan;
+        this.listo = faltan.length === 0;
+
         if (window.lucide) lucide.createIcons();
       },
     };
