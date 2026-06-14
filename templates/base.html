@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CONECTA UNSA{% endblock %}</title>
+  {% block meta %}{% endblock %}
+
+  <!-- Tipografía Inter (branding §3) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind (CDN, sin build de Node — NFR-PERF-1) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            granate: {
+              50: '#FBF2F3', 100: '#F5DEE1', 700: '#7A1F2C',
+              800: '#52151E', 900: '#3D1016',
+            },
+            exito: '#2E7D5B', alerta: '#B7791F', peligro: '#C0392B',
+            info: '#2563EB', dorado: '#C8A02C',
+          },
+        },
+      },
+    };
+  </script>
+  <!-- Alpine.js (CDN) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-white text-slate-800 font-sans antialiased flex flex-col">
+  <!-- Saltar al contenido (NFR-A11Y-2) -->
+  <a href="#contenido"
+     class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:bg-granate-700 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg">
+    Saltar al contenido
+  </a>
+
+  {% block header %}
+  <header class="bg-granate-700 text-white">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+      <a href="{% url 'core:home' %}" class="flex items-center gap-2 font-semibold text-lg">
+        <span aria-hidden="true" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/15">U</span>
+        <span><span class="font-medium">CONECTA</span> UNSA</span>
+      </a>
+      <nav class="ml-auto flex items-center gap-4 text-sm" aria-label="Principal">
+        {% block nav %}{% endblock %}
+      </nav>
+    </div>
+  </header>
+  {% endblock %}
+
+  {% if messages %}
+  <div class="max-w-6xl mx-auto px-4 w-full mt-4" role="status" aria-live="polite">
+    {% for message in messages %}
+    <div class="mb-2 rounded-lg border px-4 py-3 text-sm
+                {% if message.tags == 'error' %}border-peligro/30 bg-peligro/5 text-peligro
+                {% elif message.tags == 'warning' %}border-alerta/30 bg-alerta/5 text-alerta
+                {% elif message.tags == 'success' %}border-exito/30 bg-exito/5 text-exito
+                {% else %}border-info/30 bg-info/5 text-info{% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main id="contenido" class="flex-1 w-full">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}
+  <footer class="bg-granate-900 text-white/80 mt-12">
+    <div class="max-w-6xl mx-auto px-4 py-8 text-sm">
+      <p class="font-semibold text-white">CONECTA UNSA</p>
+      <p class="mt-1">Bolsa de Trabajo · Universidad Nacional de San Agustín de Arequipa</p>
+      <p class="mt-2 text-white/60">Software público · Sin IA · Reglas transparentes y auditables.</p>
+    </div>
+  </footer>
+  {% endblock %}
+</body>
+</html>

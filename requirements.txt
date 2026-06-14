@@ -1,0 +1,14 @@
+# CONECTA UNSA — dependencias (constitución §2)
+# Nota: el contrato de deploy es Python 3.13 (ver .python-version / runtime.txt).
+Django==6.0.6
+gunicorn==26.0.0
+psycopg[binary]==3.3.4
+dj-database-url==3.1.2
+whitenoise==6.12.0
+django-allauth[socialaccount]==65.18.0
+resend==2.30.1
+python-dotenv==1.2.2
+
+# Pruebas
+pytest==9.1.0
+pytest-django==4.12.0

@@ -1,0 +1,36 @@
+# Entorno local: web (Django) + Postgres. Para producción se usa Railway.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: conecta_unsa
+      POSTGRES_USER: conecta
+      POSTGRES_PASSWORD: conecta
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conecta -d conecta_unsa"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      DEBUG: "True"
+      SECRET_KEY: "dev-secret-key"
+      DATABASE_URL: "postgres://conecta:conecta@db:5432/conecta_unsa"
+      ALLOWED_HOSTS: "localhost,127.0.0.1"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
