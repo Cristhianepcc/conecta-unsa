@@ -186,7 +186,9 @@ STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # Comprimido sin manifiesto: `{% static %}` funciona sin requerir collectstatic
+        # (no rompe los tests, que corren con DEBUG=False). WhiteNoise igual sirve comprimido.
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 

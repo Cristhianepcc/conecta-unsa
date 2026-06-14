@@ -41,29 +41,17 @@
 
     <!-- Hero visual: foto del campus + panel granate diagonal con sello UNSA -->
     <div class="relative rounded-2xl overflow-hidden shadow-lg min-h-[300px]">
-      {% comment %}
-      ⚠️ FALTA IMAGEN: foto oficial del campus UNSA con el Misti de fondo (como en el mockup).
-      Cuando exista el archivo, colócalo en `static/img/hero-campus.jpg` y reemplaza el
-      placeholder de abajo por:
-        <img src="{% static 'img/hero-campus.jpg' %}" alt="Campus de la UNSA, Arequipa"
-             class="absolute inset-0 h-full w-full object-cover">
-      {% endcomment %}
-      <div class="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-400">
-        <div class="text-center">
-          <i data-lucide="mountain" class="w-10 h-10 mx-auto"></i>
-          <p class="mt-2 text-sm">Imagen del campus UNSA<br><span class="text-xs">(placeholder — falta la foto oficial)</span></p>
-        </div>
-      </div>
+      <!-- Foto del campus UNSA (static/img/campus.jpg). Sustituible por una de mayor resolución. -->
+      <img src="{% static 'img/campus.jpg' %}" alt="Campus de la UNSA, Arequipa"
+           class="absolute inset-0 h-full w-full object-cover">
 
       <!-- Panel granate diagonal (esquina superior derecha) con el escudo + claim -->
       <div class="absolute top-0 right-0 h-full w-3/5 bg-granate-700/95 text-white p-8 flex flex-col items-end justify-center text-right"
            style="clip-path: polygon(28% 0, 100% 0, 100% 100%, 0% 100%);">
-        {% comment %} ⚠️ FALTA IMAGEN: escudo UNSA oficial (SVG/PNG). Sustituir el círculo «U»
-        por <img src="{% static 'img/escudo-unsa.svg' %}" alt="Escudo UNSA" class="h-16 w-16"> {% endcomment %}
-        <span aria-hidden="true"
-              class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/15 ring-4 ring-white/20 text-2xl font-bold">U</span>
-        <p class="mt-3 text-2xl font-bold tracking-wide">UNSA</p>
-        <p class="mt-1 text-white/85 text-sm max-w-[12rem]">Comprometidos con tu desarrollo profesional</p>
+        <span class="inline-flex items-center bg-white/95 rounded-lg px-3 py-2">
+          <img src="{% static 'img/LOGO_UNSA.png' %}" alt="UNSA" class="h-12 w-auto">
+        </span>
+        <p class="mt-3 text-white/90 text-sm max-w-[12rem]">Comprometidos con tu desarrollo profesional</p>
       </div>
     </div>
   </div>

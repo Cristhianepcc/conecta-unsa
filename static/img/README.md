@@ -1,11 +1,9 @@
-# Imágenes pendientes (placeholders en el código)
+# Imágenes del proyecto
 
-Coloca aquí los archivos oficiales y descomenta/activa el `<img>` indicado en las plantillas.
-
-| Archivo esperado | Dónde se usa | Placeholder actual |
+| Archivo | Dónde se usa | Estado |
 |---|---|---|
-| `escudo-unsa.svg` (o `.png` alta resolución) | header y footer (`templates/base.html`), panel del hero (`apps/core/templates/core/home.html`) | círculo granate con la letra «U» |
-| `hero-campus.jpg` | foto del hero — campus UNSA con el Misti de fondo (`apps/core/templates/core/home.html`) | bloque gris con ícono de montaña |
+| `LOGO_UNSA.png` | header y footer (`templates/base.html`) + panel del hero (`core/home.html`) | ✅ en uso |
+| `campus.jpg` | foto del hero — campus UNSA (`core/home.html`) | ✅ en uso (baja resolución; reemplazable por una mejor con el mismo nombre) |
 
-Cada lugar tiene un comentario `⚠️ FALTA IMAGEN` con el snippet exacto a usar.
+En dev se sirven automáticamente; en producción se recogen con `collectstatic` (WhiteNoise).
 Los logos de empresas se cargan por URL (`Empresa.logo_url`); si están vacíos se muestra la inicial.
