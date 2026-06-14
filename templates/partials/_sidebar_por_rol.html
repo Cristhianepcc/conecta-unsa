@@ -1,0 +1,11 @@
+{% comment %}Sidebar según el rol del usuario autenticado. Contexto: seccion.
+Útil en páginas compartidas por varios roles (p. ej. Notificaciones).{% endcomment %}
+{% with rol=request.user.perfil.rol %}
+  {% if rol == "admin" %}
+    {% include "core/_sidebar_admin.html" with seccion=seccion %}
+  {% elif rol == "reclutador" %}
+    {% include "empresas/_sidebar_empresa.html" with seccion=seccion %}
+  {% else %}
+    {% include "usuarios/_sidebar_egresado.html" with seccion=seccion %}
+  {% endif %}
+{% endwith %}

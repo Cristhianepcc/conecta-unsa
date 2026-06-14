@@ -1,16 +1,12 @@
-{% extends "base.html" %}
+{% extends "dashboard_base.html" %}
 
 {% block title %}Notificaciones — CONECTA UNSA{% endblock %}
+{% block dashboard_title %}Notificaciones{% endblock %}
+{% block sidebar_items %}{% include "partials/_sidebar_por_rol.html" with seccion="notificaciones" %}{% endblock %}
 
-{% block nav %}
-  <a href="{% url 'usuarios:dashboard' %}" class="hover:underline">Panel</a>
-  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Cerrar sesión</a>
-{% endblock %}
-
-{% block content %}
-<section class="max-w-2xl mx-auto px-4 py-10">
-  <h1 class="text-2xl font-bold text-granate-700">Notificaciones</h1>
-  <ul class="mt-6 divide-y divide-slate-100 border border-slate-200 rounded-lg">
+{% block dashboard_content %}
+<div class="max-w-2xl">
+  <ul class="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white">
     {% for n in notificaciones %}
     <li class="px-4 py-3 text-sm {% if not n.leido %}bg-granate-50{% endif %}">
       {% if n.url %}<a href="{{ n.url }}" class="text-slate-700 hover:underline">{{ n.mensaje }}</a>
@@ -18,8 +14,11 @@
       <div class="text-xs text-slate-400 mt-1">{{ n.creado_en|date:"d/m/Y H:i" }}</div>
     </li>
     {% empty %}
-    <li class="px-4 py-6 text-sm text-slate-400 text-center">No tienes notificaciones.</li>
+    <li class="px-4 py-10 text-sm text-slate-400 text-center">
+      <i data-lucide="bell-off" class="w-6 h-6 mx-auto mb-2"></i>
+      No tienes notificaciones.
+    </li>
     {% endfor %}
   </ul>
-</section>
+</div>
 {% endblock %}
