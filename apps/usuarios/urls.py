@@ -12,6 +12,8 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     path("completar-perfil/", views.completar_perfil, name="completar_perfil"),
     path("dashboard/", views.dashboard, name="dashboard"),
+    path("guardadas/", views.guardadas, name="guardadas"),
+    path("historial/", views.historial, name="historial"),
     # 07 — Perfil y credencial
     path("perfil/", views.perfil, name="perfil"),
     path("perfil/credencial/<int:credencial_id>/eliminar/", views.eliminar_credencial,

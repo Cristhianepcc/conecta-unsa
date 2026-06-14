@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Historial — CONECTA UNSA{% endblock %}
+{% block nav %}
+  <a href="{% url 'usuarios:dashboard' %}" class="hover:underline">Panel</a>
+  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Salir</a>
+{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-bold text-granate-700">Historial de vistas</h1>
+  <div class="mt-6 space-y-4">
+    {% for conv in convocatorias %}
+      {% include "convocatorias/_tarjeta.html" with conv=conv %}
+    {% empty %}
+      <p class="text-sm text-slate-400">Todavía no viste convocatorias.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

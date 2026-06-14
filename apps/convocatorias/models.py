@@ -5,6 +5,7 @@ qué mostrar/exigir según `tipo` (feature 11/12). Aquí viven el modelo, los es
 y el % de transparencia.
 """
 
+from django.conf import settings
 from django.db import models
 
 from apps.core import constants
@@ -152,3 +153,36 @@ class Convocatoria(models.Model):
         if guardar and self.pk:
             super().save(update_fields=["transparencia_pct"])
         return self.transparencia_pct
+
+
+# --- Interacción del egresado con convocatorias (feature 10) ----------------
+INTERACCION_VISTA = "vista"
+INTERACCION_GUARDADA = "guardada"
+TIPOS_INTERACCION = [
+    (INTERACCION_VISTA, "Vista"),
+    (INTERACCION_GUARDADA, "Guardada"),
+]
+
+
+class InteraccionConvocatoria(models.Model):
+    """Vista o guardado de una convocatoria por un egresado (historial / métricas)."""
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="interacciones", verbose_name="usuario",
+    )
+    convocatoria = models.ForeignKey(
+        Convocatoria, on_delete=models.CASCADE,
+        related_name="interacciones", verbose_name="convocatoria",
+    )
+    tipo = models.CharField("tipo", max_length=10, choices=TIPOS_INTERACCION)
+    creado_en = models.DateTimeField("creado", auto_now=True)
+
+    class Meta:
+        verbose_name = "interacción con convocatoria"
+        verbose_name_plural = "interacciones con convocatorias"
+        unique_together = [("usuario", "convocatoria", "tipo")]
+        ordering = ["-creado_en"]
+
+    def __str__(self):
+        return f"{self.usuario} {self.tipo} {self.convocatoria_id}"
