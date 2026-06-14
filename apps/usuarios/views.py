@@ -221,12 +221,26 @@ def historial(request):
 @egresado_required
 def perfil(request):
     """Edita preferencias y administra credenciales autodeclaradas (CA-2/CA-4)."""
+    from apps.core import constants
+
     talento = asegurar_perfil_talento(request.user)
 
     if request.method == "POST" and "guardar_preferencias" in request.POST:
         pref_form = PreferenciasForm(request.POST, instance=talento)
         if pref_form.is_valid():
-            pref_form.save()
+            obj = pref_form.save(commit=False)
+            # Matriz tri-estado de tipos (preferido / normal / silenciado).
+            preferidos, silenciados = [], []
+            for value, _label in constants.TIPOS_CONVOCATORIA:
+                estado = request.POST.get(f"tipo_{value}", "normal")
+                if estado == "preferido":
+                    preferidos.append(value)
+                elif estado == "silenciado":
+                    silenciados.append(value)
+            obj.tipos_preferidos = preferidos
+            obj.categorias_silenciadas = silenciados
+            obj.save()
+            pref_form.save_m2m()
             messages.success(request, "Preferencias guardadas.")
             return redirect("usuarios:perfil")
     else:
@@ -243,6 +257,17 @@ def perfil(request):
             messages.success(request, "Credencial agregada.")
             return redirect("usuarios:perfil")
 
+    preferidos = talento.tipos_preferidos or []
+    silenciados = talento.categorias_silenciadas or []
+    tipos_estado = [
+        {
+            "value": v,
+            "label": label,
+            "estado": "preferido" if v in preferidos else ("silenciado" if v in silenciados else "normal"),
+        }
+        for v, label in constants.TIPOS_CONVOCATORIA
+    ]
+
     return render(
         request,
         "usuarios/perfil.html",
@@ -252,6 +277,7 @@ def perfil(request):
             "cred_form": cred_form,
             "credenciales": talento.credenciales.all(),
             "completitud": completitud_perfil(talento),
+            "tipos_estado": tipos_estado,
         },
     )
 

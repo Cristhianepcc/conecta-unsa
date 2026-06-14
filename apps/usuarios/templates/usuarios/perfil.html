@@ -6,12 +6,11 @@
 
 {% block extra_head %}
 <style>
-  /* Preferencias por casillas como "pills" */
-  .pills ul, .pills > div { list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:.5rem; }
-  .pills li, .pills > div > div { margin:0; }
-  .pills label { display:inline-flex; align-items:center; gap:.4rem; border:1px solid #cbd5e1;
-    border-radius:9999px; padding:.35rem .75rem; font-size:.85rem; color:#334155; cursor:pointer; background:#fff; }
-  .pills input { accent-color:#7A1F2C; }
+  /* Carreras afines: casillas como chips (CheckboxSelectMultiple renderizado por nosotros) */
+  .chips label { display:inline-flex; align-items:center; gap:.4rem; border:1px solid #cbd5e1;
+    border-radius:9999px; padding:.3rem .7rem; font-size:.8rem; color:#334155; cursor:pointer; background:#fff; }
+  .chips label:hover { border-color:#7A1F2C; }
+  .chips input { accent-color:#7A1F2C; }
 </style>
 {% endblock %}
 
@@ -69,7 +68,8 @@
         {% if c.editable %}
         <form method="post" action="{% url 'usuarios:eliminar_credencial' c.id %}">
           {% csrf_token %}
-          <button class="inline-flex items-center gap-1 text-peligro hover:underline text-sm"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          <button aria-label="Eliminar credencial: {{ c.get_tipo_display }}" title="Eliminar"
+                  class="inline-flex items-center gap-1 text-peligro hover:underline text-sm"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
         </form>
         {% else %}
         <span class="inline-flex items-center gap-1 text-xs text-slate-400"><i data-lucide="lock" class="w-3.5 h-3.5"></i>solo lectura</span>
@@ -101,19 +101,44 @@
         <div class="campo">{{ pref_form.carrera.label_tag }} {{ pref_form.carrera }}</div>
         <div class="campo">{{ pref_form.estado_academico.label_tag }} {{ pref_form.estado_academico }}</div>
       </div>
-      <div class="campo">
-        {{ pref_form.carreras_extra.label_tag }}
-        {{ pref_form.carreras_extra }}
-        <p class="text-xs text-slate-400 mt-1">Mantén Ctrl/Cmd para elegir varias carreras afines.</p>
-      </div>
       <div>
-        <p class="font-medium text-slate-700">Tipos preferidos</p>
-        <div class="pills mt-2">{{ pref_form.tipos_preferidos }}</div>
+        <p class="font-medium text-slate-700">Carreras afines de interés</p>
+        <p class="text-xs text-slate-500 mt-0.5">Verás también convocatorias de estas carreras.</p>
+        <div class="chips mt-2 flex flex-wrap gap-2 max-h-44 overflow-y-auto p-1 rounded-lg border border-slate-200">
+          {% for cb in pref_form.carreras_extra %}
+            <label>{{ cb.tag }} {{ cb.choice_label }}</label>
+          {% endfor %}
+        </div>
       </div>
+
+      <!-- Matriz tri-estado de tipos -->
       <div>
-        <p class="font-medium text-slate-700">Silenciar tipos</p>
-        <div class="pills mt-2">{{ pref_form.categorias_silenciadas }}</div>
+        <p class="font-medium text-slate-700">Tipos de convocatoria</p>
+        <p class="text-xs text-slate-500 mt-0.5">Marca cuáles prefieres ver primero o silenciar.</p>
+        <div class="mt-3 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-xs text-slate-500 text-center">
+                <th class="text-left font-medium pb-2">Tipo</th>
+                <th class="font-medium pb-2 px-2">Preferido</th>
+                <th class="font-medium pb-2 px-2">Normal</th>
+                <th class="font-medium pb-2 px-2">Silenciar</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {% for t in tipos_estado %}
+              <tr>
+                <td class="py-2 text-slate-700">{{ t.label }}</td>
+                <td class="py-2 px-2 text-center"><input type="radio" name="tipo_{{ t.value }}" value="preferido" {% if t.estado == 'preferido' %}checked{% endif %} style="accent-color:#2E7D5B" aria-label="{{ t.label }}: preferido"></td>
+                <td class="py-2 px-2 text-center"><input type="radio" name="tipo_{{ t.value }}" value="normal" {% if t.estado == 'normal' %}checked{% endif %} aria-label="{{ t.label }}: normal"></td>
+                <td class="py-2 px-2 text-center"><input type="radio" name="tipo_{{ t.value }}" value="silenciado" {% if t.estado == 'silenciado' %}checked{% endif %} style="accent-color:#C0392B" aria-label="{{ t.label }}: silenciar"></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
+
       <div class="campo max-w-xs">{{ pref_form.frecuencia.label_tag }} {{ pref_form.frecuencia }}</div>
       <button name="guardar_preferencias" value="1"
               class="inline-flex items-center gap-1.5 rounded-lg bg-granate-700 px-4 py-2 text-white hover:bg-granate-800">

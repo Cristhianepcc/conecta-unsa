@@ -58,6 +58,11 @@
     }
     .campo input[aria-invalid="true"], .campo .errorlist + input { border-color: #C0392B; }
     .errorlist { color: #C0392B; font-size: .75rem; list-style: none; padding: 0; margin: .25rem 0 0; }
+    /* Foco visible accesible (WCAG AA, NFR-A11Y-2) para enlaces, botones y controles */
+    a:focus-visible, button:focus-visible, [role="tab"]:focus-visible, summary:focus-visible,
+    input[type="radio"]:focus-visible, input[type="checkbox"]:focus-visible {
+      outline: 2px solid #7A1F2C; outline-offset: 2px; border-radius: 4px;
+    }
   </style>
 
   {% block extra_head %}{% endblock %}
@@ -165,12 +170,17 @@
     <div class="border-t border-white/10">
       <div class="max-w-6xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
         <p>© 2026 Universidad Nacional de San Agustín de Arequipa. Todos los derechos reservados.</p>
-        <div class="flex items-center gap-3" aria-label="Redes sociales">
-          <i data-lucide="facebook" class="w-4 h-4"></i>
-          <i data-lucide="instagram" class="w-4 h-4"></i>
-          <i data-lucide="youtube" class="w-4 h-4"></i>
-          <i data-lucide="linkedin" class="w-4 h-4"></i>
-        </div>
+        {# TODO: reemplazar href por las URLs reales de redes institucionales #}
+        <nav class="flex items-center gap-1" aria-label="Redes sociales de la UNSA">
+          <a href="https://www.unsa.edu.pe" target="_blank" rel="noopener" aria-label="Facebook de la UNSA"
+             class="p-1.5 rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+          <a href="https://www.unsa.edu.pe" target="_blank" rel="noopener" aria-label="Instagram de la UNSA"
+             class="p-1.5 rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+          <a href="https://www.unsa.edu.pe" target="_blank" rel="noopener" aria-label="YouTube de la UNSA"
+             class="p-1.5 rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"><i data-lucide="youtube" class="w-4 h-4"></i></a>
+          <a href="https://www.unsa.edu.pe" target="_blank" rel="noopener" aria-label="LinkedIn de la UNSA"
+             class="p-1.5 rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"><i data-lucide="linkedin" class="w-4 h-4"></i></a>
+        </nav>
       </div>
     </div>
   </footer>

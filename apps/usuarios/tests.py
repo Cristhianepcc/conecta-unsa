@@ -257,8 +257,9 @@ class PerfilTalentoTests(TestCase):
                 "carrera": carrera.id,
                 "estado_academico": "egresado",
                 "frecuencia": "semanal",
-                "categorias_silenciadas": ["voluntariado"],
-                "tipos_preferidos": ["practica_preprofesional"],
+                # Matriz tri-estado: cada tipo lleva su estado.
+                "tipo_voluntariado": "silenciado",
+                "tipo_practica_preprofesional": "preferido",
             },
         )
         talento = asegurar_perfil_talento(user)

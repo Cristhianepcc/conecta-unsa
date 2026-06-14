@@ -39,23 +39,18 @@ class CompletarPerfilForm(forms.Form):
 
 
 class PreferenciasForm(forms.ModelForm):
-    """Preferencias del egresado (carreras extra, silenciar, tipos preferidos, frecuencia)."""
+    """Preferencias del egresado: carrera, estado, carreras afines y frecuencia.
 
-    categorias_silenciadas = forms.MultipleChoiceField(
-        choices=constants.TIPOS_CONVOCATORIA, required=False,
-        widget=forms.CheckboxSelectMultiple, label="Silenciar tipos",
-    )
-    tipos_preferidos = forms.MultipleChoiceField(
-        choices=constants.TIPOS_CONVOCATORIA, required=False,
-        widget=forms.CheckboxSelectMultiple, label="Tipos preferidos",
-    )
+    Los tipos (preferido/normal/silenciado) se manejan como matriz tri-estado en la
+    vista/plantilla (no como campos del form), para evitar estados contradictorios.
+    """
+
     frecuencia = forms.ChoiceField(choices=FRECUENCIAS, label="Frecuencia de notificación")
 
     class Meta:
         model = PerfilTalento
-        fields = ["carrera", "estado_academico", "carreras_extra",
-                  "categorias_silenciadas", "tipos_preferidos", "frecuencia"]
-        widgets = {"carreras_extra": forms.SelectMultiple}
+        fields = ["carrera", "estado_academico", "carreras_extra", "frecuencia"]
+        widgets = {"carreras_extra": forms.CheckboxSelectMultiple}
 
 
 class CredencialForm(forms.ModelForm):
