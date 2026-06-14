@@ -1,14 +1,118 @@
 {% extends "base.html" %}
 
-{% block title %}CONECTA UNSA — Bolsa de Trabajo{% endblock %}
+{% block title %}CONECTA UNSA — Oportunidades relevantes para egresados{% endblock %}
 
 {% block content %}
-<section class="max-w-6xl mx-auto px-4 py-16">
-  <h1 class="text-3xl sm:text-4xl font-bold text-granate-700">CONECTA UNSA</h1>
-  <p class="mt-4 max-w-2xl text-lg text-slate-600">
-    Portal oficial de la Bolsa de Trabajo de la Universidad Nacional de San Agustín.
-    Convocatorias verificadas, transparentes y pertinentes para la comunidad agustina.
-  </p>
-  <p class="mt-8 text-sm text-slate-400">Fundación operativa · la landing definitiva llega en la feature 09.</p>
+<!-- 2. Hero -->
+<section class="bg-granate-50">
+  <div class="max-w-6xl mx-auto px-4 py-16 sm:py-20">
+    <h1 class="text-3xl sm:text-5xl font-bold text-granate-700 max-w-3xl">
+      Oportunidades relevantes para estudiantes y egresados de la UNSA
+    </h1>
+    <p class="mt-4 text-lg text-slate-600 max-w-2xl">
+      Convocatorias verificadas y transparentes, dirigidas a tu carrera. Sin saturación:
+      un solo resumen semanal con lo que realmente te corresponde.
+    </p>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href="{% url 'usuarios:login' %}"
+         class="rounded-lg bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800">
+        Ingresar con correo UNSA
+      </a>
+      <a href="{% url 'core:como_funciona' %}"
+         class="rounded-lg border border-granate-700 px-6 py-3 font-medium text-granate-700 hover:bg-granate-100">
+        Cómo funciona
+      </a>
+    </div>
+
+    <!-- 2 puertas -->
+    <div class="mt-10 grid gap-4 sm:grid-cols-2 max-w-2xl">
+      <a href="{% url 'usuarios:login' %}" class="rounded-xl border border-slate-200 bg-white p-5 hover:shadow-sm">
+        <p class="font-semibold text-slate-800">Soy egresado</p>
+        <p class="text-sm text-slate-500 mt-1">Ingresa con tu correo institucional y recibe convocatorias para tu carrera.</p>
+      </a>
+      <a href="{% url 'empresas:registro' %}" class="rounded-xl border border-slate-200 bg-white p-5 hover:shadow-sm">
+        <p class="font-semibold text-slate-800">Soy empresa</p>
+        <p class="text-sm text-slate-500 mt-1">Publica convocatorias y llega al talento agustino pertinente.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Métricas honestas (calculadas de datos reales) -->
+<section class="max-w-6xl mx-auto px-4 py-12">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+    <div><p class="text-3xl font-bold text-granate-700">{{ metricas.convocatorias_activas }}</p>
+      <p class="text-sm text-slate-500">convocatorias activas</p></div>
+    <div><p class="text-3xl font-bold text-granate-700">{{ metricas.carreras_cubiertas }}</p>
+      <p class="text-sm text-slate-500">carreras cubiertas</p></div>
+    <div><p class="text-3xl font-bold text-granate-700">{{ metricas.indice_transparencia }}%</p>
+      <p class="text-sm text-slate-500">índice de transparencia</p></div>
+    <div><p class="text-3xl font-bold text-granate-700">{{ metricas.empresas_participantes }}</p>
+      <p class="text-sm text-slate-500">empresas participantes</p></div>
+  </div>
+</section>
+
+<!-- 3. Cómo funciona -->
+<section class="bg-slate-50">
+  <div class="max-w-6xl mx-auto px-4 py-14">
+    <h2 class="text-2xl font-bold text-slate-800">Cómo funciona</h2>
+    <div class="mt-8 grid gap-6 sm:grid-cols-3">
+      <div class="rounded-xl bg-white border border-slate-200 p-6">
+        <p class="text-granate-700 font-bold text-lg">1</p>
+        <p class="mt-2 font-semibold">Ingresa y completa tu perfil</p>
+        <p class="text-sm text-slate-500 mt-1">Tu carrera y estado académico definen qué te corresponde por ley y pertinencia.</p>
+      </div>
+      <div class="rounded-xl bg-white border border-slate-200 p-6">
+        <p class="text-granate-700 font-bold text-lg">2</p>
+        <p class="mt-2 font-semibold">Recibe convocatorias pertinentes</p>
+        <p class="text-sm text-slate-500 mt-1">Solo lo que aplica a tu carrera y estado, ordenado por afinidad con tu perfil.</p>
+      </div>
+      <div class="rounded-xl bg-white border border-slate-200 p-6">
+        <p class="text-granate-700 font-bold text-lg">3</p>
+        <p class="mt-2 font-semibold">Un resumen semanal, sin saturación</p>
+        <p class="text-sm text-slate-500 mt-1">Un único correo consolidado con las oportunidades de la semana.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Categorías (taxonomía real) -->
+<section class="max-w-6xl mx-auto px-4 py-14">
+  <h2 class="text-2xl font-bold text-slate-800">Convocatorias por área</h2>
+  <div class="mt-8 grid gap-4 sm:grid-cols-3">
+    {% for c in categorias %}
+    <div class="rounded-xl border border-slate-200 p-5">
+      <p class="font-semibold text-slate-800">{{ c.area.nombre }}</p>
+      <p class="text-sm text-slate-500 mt-1">{{ c.conteo }} convocatoria{{ c.conteo|pluralize }} activa{{ c.conteo|pluralize }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- 5. Transparencia (semáforo) -->
+<section class="bg-granate-50">
+  <div class="max-w-6xl mx-auto px-4 py-14">
+    <h2 class="text-2xl font-bold text-slate-800">Por qué confiar: transparencia</h2>
+    <p class="mt-2 text-slate-600 max-w-2xl">Cada convocatoria recibe un % de transparencia según
+      cuánta información clara ofrece (el sueldo visible es lo que más pesa). Lo mostramos con un semáforo:</p>
+    <div class="mt-6 grid gap-4 sm:grid-cols-3 max-w-3xl">
+      <div class="rounded-lg bg-white border border-slate-200 p-4"><span class="text-exito font-semibold">🟢 Alta (≥80%)</span>
+        <p class="text-sm text-slate-500 mt-1">Información completa, sueldo visible. Mayor difusión.</p></div>
+      <div class="rounded-lg bg-white border border-slate-200 p-4"><span class="text-alerta font-semibold">🟡 Media (50–79%)</span>
+        <p class="text-sm text-slate-500 mt-1">Aceptable, con sugerencia de completar.</p></div>
+      <div class="rounded-lg bg-white border border-slate-200 p-4"><span class="text-peligro font-semibold">🔴 Baja (&lt;50%)</span>
+        <p class="text-sm text-slate-500 mt-1">Poca información; menor visibilidad.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. CTA final -->
+<section class="max-w-6xl mx-auto px-4 py-16 text-center">
+  <h2 class="text-2xl font-bold text-slate-800">Empieza hoy</h2>
+  <div class="mt-6 flex flex-wrap gap-3 justify-center">
+    <a href="{% url 'usuarios:login' %}" class="rounded-lg bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800">Soy egresado</a>
+    <a href="{% url 'empresas:registro' %}" class="rounded-lg border border-granate-700 px-6 py-3 font-medium text-granate-700 hover:bg-granate-100">Soy empresa</a>
+  </div>
 </section>
 {% endblock %}

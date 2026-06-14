@@ -64,3 +64,86 @@ class FundacionTests(TestCase):
         self.assertEqual(PesoTransparencia.objects.get().peso, 30)
         self.assertTrue(ReglaElegibilidad.objects.get().permitido)
         self.assertEqual(AdminAllowlist.objects.get().email, "admin@unsa.edu.pe")
+
+
+# --- 09 Landing pública -----------------------------------------------------
+class LandingTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        from datetime import date, timedelta
+
+        from django.core.management import call_command
+
+        from apps.convocatorias.models import ESTADO_PUBLICADA, Convocatoria
+        from apps.empresas.models import ESTADO_ACTIVA, Empresa
+        from apps.taxonomia.models import Carrera
+
+        call_command("seed_config")
+        call_command("seed_taxonomia")
+        empresa = Empresa.objects.create(
+            ruc="20900000001", razon_social="Landing SAC", estado=ESTADO_ACTIVA
+        )
+        sistemas = Carrera.objects.get(nombre="Ingeniería de Sistemas")
+        for i in range(3):
+            conv = Convocatoria.objects.create(
+                empresa=empresa, tipo="empleo", titulo=f"Empleo {i}",
+                estado=ESTADO_PUBLICADA, transparencia_pct=80,
+                fecha_limite=date.today() + timedelta(days=20),
+            )
+            conv.carreras_objetivo.set([sistemas])
+        cls.sistemas = sistemas
+
+    def test_ca1__metricas_calculadas_de_bd(self):
+        """CA-1: las métricas se calculan de datos reales, no son constantes."""
+        from apps.core.services import metricas_landing
+
+        m = metricas_landing()
+        self.assertEqual(m["convocatorias_activas"], 3)
+        self.assertEqual(m["indice_transparencia"], 80)
+        self.assertGreaterEqual(m["carreras_cubiertas"], 1)
+
+    def test_ca1__metricas_cambian_con_los_datos(self):
+        """CA-1: si cambian los datos, cambia la métrica (no es un número fijo)."""
+        from apps.convocatorias.models import ESTADO_PUBLICADA, Convocatoria
+        from apps.core.services import metricas_landing
+        from datetime import date, timedelta
+
+        antes = metricas_landing()["convocatorias_activas"]
+        c = Convocatoria.objects.create(
+            empresa_id=Convocatoria.objects.first().empresa_id, tipo="empleo",
+            titulo="Nueva", estado=ESTADO_PUBLICADA,
+            fecha_limite=date.today() + timedelta(days=5),
+        )
+        c.carreras_objetivo.set([self.sistemas])
+        self.assertEqual(metricas_landing()["convocatorias_activas"], antes + 1)
+
+    def test_ca2__dos_puertas_en_landing(self):
+        """CA-2: la landing ofrece entrada para egresado y para empresa."""
+        resp = self.client.get(reverse("core:home"))
+        self.assertContains(resp, "Soy egresado")
+        self.assertContains(resp, "Soy empresa")
+
+    def test_ca3__categorias_desde_taxonomia(self):
+        """CA-3: las categorías provienen de la taxonomía real (3 áreas)."""
+        from apps.core.services import categorias_con_conteo
+
+        cats = categorias_con_conteo()
+        self.assertEqual(len(cats), 3)
+        resp = self.client.get(reverse("core:home"))
+        self.assertContains(resp, "Ingenierías y Ciencias Básicas")
+
+    def test_ca4__semaforo_explicado(self):
+        resp = self.client.get(reverse("core:home"))
+        self.assertContains(resp, "🟢")
+        self.assertContains(resp, "🔴")
+
+    def test_ca5__footer_institucional(self):
+        """CA-5: footer con privacidad, términos y contacto."""
+        resp = self.client.get(reverse("core:home"))
+        self.assertContains(resp, reverse("core:privacidad"))
+        self.assertContains(resp, reverse("core:terminos"))
+        self.assertContains(resp, "empleabilidad@unsa.edu.pe")
+
+    def test__paginas_apoyo_responden(self):
+        for nombre in ("como_funciona", "privacidad", "terminos"):
+            self.assertEqual(self.client.get(reverse(f"core:{nombre}")).status_code, 200)

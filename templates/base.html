@@ -51,7 +51,17 @@
         <span><span class="font-medium">CONECTA</span> UNSA</span>
       </a>
       <nav class="ml-auto flex items-center gap-4 text-sm" aria-label="Principal">
-        {% block nav %}{% endblock %}
+        {% block nav %}
+          {% if user.is_authenticated %}
+            {% include "notificaciones/_campana.html" %}
+            <a href="{% url 'usuarios:post_login' %}" class="hover:underline">Mi panel</a>
+            <a href="{% url 'usuarios:logout' %}" class="hover:underline">Salir</a>
+          {% else %}
+            <a href="{% url 'usuarios:login' %}" class="hover:underline">Iniciar sesión</a>
+            <a href="{% url 'empresas:registro' %}"
+               class="rounded-lg bg-white/15 px-3 py-1.5 hover:bg-white/25">Publicar convocatoria</a>
+          {% endif %}
+        {% endblock %}
       </nav>
     </div>
   </header>
@@ -77,10 +87,25 @@
 
   {% block footer %}
   <footer class="bg-granate-900 text-white/80 mt-12">
-    <div class="max-w-6xl mx-auto px-4 py-8 text-sm">
-      <p class="font-semibold text-white">CONECTA UNSA</p>
-      <p class="mt-1">Bolsa de Trabajo · Universidad Nacional de San Agustín de Arequipa</p>
-      <p class="mt-2 text-white/60">Software público · Sin IA · Reglas transparentes y auditables.</p>
+    <div class="max-w-6xl mx-auto px-4 py-8 text-sm grid gap-6 sm:grid-cols-3">
+      <div>
+        <p class="font-semibold text-white">CONECTA UNSA</p>
+        <p class="mt-1">Bolsa de Trabajo · Universidad Nacional de San Agustín de Arequipa</p>
+        <p class="mt-2 text-white/60">Software público · Sin IA · Reglas transparentes y auditables.</p>
+      </div>
+      <nav aria-label="Institucional">
+        <p class="text-white font-medium">Institucional</p>
+        <ul class="mt-2 space-y-1">
+          <li><a href="{% url 'core:como_funciona' %}" class="hover:underline">Cómo funciona</a></li>
+          <li><a href="{% url 'core:privacidad' %}" class="hover:underline">Política de Privacidad</a></li>
+          <li><a href="{% url 'core:terminos' %}" class="hover:underline">Términos y condiciones</a></li>
+        </ul>
+      </nav>
+      <div>
+        <p class="text-white font-medium">Contacto</p>
+        <p class="mt-2 text-white/70">Oficina de Empleabilidad — Bolsa de Trabajo UNSA</p>
+        <p class="text-white/70">empleabilidad@unsa.edu.pe</p>
+      </div>
     </div>
   </footer>
   {% endblock %}
