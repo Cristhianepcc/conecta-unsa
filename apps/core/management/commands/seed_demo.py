@@ -2,7 +2,8 @@
 
 Orquesta taxonomía + config + elegibilidad, y siembra empresas y convocatorias de
 muestra (ficticias realistas) con cifras que la landing/dashboards calculan de verdad.
-NO siembra perfiles de egresado: cada quien entra con su propio Gmail.
+Crea además un usuario demo por rol (egresado, administrador, empresa) para mostrar
+los flujos al jurado; en producción cada quien entra con su propio Gmail.
 """
 
 from datetime import timedelta
@@ -208,6 +209,8 @@ class Command(BaseCommand):
         # Cuentas de empresa (login por email) e imágenes realistas (logo + banner).
         call_command("seed_cuentas")
         call_command("seed_imagenes")
+        # Notificaciones in-app para que la campana se vea viva.
+        call_command("seed_notificaciones")
 
         self.stdout.write(self.style.SUCCESS(
             f"Demo sembrada: {Empresa.objects.count()} empresas, "
