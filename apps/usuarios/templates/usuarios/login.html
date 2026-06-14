@@ -20,10 +20,13 @@
 {% block content %}
 <div class="grid lg:grid-cols-[5fr_7fr] min-h-screen">
 
-  <!-- ===== Panel de marca (granate) ===== -->
-  <aside class="hidden lg:flex flex-col justify-between bg-granate-700 text-white p-10 relative overflow-hidden">
-    <div class="absolute inset-0 opacity-10"
-         style="background:radial-gradient(circle at 20% 10%, #fff 0, transparent 45%);"></div>
+  <!-- ===== Panel de marca (foto del campus + velo granate) ===== -->
+  <aside class="hidden lg:flex flex-col justify-between text-white p-10 relative overflow-hidden bg-granate-800">
+    <!-- Fondo: foto aérea del campus UNSA -->
+    <img src="{% static 'img/landing-pabello.jpg' %}" alt=""
+         class="absolute inset-0 h-full w-full object-cover">
+    <!-- Velo granate para legibilidad del texto -->
+    <div class="absolute inset-0 bg-gradient-to-br from-granate-900/95 via-granate-800/90 to-granate-700/80"></div>
 
     <div class="relative">
       <div class="flex items-center gap-3">
