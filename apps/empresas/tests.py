@@ -46,7 +46,7 @@ class RegistroEmpresaTests(TestCase):
     def test_ca1__registro_crea_empresa_pendiente(self):
         """CA-1: el registro crea la empresa en estado pendiente."""
         resp = self.client.post(reverse("empresas:registro"), _datos_registro())
-        self.assertRedirects(resp, reverse("usuarios:login"))
+        self.assertRedirects(resp, reverse("empresas:registro_exito"))
         empresa = Empresa.objects.get(ruc="20123456789")
         self.assertEqual(empresa.estado, ESTADO_PENDIENTE)
         self.assertEqual(empresa.reclutador.nombres, "Juan")

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Registro enviado — CONECTA UNSA{% endblock %}
+
+{% block content %}
+<section class="max-w-lg mx-auto px-4 py-16 text-center">
+  <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-exito/10 text-exito">
+    <i data-lucide="check-circle-2" class="w-9 h-9"></i>
+  </div>
+
+  <h1 class="mt-6 text-2xl font-bold text-slate-800">¡Registro enviado!</h1>
+  <p class="mt-3 text-slate-600">
+    Recibimos los datos de tu empresa. La <strong>Universidad la verificará</strong> antes de
+    habilitar la publicación de convocatorias.
+  </p>
+
+  <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5 text-left text-sm text-slate-600">
+    <p class="font-medium text-slate-700">¿Qué sigue?</p>
+    <ol class="mt-2 space-y-2 list-decimal pl-5">
+      <li>El equipo de la Bolsa de Trabajo revisa tu RUC y datos.</li>
+      <li>Cuando tu empresa quede <strong>activa</strong>, podrás iniciar sesión y publicar.</li>
+      <li>Te avisaremos al correo del reclutador registrado.</li>
+    </ol>
+  </div>
+
+  <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+    <a href="{% url 'usuarios:login' %}"
+       class="inline-flex items-center justify-center gap-2 rounded-lg bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800">
+      Ir a iniciar sesión <i data-lucide="arrow-right" class="w-4 h-4"></i>
+    </a>
+    <a href="{% url 'core:home' %}"
+       class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-6 py-3 font-medium text-slate-700 hover:bg-slate-50">
+      Volver al inicio
+    </a>
+  </div>
+</section>
+{% endblock %}

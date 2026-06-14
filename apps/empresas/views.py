@@ -112,11 +112,9 @@ def registro(request):
                 username=reclutador_form.cleaned_data["username"],
                 password=reclutador_form.cleaned_data["password1"],
             )
-            messages.success(
-                request,
-                "Registro enviado. Tu cuenta será verificada por la universidad antes de publicar.",
-            )
-            return redirect("usuarios:login")
+            # Estado de éxito contextual (Post/Redirect/Get): evita el banner global
+            # desconectado del flujo y previene reenvío al refrescar.
+            return redirect("empresas:registro_exito")
     else:
         empresa_form = EmpresaForm()
         reclutador_form = ReclutadorForm()
@@ -126,3 +124,8 @@ def registro(request):
         "empresas/registro.html",
         {"empresa_form": empresa_form, "reclutador_form": reclutador_form},
     )
+
+
+def registro_exito(request):
+    """Pantalla de confirmación posterior al registro de empresa (feedback en contexto)."""
+    return render(request, "empresas/registro_exito.html")
