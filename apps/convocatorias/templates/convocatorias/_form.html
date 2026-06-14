@@ -47,7 +47,7 @@ este parcial, para que el botón "Enviar" —fuera de este div— pueda leer lis
     </legend>
 
     <div class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-      <div class="campo sm:col-span-2"><label for="{{ form.tipo.id_for_label }}">Tipo de convocatoria</label>
+      <div class="campo sm:col-span-2"><label for="{{ form.tipo.id_for_label }}">Tipo de convocatoria <span class="text-peligro">*</span></label>
         <select name="tipo" id="{{ form.tipo.id_for_label }}" x-model="tipo">
           {% for value, label in form.tipo.field.choices %}
           <option value="{{ value }}" {% if form.tipo.value == value %}selected{% endif %}>{{ label }}</option>
@@ -55,16 +55,45 @@ este parcial, para que el botón "Enviar" —fuera de este div— pueda leer lis
         </select>{{ form.tipo.errors }}
       </div>
       {% for f in form %}{% if f.name in "titulo,modalidad,ubicacion,duracion_estimada,fecha_limite,medio_postulacion,email_contacto" %}
-      <div class="campo"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>
+      <div class="campo">
+        <label for="{{ f.id_for_label }}">{{ f.label }} <span class="text-peligro">*</span></label>
+        {{ f }}
+        {% if f.help_text %}<p class="mt-1 text-xs text-slate-500">{{ f.help_text }}</p>{% endif %}
+        {{ f.errors }}
+      </div>
       {% endif %}{% endfor %}
-      {% for f in form %}{% if f.name in "descripcion,carreras_objetivo" %}
-      <div class="campo sm:col-span-2"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>
+      {% for f in form %}{% if f.name == "descripcion" %}
+      <div class="campo sm:col-span-2"><label for="{{ f.id_for_label }}">{{ f.label }} <span class="text-peligro">*</span></label>{{ f }}{{ f.errors }}</div>
       {% endif %}{% endfor %}
+
+      {# Carreras objetivo: multi-selección con búsqueda (puedes elegir varias) #}
+      <div class="sm:col-span-2" x-data="{ q: '' }">
+        <span class="block text-xs font-semibold text-slate-600 mb-2">{{ form.carreras_objetivo.label }}
+          <span class="font-normal text-slate-400">· puedes elegir varias</span></span>
+        <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+          <div class="relative border-b border-slate-100">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+            <input type="text" x-model="q" placeholder="Buscar carrera…"
+                   class="w-full border-0 bg-white pl-9 pr-3 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none">
+          </div>
+          <div class="max-h-56 overflow-y-auto p-1.5">
+            {% for sub in form.carreras_objetivo %}
+            <label x-show="'{{ sub.choice_label|lower|escapejs }}'.includes(q.toLowerCase().trim())"
+                   class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-50 cursor-pointer">
+              {{ sub.tag }} <span>{{ sub.choice_label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {{ form.carreras_objetivo.errors }}
+      </div>
     </div>
 
     <label class="check-row mt-5 text-sm cursor-pointer">{{ form.no_discriminacion }}
-      <span class="text-slate-600">{{ form.no_discriminacion.label }} <span class="text-slate-400">(Ley 26772)</span></span></label>
+      <span class="text-slate-600">{{ form.no_discriminacion.label }} <span class="text-peligro">*</span> <span class="text-slate-400">(Ley 26772)</span></span></label>
     {{ form.no_discriminacion.errors }}
+
+    <p class="mt-4 text-xs text-slate-500">Los campos con <span class="text-peligro font-semibold">*</span> son obligatorios para publicar.</p>
   </fieldset>
 
   {# ===== Bloque 2 · Según el tipo (campos dinámicos) ===== #}
@@ -90,16 +119,27 @@ este parcial, para que el botón "Enviar" —fuera de este div— pueda leer lis
         {{ form.jornada_horas }}{{ form.jornada_horas.errors }}
       </div>
 
-      {# Régimen laboral: trainee, empleo, CAS, consultoría #}
+      {# Régimen laboral: trainee, empleo, CAS, consultoría (con sugerencias) #}
       <div class="campo" x-show="['trainee','empleo','cas','consultoria'].includes(tipo)">
         <label for="{{ form.regimen.id_for_label }}">{{ form.regimen.label }}</label>
-        {{ form.regimen }}{{ form.regimen.errors }}
+        {{ form.regimen }}
+        <datalist id="regimenes-list">
+          <option value="Régimen privado (D.L. 728)"></option>
+          <option value="Régimen CAS (D.L. 1057)"></option>
+          <option value="Régimen público (D.L. 276)"></option>
+          <option value="Régimen MYPE"></option>
+          <option value="Locación de servicios (recibo por honorarios)"></option>
+          <option value="Practicante (Ley 28518)"></option>
+        </datalist>
+        <p class="mt-1 text-xs text-slate-500">Elige una sugerencia o escribe el tuyo.</p>
+        {{ form.regimen.errors }}
       </div>
 
       {# Convenio + ciclo/egreso: prácticas #}
-      <label class="campo check-row text-sm cursor-pointer self-end" x-show="['practica_preprofesional','practica_profesional'].includes(tipo)">
-        {{ form.requiere_convenio }}<span class="text-slate-600">{{ form.requiere_convenio.label }}</span>
-      </label>
+      <div class="campo" x-show="['practica_preprofesional','practica_profesional'].includes(tipo)">
+        <label for="{{ form.requiere_convenio.id_for_label }}">{{ form.requiere_convenio.label }}</label>
+        {{ form.requiere_convenio }}{{ form.requiere_convenio.errors }}
+      </div>
       <div class="campo" x-show="tipo === 'practica_preprofesional'">
         <label for="{{ form.ciclo_minimo.id_for_label }}">{{ form.ciclo_minimo.label }}</label>
         {{ form.ciclo_minimo }}{{ form.ciclo_minimo.errors }}
@@ -126,9 +166,10 @@ este parcial, para que el botón "Enviar" —fuera de este div— pueda leer lis
       </div>
 
       {# Seguro: prácticas / empleo / trainee #}
-      <label class="campo check-row text-sm cursor-pointer self-end" x-show="['practica_preprofesional','practica_profesional','empleo','trainee'].includes(tipo)">
-        {{ form.incluye_seguro }}<span class="text-slate-600">{{ form.incluye_seguro.label }}</span>
-      </label>
+      <div class="campo" x-show="['practica_preprofesional','practica_profesional','empleo','trainee'].includes(tipo)">
+        <label for="{{ form.incluye_seguro.id_for_label }}">{{ form.incluye_seguro.label }}</label>
+        {{ form.incluye_seguro }}{{ form.incluye_seguro.errors }}
+      </div>
       {# No vínculo: CAS / consultoría #}
       <label class="campo check-row text-sm cursor-pointer self-end" x-show="['cas','consultoria'].includes(tipo)">
         {{ form.no_vinculo }}<span class="text-slate-600">{{ form.no_vinculo.label }}</span>
@@ -181,7 +222,12 @@ este parcial, para que el botón "Enviar" —fuera de este div— pueda leer lis
 
     <div class="mt-6 grid gap-x-6 gap-y-5 sm:grid-cols-2">
       {% for f in form %}{% if f.name in "banda_salarial_min,banda_salarial_max,vacantes" %}
-      <div class="campo"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>
+      <div class="campo">
+        <label for="{{ f.id_for_label }}">{{ f.label }} <span class="text-xs font-normal text-slate-400">· opcional</span></label>
+        {{ f }}
+        {% if f.help_text %}<p class="mt-1 text-xs text-slate-500">{{ f.help_text }}</p>{% endif %}
+        {{ f.errors }}
+      </div>
       {% endif %}{% endfor %}
       {% for f in form %}{% if f.name in "beneficios" %}
       <div class="campo sm:col-span-2"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>
