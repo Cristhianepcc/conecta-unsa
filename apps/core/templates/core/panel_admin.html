@@ -3,13 +3,65 @@
 {% block title %}Panel administrativo — CONECTA UNSA{% endblock %}
 
 {% block nav %}
-  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Cerrar sesión</a>
+  {% include "notificaciones/_campana.html" %}
+  <a href="/admin/" class="hover:underline">Django Admin</a>
+  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Salir</a>
 {% endblock %}
 
 {% block content %}
-<section class="max-w-6xl mx-auto px-4 py-12">
+<section class="max-w-6xl mx-auto px-4 py-10">
   <h1 class="text-2xl font-bold text-granate-700">Panel administrativo</h1>
-  <p class="mt-2 text-slate-600">Bolsa de Trabajo · revisión y difusión de convocatorias.</p>
-  <p class="mt-6 text-sm text-slate-400">La cola de revisión y la configuración llegan en la feature 12.</p>
+  <p class="mt-1 text-sm text-slate-500">Bolsa de Trabajo · revisión y difusión de convocatorias.</p>
+
+  <!-- Métricas -->
+  <div class="mt-8 grid grid-cols-2 sm:grid-cols-5 gap-4 text-center">
+    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.recibidas }}</p><p class="text-xs text-slate-500">recibidas</p></div>
+    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.validadas }}</p><p class="text-xs text-slate-500">validadas</p></div>
+    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-alerta">{{ metricas.pendientes }}</p><p class="text-xs text-slate-500">pendientes</p></div>
+    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-peligro">{{ metricas.duplicados }}</p><p class="text-xs text-slate-500">con duplicado</p></div>
+    <div class="rounded-xl border border-slate-200 p-4"><p class="text-2xl font-bold text-granate-700">{{ metricas.indice_transparencia }}%</p><p class="text-xs text-slate-500">transparencia</p></div>
+  </div>
+
+  <!-- Bandeja -->
+  <h2 class="mt-10 text-lg font-semibold text-slate-800">Bandeja por revisar</h2>
+  <div class="mt-4 space-y-3">
+    {% for item in bandeja %}
+    <div class="rounded-xl border border-slate-200 p-4 flex items-start justify-between gap-4
+                {% if 'duplicado' in item.alertas %}border-peligro/40 bg-peligro/5{% endif %}">
+      <div>
+        <a href="{% url 'core:revisar_convocatoria' item.conv.id %}" class="font-semibold text-granate-700 hover:underline">
+          {{ item.conv.titulo }}
+        </a>
+        <p class="text-sm text-slate-500">{{ item.conv.empresa }}
+          {% if item.conv.empresa.verificada %}<span class="text-exito">✓</span>{% endif %}
+          · {{ item.conv.get_tipo_display }} · {{ item.conv.get_estado_display }}</p>
+        <!-- Badges de alerta -->
+        <div class="mt-2 flex flex-wrap gap-2 text-xs">
+          {% if 'duplicado' in item.alertas %}
+            <span class="rounded-full bg-peligro/10 text-peligro px-2 py-0.5">🔴 duplicado
+              {% if item.duplicados %}({{ item.duplicados.0.1|floatformat:0 }}% sim.){% endif %}</span>
+          {% endif %}
+          {% if 'incompleta' in item.alertas %}<span class="rounded-full bg-alerta/10 text-alerta px-2 py-0.5">🟡 incompleta</span>{% endif %}
+          {% if 'baja_transparencia' in item.alertas %}<span class="rounded-full bg-alerta/10 text-alerta px-2 py-0.5">🟡 baja transparencia</span>{% endif %}
+          {% if 'exceso_difusion' in item.alertas %}<span class="rounded-full bg-dorado/20 text-dorado px-2 py-0.5">🟠 exceso difusión</span>{% endif %}
+          {% if not item.alertas %}<span class="rounded-full bg-exito/10 text-exito px-2 py-0.5">sin alertas</span>{% endif %}
+        </div>
+      </div>
+      <div class="text-right shrink-0">
+        <span class="text-sm font-medium">{{ item.conv.transparencia_pct }}%</span>
+        <div class="mt-2"><a href="{% url 'core:revisar_convocatoria' item.conv.id %}"
+          class="text-sm rounded-lg bg-granate-700 text-white px-3 py-1.5 hover:bg-granate-800">Revisar</a></div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-sm text-slate-400">No hay convocatorias por revisar. 🎉</p>
+    {% endfor %}
+  </div>
+
+  <p class="mt-10 text-sm text-slate-400">
+    La configuración (parámetros legales, pesos de transparencia, matriz de elegibilidad, taxonomía)
+    y la creación de empresas/convocatorias referenciales se gestionan en
+    <a href="/admin/" class="text-granate-700 underline">Django Admin</a>.
+  </p>
 </section>
 {% endblock %}

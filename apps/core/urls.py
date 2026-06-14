@@ -10,4 +10,6 @@ urlpatterns = [
     path("privacidad/", views.privacidad, name="privacidad"),
     path("terminos/", views.terminos, name="terminos"),
     path("panel-admin/", views.panel_admin, name="panel_admin"),
+    path("panel-admin/convocatoria/<int:pk>/", views.revisar_convocatoria,
+         name="revisar_convocatoria"),
 ]
