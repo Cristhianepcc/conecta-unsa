@@ -51,6 +51,35 @@ CRITERIOS_TRANSPARENCIA = [
 ]
 
 
+# --- Matriz de elegibilidad estado × tipo (matching.md, demo pregrado) -----
+# Para cada estado académico, el conjunto de tipos de convocatoria permitidos.
+MATRIZ_ELEGIBILIDAD = {
+    ESTADO_ESTUDIANTE: {
+        TIPO_PRACTICA_PREPROFESIONAL,
+        TIPO_VOLUNTARIADO,
+        TIPO_BECA,
+        TIPO_CONSULTORIA,  # opcional para estudiante
+    },
+    ESTADO_EGRESADO: {
+        TIPO_PRACTICA_PROFESIONAL,
+        TIPO_TRAINEE,
+        TIPO_EMPLEO,
+        TIPO_CAS,
+        TIPO_VOLUNTARIADO,
+        TIPO_BECA,
+        TIPO_CONSULTORIA,
+    },
+    ESTADO_TITULADO: {
+        TIPO_TRAINEE,
+        TIPO_EMPLEO,
+        TIPO_CAS,
+        TIPO_VOLUNTARIADO,
+        TIPO_BECA,
+        TIPO_CONSULTORIA,
+    },
+}
+
+
 # --- Parámetros legales base (seed) — modelo-datos.md §4 -------------------
 PARAMETROS_LEGALES_BASE = [
     ("rmv", "1130", "Remuneración Mínima Vital vigente (S/), referencial."),
