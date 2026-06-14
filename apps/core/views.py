@@ -3,7 +3,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.usuarios.decorators import admin_required
 
-from .services import categorias_con_conteo, metricas_landing
+from .services import (
+    categorias_profesionales,
+    convocatorias_destacadas,
+    metricas_landing,
+    resumen_semanal_landing,
+)
 
 
 def home(request):
@@ -13,7 +18,9 @@ def home(request):
         "core/home.html",
         {
             "metricas": metricas_landing(),
-            "categorias": categorias_con_conteo(),
+            "categorias": categorias_profesionales(),
+            "destacadas": convocatorias_destacadas(),
+            "resumen": resumen_semanal_landing(),
         },
     )
 

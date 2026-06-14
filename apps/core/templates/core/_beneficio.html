@@ -1,0 +1,10 @@
+{% comment %}Ítem de beneficio. Contexto: icono, titulo, texto.{% endcomment %}
+<div class="flex items-start gap-4">
+  <span class="shrink-0 h-11 w-11 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center">
+    <i data-lucide="{{ icono }}" class="w-5 h-5"></i>
+  </span>
+  <div>
+    <h3 class="font-semibold text-slate-800">{{ titulo }}</h3>
+    <p class="text-sm text-slate-500">{{ texto }}</p>
+  </div>
+</div>

@@ -1,118 +1,233 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}CONECTA UNSA — Oportunidades relevantes para egresados{% endblock %}
 
 {% block content %}
-<!-- 2. Hero -->
-<section class="bg-granate-50">
-  <div class="max-w-6xl mx-auto px-4 py-16 sm:py-20">
-    <h1 class="text-3xl sm:text-5xl font-bold text-granate-700 max-w-3xl">
-      Oportunidades relevantes para estudiantes y egresados de la UNSA
-    </h1>
-    <p class="mt-4 text-lg text-slate-600 max-w-2xl">
-      Convocatorias verificadas y transparentes, dirigidas a tu carrera. Sin saturación:
-      un solo resumen semanal con lo que realmente te corresponde.
-    </p>
+<!-- ===== HERO ===== -->
+<section class="relative bg-gradient-to-b from-granate-50 to-white overflow-hidden">
+  <div class="max-w-6xl mx-auto px-4 pt-14 pb-28 grid lg:grid-cols-2 gap-10 items-center">
+    <div>
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-800 leading-[1.1]">
+        Oportunidades laborales relevantes para
+        <span class="text-granate-700">egresados UNSA</span>
+      </h1>
+      <p class="mt-5 max-w-xl text-lg text-slate-600">
+        CONECTA UNSA organiza y difunde convocatorias laborales de forma pertinente,
+        transparente y confiable, para que encuentres oportunidades relacionadas a tu formación.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="{% url 'usuarios:login' %}"
+           class="inline-flex items-center gap-2 rounded-lg bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800">
+          Ver convocatorias <i data-lucide="search" class="w-4 h-4"></i>
+        </a>
+        <a href="{% url 'core:como_funciona' %}"
+           class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 hover:bg-slate-50">
+          ¿Cómo funciona? <i data-lucide="info" class="w-4 h-4"></i>
+        </a>
+      </div>
 
-    <div class="mt-8 flex flex-wrap gap-3">
-      <a href="{% url 'usuarios:login' %}"
-         class="rounded-lg bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800">
-        Ingresar con correo UNSA
-      </a>
-      <a href="{% url 'core:como_funciona' %}"
-         class="rounded-lg border border-granate-700 px-6 py-3 font-medium text-granate-700 hover:bg-granate-100">
-        Cómo funciona
-      </a>
+      <!-- 2 puertas (la entrada según quién eres) -->
+      <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+        <span class="text-slate-400">Ingresa como:</span>
+        <a href="{% url 'usuarios:login' %}" class="inline-flex items-center gap-1.5 font-medium text-granate-700 hover:underline">
+          <i data-lucide="graduation-cap" class="w-4 h-4"></i> Soy egresado
+        </a>
+        <a href="{% url 'empresas:registro' %}" class="inline-flex items-center gap-1.5 font-medium text-granate-700 hover:underline">
+          <i data-lucide="building-2" class="w-4 h-4"></i> Soy empresa
+        </a>
+      </div>
     </div>
 
-    <!-- 2 puertas -->
-    <div class="mt-10 grid gap-4 sm:grid-cols-2 max-w-2xl">
-      <a href="{% url 'usuarios:login' %}" class="rounded-xl border border-slate-200 bg-white p-5 hover:shadow-sm">
-        <p class="font-semibold text-slate-800">Soy egresado</p>
-        <p class="text-sm text-slate-500 mt-1">Ingresa con tu correo institucional y recibe convocatorias para tu carrera.</p>
-      </a>
-      <a href="{% url 'empresas:registro' %}" class="rounded-xl border border-slate-200 bg-white p-5 hover:shadow-sm">
-        <p class="font-semibold text-slate-800">Soy empresa</p>
-        <p class="text-sm text-slate-500 mt-1">Publica convocatorias y llega al talento agustino pertinente.</p>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- Métricas honestas (calculadas de datos reales) -->
-<section class="max-w-6xl mx-auto px-4 py-12">
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-    <div><p class="text-3xl font-bold text-granate-700">{{ metricas.convocatorias_activas }}</p>
-      <p class="text-sm text-slate-500">convocatorias activas</p></div>
-    <div><p class="text-3xl font-bold text-granate-700">{{ metricas.carreras_cubiertas }}</p>
-      <p class="text-sm text-slate-500">carreras cubiertas</p></div>
-    <div><p class="text-3xl font-bold text-granate-700">{{ metricas.indice_transparencia }}%</p>
-      <p class="text-sm text-slate-500">índice de transparencia</p></div>
-    <div><p class="text-3xl font-bold text-granate-700">{{ metricas.empresas_participantes }}</p>
-      <p class="text-sm text-slate-500">empresas participantes</p></div>
-  </div>
-</section>
-
-<!-- 3. Cómo funciona -->
-<section class="bg-slate-50">
-  <div class="max-w-6xl mx-auto px-4 py-14">
-    <h2 class="text-2xl font-bold text-slate-800">Cómo funciona</h2>
-    <div class="mt-8 grid gap-6 sm:grid-cols-3">
-      <div class="rounded-xl bg-white border border-slate-200 p-6">
-        <p class="text-granate-700 font-bold text-lg">1</p>
-        <p class="mt-2 font-semibold">Ingresa y completa tu perfil</p>
-        <p class="text-sm text-slate-500 mt-1">Tu carrera y estado académico definen qué te corresponde por ley y pertinencia.</p>
+    <!-- Hero visual: foto del campus + panel granate diagonal con sello UNSA -->
+    <div class="relative rounded-2xl overflow-hidden shadow-lg min-h-[300px]">
+      {% comment %}
+      ⚠️ FALTA IMAGEN: foto oficial del campus UNSA con el Misti de fondo (como en el mockup).
+      Cuando exista el archivo, colócalo en `static/img/hero-campus.jpg` y reemplaza el
+      placeholder de abajo por:
+        <img src="{% static 'img/hero-campus.jpg' %}" alt="Campus de la UNSA, Arequipa"
+             class="absolute inset-0 h-full w-full object-cover">
+      {% endcomment %}
+      <div class="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-400">
+        <div class="text-center">
+          <i data-lucide="mountain" class="w-10 h-10 mx-auto"></i>
+          <p class="mt-2 text-sm">Imagen del campus UNSA<br><span class="text-xs">(placeholder — falta la foto oficial)</span></p>
+        </div>
       </div>
-      <div class="rounded-xl bg-white border border-slate-200 p-6">
-        <p class="text-granate-700 font-bold text-lg">2</p>
-        <p class="mt-2 font-semibold">Recibe convocatorias pertinentes</p>
-        <p class="text-sm text-slate-500 mt-1">Solo lo que aplica a tu carrera y estado, ordenado por afinidad con tu perfil.</p>
-      </div>
-      <div class="rounded-xl bg-white border border-slate-200 p-6">
-        <p class="text-granate-700 font-bold text-lg">3</p>
-        <p class="mt-2 font-semibold">Un resumen semanal, sin saturación</p>
-        <p class="text-sm text-slate-500 mt-1">Un único correo consolidado con las oportunidades de la semana.</p>
+
+      <!-- Panel granate diagonal (esquina superior derecha) con el escudo + claim -->
+      <div class="absolute top-0 right-0 h-full w-3/5 bg-granate-700/95 text-white p-8 flex flex-col items-end justify-center text-right"
+           style="clip-path: polygon(28% 0, 100% 0, 100% 100%, 0% 100%);">
+        {% comment %} ⚠️ FALTA IMAGEN: escudo UNSA oficial (SVG/PNG). Sustituir el círculo «U»
+        por <img src="{% static 'img/escudo-unsa.svg' %}" alt="Escudo UNSA" class="h-16 w-16"> {% endcomment %}
+        <span aria-hidden="true"
+              class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/15 ring-4 ring-white/20 text-2xl font-bold">U</span>
+        <p class="mt-3 text-2xl font-bold tracking-wide">UNSA</p>
+        <p class="mt-1 text-white/85 text-sm max-w-[12rem]">Comprometidos con tu desarrollo profesional</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 4. Categorías (taxonomía real) -->
+<!-- ===== MÉTRICAS (reales) ===== -->
+<section class="max-w-6xl mx-auto px-4">
+  <div class="-mt-16 relative z-10 rounded-2xl bg-white shadow-xl ring-1 ring-slate-100 px-6 py-8">
+    <dl class="grid grid-cols-2 md:grid-cols-5 gap-6 text-center">
+      {% with m=metricas %}
+      <div>
+        <div class="mx-auto h-12 w-12 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center"><i data-lucide="briefcase"></i></div>
+        <dd class="mt-3 text-2xl font-bold text-granate-700">{{ m.convocatorias_activas }}</dd>
+        <dt class="text-xs text-slate-500">convocatorias activas</dt>
+      </div>
+      <div>
+        <div class="mx-auto h-12 w-12 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center"><i data-lucide="building-2"></i></div>
+        <dd class="mt-3 text-2xl font-bold text-granate-700">{{ m.empresas_participantes }}</dd>
+        <dt class="text-xs text-slate-500">empresas participantes</dt>
+      </div>
+      <div>
+        <div class="mx-auto h-12 w-12 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center"><i data-lucide="graduation-cap"></i></div>
+        <dd class="mt-3 text-2xl font-bold text-granate-700">{{ m.carreras_cubiertas }}</dd>
+        <dt class="text-xs text-slate-500">carreras cubiertas</dt>
+      </div>
+      <div>
+        <div class="mx-auto h-12 w-12 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center"><i data-lucide="file-check-2"></i></div>
+        <dd class="mt-3 text-2xl font-bold text-granate-700">{{ m.indice_transparencia }}%</dd>
+        <dt class="text-xs text-slate-500">con información transparente</dt>
+      </div>
+      <div>
+        <div class="mx-auto h-12 w-12 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center"><i data-lucide="line-chart"></i></div>
+        <dd class="mt-3 text-2xl font-bold text-granate-700">{{ m.vistas }}</dd>
+        <dt class="text-xs text-slate-500">visualizaciones</dt>
+      </div>
+      {% endwith %}
+    </dl>
+  </div>
+</section>
+
+<!-- ===== CATEGORÍAS (taxonomía real) ===== -->
 <section class="max-w-6xl mx-auto px-4 py-14">
-  <h2 class="text-2xl font-bold text-slate-800">Convocatorias por área</h2>
-  <div class="mt-8 grid gap-4 sm:grid-cols-3">
+  <div class="flex items-end justify-between gap-4">
+    <h2 class="text-2xl font-bold text-slate-800">Convocatorias por categoría profesional</h2>
+    <a href="{% url 'usuarios:login' %}" class="text-sm text-granate-700 font-medium hover:underline whitespace-nowrap">
+      Ver todas las categorías →
+    </a>
+  </div>
+  <div class="mt-7 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
     {% for c in categorias %}
-    <div class="rounded-xl border border-slate-200 p-5">
-      <p class="font-semibold text-slate-800">{{ c.area.nombre }}</p>
-      <p class="text-sm text-slate-500 mt-1">{{ c.conteo }} convocatoria{{ c.conteo|pluralize }} activa{{ c.conteo|pluralize }}</p>
-    </div>
+    <a href="{% url 'usuarios:login' %}"
+       class="rounded-xl border border-slate-200 p-4 text-center hover:shadow-sm hover:border-granate-200 transition">
+      <div class="mx-auto h-11 w-11 rounded-full bg-granate-100 text-granate-700 flex items-center justify-center">
+        <i data-lucide="{{ c.icono }}" class="w-5 h-5"></i>
+      </div>
+      <p class="mt-3 text-sm font-semibold text-slate-800 leading-snug">{{ c.label }}</p>
+      <p class="text-xs text-slate-400 mt-0.5">{{ c.conteo }} oportunidad{{ c.conteo|pluralize:"es" }}</p>
+    </a>
     {% endfor %}
   </div>
 </section>
 
-<!-- 5. Transparencia (semáforo) -->
-<section class="bg-granate-50">
+<!-- ===== CONVOCATORIAS DESTACADAS (reales) ===== -->
+{% if destacadas %}
+<section class="bg-slate-50 border-y border-slate-100">
   <div class="max-w-6xl mx-auto px-4 py-14">
-    <h2 class="text-2xl font-bold text-slate-800">Por qué confiar: transparencia</h2>
-    <p class="mt-2 text-slate-600 max-w-2xl">Cada convocatoria recibe un % de transparencia según
-      cuánta información clara ofrece (el sueldo visible es lo que más pesa). Lo mostramos con un semáforo:</p>
-    <div class="mt-6 grid gap-4 sm:grid-cols-3 max-w-3xl">
-      <div class="rounded-lg bg-white border border-slate-200 p-4"><span class="text-exito font-semibold">🟢 Alta (≥80%)</span>
-        <p class="text-sm text-slate-500 mt-1">Información completa, sueldo visible. Mayor difusión.</p></div>
-      <div class="rounded-lg bg-white border border-slate-200 p-4"><span class="text-alerta font-semibold">🟡 Media (50–79%)</span>
-        <p class="text-sm text-slate-500 mt-1">Aceptable, con sugerencia de completar.</p></div>
-      <div class="rounded-lg bg-white border border-slate-200 p-4"><span class="text-peligro font-semibold">🔴 Baja (&lt;50%)</span>
-        <p class="text-sm text-slate-500 mt-1">Poca información; menor visibilidad.</p></div>
+    <h2 class="text-2xl font-bold text-slate-800">Convocatorias destacadas</h2>
+    <div class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% for c in destacadas %}
+      <article class="rounded-xl bg-white border border-slate-200 p-5 flex flex-col hover:shadow-sm transition">
+        <div class="flex items-center gap-3">
+          {% if c.empresa.logo_url %}
+          <img src="{{ c.empresa.logo_url }}" alt="" class="h-9 w-9 rounded object-contain">
+          {% else %}
+          <span class="h-9 w-9 rounded bg-granate-100 text-granate-700 font-bold flex items-center justify-center">
+            {{ c.empresa.nombre_comercial|default:c.empresa.razon_social|slice:":1" }}
+          </span>
+          {% endif %}
+          <span class="text-sm text-slate-500 truncate">{{ c.empresa }}
+            {% if c.empresa.verificada %}<i data-lucide="badge-check" class="inline w-4 h-4 text-exito align-text-bottom"></i>{% endif %}
+          </span>
+        </div>
+        <h3 class="mt-3 font-semibold text-slate-800 leading-snug">{{ c.titulo }}</h3>
+        <div class="mt-3 flex flex-wrap gap-2 text-xs">
+          <span class="rounded-full bg-granate-50 text-granate-700 px-2 py-0.5">{{ c.get_tipo_display }}</span>
+          {% if c.modalidad %}<span class="rounded-full bg-slate-100 text-slate-600 px-2 py-0.5">{{ c.get_modalidad_display }}</span>{% endif %}
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+          <span class="inline-flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i>{{ c.ubicacion|default:"—" }}</span>
+          <span>Publicado hace {{ c.creada_en|timesince }}</span>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ===== TRANSPARENCIA ===== -->
+<section class="max-w-6xl mx-auto px-4 py-14">
+  <h2 class="text-2xl font-bold text-slate-800">Transparencia en cada convocatoria</h2>
+  <div class="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+    {% include "core/_valor.html" with icono="shield-check" titulo="Información verificada" texto="Validamos los datos básicos antes de su publicación." %}
+    {% include "core/_valor.html" with icono="file-text" titulo="Datos completos" texto="Priorizamos convocatorias con información clara y detallada." %}
+    {% include "core/_valor.html" with icono="target" titulo="Categorización pertinente" texto="Organizamos las oportunidades por áreas relacionadas." %}
+    {% include "core/_valor.html" with icono="megaphone" titulo="Difusión responsable" texto="Controlamos la frecuencia para evitar saturación informativa." %}
+    {% include "core/_valor.html" with icono="lock" titulo="Datos institucionales" texto="Tu información está protegida y no se comparte con terceros." %}
+  </div>
+  <!-- Semáforo explicado -->
+  <div class="mt-8 grid gap-3 sm:grid-cols-3 max-w-3xl">
+    <div class="rounded-lg bg-exito/5 border border-exito/20 p-3 text-sm"><span class="font-semibold text-exito">🟢 Alta (≥80%)</span> · mayor difusión</div>
+    <div class="rounded-lg bg-alerta/5 border border-alerta/20 p-3 text-sm"><span class="font-semibold text-alerta">🟡 Media (50–79%)</span> · difusión normal</div>
+    <div class="rounded-lg bg-peligro/5 border border-peligro/20 p-3 text-sm"><span class="font-semibold text-peligro">🔴 Baja (&lt;50%)</span> · menor visibilidad</div>
+  </div>
+</section>
+
+<!-- ===== BENEFICIOS + RESUMEN SEMANAL ===== -->
+<section class="max-w-6xl mx-auto px-4 pb-14">
+  <div class="grid gap-8 lg:grid-cols-2">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-800">Beneficios para ti</h2>
+      <div class="mt-6 space-y-5">
+        {% include "core/_beneficio.html" with icono="sparkles" titulo="Información más relevante" texto="Recibe oportunidades relacionadas a tu formación y preferencias." %}
+        {% include "core/_beneficio.html" with icono="clock" titulo="Ahorro de tiempo" texto="Resúmenes periódicos y menos correos innecesarios." %}
+        {% include "core/_beneficio.html" with icono="building" titulo="Acompañamiento institucional" texto="Un servicio de la UNSA pensado para tu desarrollo profesional." %}
+      </div>
+    </div>
+
+    <!-- Panel granate -->
+    <div class="rounded-2xl bg-granate-700 text-white p-8">
+      <div class="flex items-center gap-3">
+        <i data-lucide="calendar-days" class="w-6 h-6"></i>
+        <h3 class="text-xl font-bold">Resumen semanal de oportunidades</h3>
+      </div>
+      <p class="mt-3 text-white/80 text-sm">
+        Cada semana te acercamos las oportunidades más relevantes según tu área de interés.
+      </p>
+      <dl class="mt-6 grid grid-cols-3 gap-4 text-center">
+        <div><dd class="text-2xl font-bold">{{ resumen.nuevas }}</dd><dt class="text-xs text-white/70">nuevas convocatorias</dt></div>
+        <div><dd class="text-2xl font-bold">{{ resumen.empresas }}</dd><dt class="text-xs text-white/70">empresas publicaron</dt></div>
+        <div><dd class="text-2xl font-bold">{{ resumen.areas }}</dd><dt class="text-xs text-white/70">áreas profesionales</dt></div>
+      </dl>
+      <a href="{% url 'usuarios:login' %}"
+         class="mt-6 inline-flex items-center gap-2 rounded-lg bg-white text-granate-700 px-5 py-2.5 font-medium hover:bg-white/90">
+        Ver resumen semanal <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </a>
     </div>
   </div>
 </section>
 
-<!-- 7. CTA final -->
-<section class="max-w-6xl mx-auto px-4 py-16 text-center">
-  <h2 class="text-2xl font-bold text-slate-800">Empieza hoy</h2>
-  <div class="mt-6 flex flex-wrap gap-3 justify-center">
-    <a href="{% url 'usuarios:login' %}" class="rounded-lg bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800">Soy egresado</a>
-    <a href="{% url 'empresas:registro' %}" class="rounded-lg border border-granate-700 px-6 py-3 font-medium text-granate-700 hover:bg-granate-100">Soy empresa</a>
+<!-- ===== CTA CORREO ===== -->
+<section class="bg-granate-50 border-t border-granate-100">
+  <div class="max-w-6xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <span class="h-12 w-12 rounded-full bg-white text-granate-700 flex items-center justify-center shadow-sm"><i data-lucide="mail"></i></span>
+      <div>
+        <p class="font-semibold text-slate-800">Recibe un resumen semanal en tu correo</p>
+        <p class="text-sm text-slate-500">Selecciona tus áreas de interés y recibe oportunidades relevantes, sin saturación.</p>
+      </div>
+    </div>
+    <a href="{% url 'usuarios:login' %}"
+       class="inline-flex items-center gap-2 rounded-lg bg-granate-700 px-6 py-3 font-medium text-white hover:bg-granate-800 whitespace-nowrap">
+      Configurar mis preferencias <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+    </a>
   </div>
 </section>
 {% endblock %}

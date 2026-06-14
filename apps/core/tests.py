@@ -124,13 +124,18 @@ class LandingTests(TestCase):
         self.assertContains(resp, "Soy empresa")
 
     def test_ca3__categorias_desde_taxonomia(self):
-        """CA-3: las categorías provienen de la taxonomía real (3 áreas)."""
-        from apps.core.services import categorias_con_conteo
+        """CA-3: las categorías provienen de la taxonomía real con conteos reales."""
+        from apps.core.services import categorias_con_conteo, categorias_profesionales
 
-        cats = categorias_con_conteo()
-        self.assertEqual(len(cats), 3)
+        # Helper a nivel de área (3 áreas).
+        self.assertEqual(len(categorias_con_conteo()), 3)
+
+        # Tiles de la landing: facultades reales con ≥1 convocatoria activa.
+        tiles = categorias_profesionales()
+        labels = {t["label"] for t in tiles}
+        self.assertIn("Producción y Servicios", labels)  # facultad de Ing. de Sistemas (seed)
         resp = self.client.get(reverse("core:home"))
-        self.assertContains(resp, "Ingenierías y Ciencias Básicas")
+        self.assertContains(resp, "Producción y Servicios")
 
     def test_ca4__semaforo_explicado(self):
         resp = self.client.get(reverse("core:home"))

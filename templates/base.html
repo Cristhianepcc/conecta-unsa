@@ -33,6 +33,8 @@
   </script>
   <!-- Alpine.js (CDN) -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Lucide icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   {% block extra_head %}{% endblock %}
 </head>
@@ -44,22 +46,37 @@
   </a>
 
   {% block header %}
-  <header class="bg-granate-700 text-white">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-      <a href="{% url 'core:home' %}" class="flex items-center gap-2 font-semibold text-lg">
-        <span aria-hidden="true" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/15">U</span>
-        <span><span class="font-medium">CONECTA</span> UNSA</span>
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center gap-4">
+      <!-- Lockup: escudo UNSA (placeholder) + wordmark CONECTA UNSA -->
+      {% comment %} ⚠️ FALTA IMAGEN: escudo UNSA oficial (SVG/PNG). Colocar en
+      static/img/escudo-unsa.svg y reemplazar el círculo «U» por:
+      <img src="{% static 'img/escudo-unsa.svg' %}" alt="Escudo UNSA" class="h-10 w-10"> {% endcomment %}
+      <a href="{% url 'core:home' %}" class="flex items-center gap-3">
+        <span aria-hidden="true"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-granate-700 text-white font-bold">U</span>
+        <span class="hidden sm:block leading-tight border-l border-slate-200 pl-3">
+          <span class="block text-[15px] font-bold tracking-tight text-slate-800">
+            CONECTA <span class="text-granate-700">UNSA</span>
+          </span>
+          <span class="block text-[11px] text-slate-400">Comunicamos oportunidades, conectamos futuro.</span>
+        </span>
       </a>
-      <nav class="ml-auto flex items-center gap-4 text-sm" aria-label="Principal">
+
+      <nav class="ml-auto flex items-center gap-1 sm:gap-2 text-sm" aria-label="Principal">
         {% block nav %}
           {% if user.is_authenticated %}
             {% include "notificaciones/_campana.html" %}
-            <a href="{% url 'usuarios:post_login' %}" class="hover:underline">Mi panel</a>
-            <a href="{% url 'usuarios:logout' %}" class="hover:underline">Salir</a>
+            <a href="{% url 'usuarios:post_login' %}" class="px-3 py-2 rounded-lg text-slate-600 hover:text-granate-700 hover:bg-granate-50">Mi panel</a>
+            <a href="{% url 'usuarios:logout' %}" class="px-3 py-2 rounded-lg text-slate-600 hover:text-granate-700 hover:bg-granate-50">Salir</a>
           {% else %}
-            <a href="{% url 'usuarios:login' %}" class="hover:underline">Iniciar sesión</a>
-            <a href="{% url 'empresas:registro' %}"
-               class="rounded-lg bg-white/15 px-3 py-1.5 hover:bg-white/25">Publicar convocatoria</a>
+            <a href="{% url 'core:home' %}" class="hidden md:inline-block px-3 py-2 rounded-lg text-granate-700 font-medium">Inicio</a>
+            <a href="{% url 'core:como_funciona' %}" class="hidden md:inline-block px-3 py-2 rounded-lg text-slate-600 hover:text-granate-700 hover:bg-granate-50">Sobre CONECTA UNSA</a>
+            <a href="{% url 'core:como_funciona' %}" class="hidden md:inline-block px-3 py-2 rounded-lg text-slate-600 hover:text-granate-700 hover:bg-granate-50">Ayuda</a>
+            <a href="{% url 'usuarios:login' %}"
+               class="inline-flex items-center gap-2 rounded-lg bg-granate-700 px-4 py-2 font-medium text-white hover:bg-granate-800">
+              <i data-lucide="log-in" class="w-4 h-4"></i> Iniciar sesión
+            </a>
           {% endif %}
         {% endblock %}
       </nav>
@@ -87,27 +104,52 @@
 
   {% block footer %}
   <footer class="bg-granate-900 text-white/80 mt-12">
-    <div class="max-w-6xl mx-auto px-4 py-8 text-sm grid gap-6 sm:grid-cols-3">
-      <div>
-        <p class="font-semibold text-white">CONECTA UNSA</p>
-        <p class="mt-1">Bolsa de Trabajo · Universidad Nacional de San Agustín de Arequipa</p>
-        <p class="mt-2 text-white/60">Software público · Sin IA · Reglas transparentes y auditables.</p>
+    <div class="max-w-6xl mx-auto px-4 py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+      <div class="lg:col-span-2">
+        <div class="flex items-center gap-3">
+          {# ⚠️ FALTA IMAGEN: escudo UNSA oficial (versión monocroma/blanca para el footer). #}
+          <span aria-hidden="true" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white font-bold">U</span>
+          <span class="font-bold text-white text-base">CONECTA <span class="text-white">UNSA</span></span>
+        </div>
+        <p class="mt-3 max-w-sm text-white/70">
+          Servicio institucional de comunicación y acceso a oportunidades laborales para
+          estudiantes y egresados de la Universidad Nacional de San Agustín de Arequipa.
+        </p>
+        <p class="mt-3 text-white/50 text-xs">Software público · Sin IA · Reglas transparentes y auditables.</p>
       </div>
-      <nav aria-label="Institucional">
-        <p class="text-white font-medium">Institucional</p>
-        <ul class="mt-2 space-y-1">
-          <li><a href="{% url 'core:como_funciona' %}" class="hover:underline">Cómo funciona</a></li>
-          <li><a href="{% url 'core:privacidad' %}" class="hover:underline">Política de Privacidad</a></li>
-          <li><a href="{% url 'core:terminos' %}" class="hover:underline">Términos y condiciones</a></li>
+      <nav aria-label="Enlaces">
+        <p class="text-white font-semibold">Enlaces</p>
+        <ul class="mt-3 space-y-2">
+          <li><a href="{% url 'core:home' %}" class="hover:text-white">Inicio</a></li>
+          <li><a href="{% url 'usuarios:login' %}" class="hover:text-white">Convocatorias</a></li>
+          <li><a href="{% url 'core:como_funciona' %}" class="hover:text-white">Sobre CONECTA UNSA</a></li>
+          <li><a href="{% url 'core:como_funciona' %}" class="hover:text-white">Ayuda</a></li>
         </ul>
       </nav>
-      <div>
-        <p class="text-white font-medium">Contacto</p>
-        <p class="mt-2 text-white/70">Oficina de Empleabilidad — Bolsa de Trabajo UNSA</p>
-        <p class="text-white/70">empleabilidad@unsa.edu.pe</p>
+      <nav aria-label="Información">
+        <p class="text-white font-semibold">Información</p>
+        <ul class="mt-3 space-y-2">
+          <li><a href="{% url 'core:privacidad' %}" class="hover:text-white">Política de privacidad</a></li>
+          <li><a href="{% url 'core:terminos' %}" class="hover:text-white">Términos de uso</a></li>
+          <li><a href="{% url 'core:como_funciona' %}" class="hover:text-white">Transparencia del servicio</a></li>
+          <li><a href="mailto:empleabilidad@unsa.edu.pe" class="hover:text-white">Contacto institucional</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="border-t border-white/10">
+      <div class="max-w-6xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
+        <p>© 2026 Universidad Nacional de San Agustín de Arequipa. Todos los derechos reservados.</p>
+        <div class="flex items-center gap-3" aria-label="Redes sociales">
+          <i data-lucide="facebook" class="w-4 h-4"></i>
+          <i data-lucide="instagram" class="w-4 h-4"></i>
+          <i data-lucide="youtube" class="w-4 h-4"></i>
+          <i data-lucide="linkedin" class="w-4 h-4"></i>
+        </div>
       </div>
     </div>
   </footer>
   {% endblock %}
+
+  <script>window.addEventListener('load', () => window.lucide && lucide.createIcons());</script>
 </body>
 </html>
