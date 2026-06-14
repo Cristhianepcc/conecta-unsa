@@ -65,7 +65,7 @@ def demo_login(request, rol):
         talento = asegurar_perfil_talento(user)
         if not talento.carrera_id:
             talento.carrera = (
-                Carrera.objects.filter(nombre="Ingeniería de Sistemas").first()
+                Carrera.objects.filter(nombre="Ingeniería Industrial").first()
                 or Carrera.objects.first()
             )
             talento.estado_academico = "egresado"

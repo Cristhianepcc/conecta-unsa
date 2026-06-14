@@ -46,16 +46,30 @@ python manage.py runserver
 
 Contraseña común: **`demo12345`**
 
-| Usuario | Rol | Acceso en la demo | Destino |
-|---|---|---|---|
-| `demo_egresado` | Estudiante / Egresado | Login → "Soy de la UNSA" → botón **Egresado** | Dashboard del egresado (feed) |
-| `demo_admin` | Administrativo | Login → "Soy de la UNSA" → botón **Administrador** | Panel administrativo (bandeja) |
-| `demo_empresa` | Empresa (reclutador) | Login → "Soy empresa" → `demo_empresa` / `demo12345` | Dashboard de empresa |
+| Usuario | Persona | Rol | Acceso en la demo | Destino |
+|---|---|---|---|---|
+| `demo_egresado` | María Fernanda Quispe Mamani | Estudiante / Egresado | Login → "Soy de la UNSA" → botón **Egresado** | Dashboard del egresado (feed) |
+| `demo_admin` | Lucía Herrera Paredes | Administrativo | Login → "Soy de la UNSA" → botón **Administrador** | Panel administrativo (bandeja) |
+| `demo_empresa` | Carlos Rivera Núñez | Empresa (reclutador) | Login → "Soy empresa" → `demo_empresa` / `demo12345` | Dashboard de empresa |
 
-Detalles:
-- `demo_egresado` ya tiene **perfil completo** (carrera Ing. de Sistemas, estado egresado) → entra directo al feed con recomendaciones.
-- `demo_admin` está en la **AdminAllowlist** → el sistema lo reconoce como administrativo.
-- `demo_empresa` tiene una **empresa verificada** (Empresa Demo S.A.C.) → puede publicar convocatorias.
+### Perfil de `demo_egresado` (para lucir el matching)
+- **Carrera:** Ingeniería Industrial · **Estado:** Egresado · **Perfil completo**.
+- **Preferencias:** tipos preferidos *Trainee / Empleo / Práctica profesional*; frecuencia semanal;
+  carrera afín de interés: *Administración*.
+- **Credenciales:**
+  - 🟢 Inglés B2 — Centro de Idiomas UNSA *(verificado)*
+  - 🟢 Tesis: Optimización de la línea de producción (2025) *(verificado)*
+  - 🟢 Prácticas en planta — sector industrial *(verificado)*
+  - ⚪ Delegada de Ingeniería Industrial (2023) *(autodeclarado)*
+  - ⚪ Voluntariado TECHO (2024) *(autodeclarado)*
+
+### Perfil de `demo_admin`
+- En la **AdminAllowlist** (`demo.admin@unsa.edu.pe`) → el sistema lo reconoce como administrativo.
+
+### Perfil de `demo_empresa`
+- Empresa **verificada**: *Soluciones Industriales del Sur S.A.C. (SISUR)* — RUC 20100000100,
+  CIIU, dirección en el Parque Industrial APIMA, web y descripción.
+- Reclutador: Carlos Rivera Núñez · Jefe de RR.HH. · `rrhh@sisur.demo.pe`.
 
 > Empresas de muestra adicionales: `empresa_011` … `empresa_018` (también `demo12345`).
 
