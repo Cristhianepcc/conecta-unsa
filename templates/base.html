@@ -36,6 +36,30 @@
   <!-- Lucide icons (CDN) -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Campos de formulario: estilo único, accesible (NFR-A11Y). Fuente de verdad para .campo -->
+  <style>
+    [x-cloak] { display: none !important; }
+    .campo { display: block; }
+    .campo label { font-size: .85rem; font-weight: 500; color: #334155; display: block; }
+    .campo input:not([type="checkbox"]):not([type="radio"]),
+    .campo select,
+    .campo textarea {
+      width: 100%; border: 1px solid #cbd5e1; border-radius: .5rem;
+      padding: .55rem .75rem; margin-top: .25rem; background: #fff; color: #1e293b;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .campo input:not([type="checkbox"]):not([type="radio"]):hover,
+    .campo select:hover, .campo textarea:hover { border-color: #94a3b8; }
+    .campo input:focus-visible, .campo select:focus-visible, .campo textarea:focus-visible {
+      outline: none; border-color: #7A1F2C; box-shadow: 0 0 0 3px rgba(122, 31, 44, .18);
+    }
+    .campo input[type="checkbox"], .campo input[type="radio"] {
+      width: 1.05rem; height: 1.05rem; accent-color: #7A1F2C; flex: none; cursor: pointer;
+    }
+    .campo input[aria-invalid="true"], .campo .errorlist + input { border-color: #C0392B; }
+    .errorlist { color: #C0392B; font-size: .75rem; list-style: none; padding: 0; margin: .25rem 0 0; }
+  </style>
+
   {% block extra_head %}{% endblock %}
 </head>
 <body class="min-h-screen bg-white text-slate-800 font-sans antialiased flex flex-col">
@@ -85,12 +109,15 @@
   {% if messages %}
   <div class="max-w-6xl mx-auto px-4 w-full mt-4" role="status" aria-live="polite">
     {% for message in messages %}
-    <div class="mb-2 rounded-lg border px-4 py-3 text-sm
+    <div data-flash class="mb-2 flex items-start gap-3 rounded-lg border px-4 py-3 text-sm transition-opacity duration-500
                 {% if message.tags == 'error' %}border-peligro/30 bg-peligro/5 text-peligro
                 {% elif message.tags == 'warning' %}border-alerta/30 bg-alerta/5 text-alerta
                 {% elif message.tags == 'success' %}border-exito/30 bg-exito/5 text-exito
                 {% else %}border-info/30 bg-info/5 text-info{% endif %}">
-      {{ message }}
+      <span class="flex-1">{{ message }}</span>
+      <button type="button" data-flash-close aria-label="Cerrar aviso" class="shrink-0 opacity-60 hover:opacity-100">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
     </div>
     {% endfor %}
   </div>
@@ -150,5 +177,17 @@
   {% endblock %}
 
   <script>window.addEventListener('load', () => window.lucide && lucide.createIcons());</script>
+  <script>
+    (function () {
+      function dismiss(el) {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 500);
+      }
+      document.querySelectorAll('[data-flash]').forEach((el) => {
+        el.querySelector('[data-flash-close]')?.addEventListener('click', () => dismiss(el));
+        setTimeout(() => dismiss(el), 5000);
+      });
+    })();
+  </script>
 </body>
 </html>

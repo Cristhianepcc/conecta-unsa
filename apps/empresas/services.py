@@ -55,29 +55,64 @@ def empresa_de(usuario) -> Empresa | None:
 
 
 def metricas_empresa(empresa: Empresa) -> dict:
-    """Métricas propias calculadas de datos reales (CA-5)."""
+    """Métricas propias calculadas de datos reales (CA-5).
+
+    `vistas` y `guardadas` son dicts {total, delta} donde `delta` es la variación %
+    de los últimos 7 días frente a los 7 anteriores (None si no hay base de comparación).
+    """
+    from datetime import timedelta
+
     from django.db.models import Q
     from django.utils import timezone
 
     from apps.convocatorias.models import (
         ESTADO_PUBLICADA,
+        INTERACCION_GUARDADA,
         INTERACCION_VISTA,
         InteraccionConvocatoria,
     )
     from apps.matching.services import alcance
 
     hoy = timezone.localdate()
+    sem_ini = hoy - timedelta(days=7)
+    sem_prev = hoy - timedelta(days=14)
     convs = empresa.convocatorias.all()
     activas = convs.filter(estado=ESTADO_PUBLICADA).filter(
         Q(fecha_limite__gte=hoy) | Q(fecha_limite__isnull=True)
     )
-    vistas = InteraccionConvocatoria.objects.filter(
-        convocatoria__empresa=empresa, tipo=INTERACCION_VISTA
-    ).count()
+    inter = InteraccionConvocatoria.objects.filter(convocatoria__empresa=empresa)
+
+    def _con_tendencia(tipo: str) -> dict:
+        qs = inter.filter(tipo=tipo)
+        ult = qs.filter(creado_en__date__gte=sem_ini).count()
+        prev = qs.filter(
+            creado_en__date__gte=sem_prev, creado_en__date__lt=sem_ini
+        ).count()
+        delta = round((ult - prev) / prev * 100) if prev else None
+        return {"total": qs.count(), "delta": delta}
+
     return {
         "activas": activas.count(),
         "publicadas": convs.filter(estado=ESTADO_PUBLICADA).count(),
         "total": convs.count(),
         "alcance": sum(alcance(c) for c in activas),
-        "vistas": vistas,
+        "vistas": _con_tendencia(INTERACCION_VISTA),
+        "guardadas": _con_tendencia(INTERACCION_GUARDADA),
     }
+
+
+def completitud_empresa(empresa: Empresa) -> dict:
+    """Checklist de completitud del perfil público de la empresa.
+
+    Devuelve {pct, items: [{label, ok}]} para el panel "Estado de tu empresa".
+    """
+    items = [
+        {"label": "Descripción de la empresa", "ok": bool(empresa.descripcion.strip())},
+        {"label": "Logo", "ok": bool(empresa.logo_url.strip())},
+        {"label": "Sitio web o LinkedIn", "ok": bool(empresa.web.strip() or empresa.linkedin.strip())},
+        {"label": "Teléfono de contacto", "ok": bool(empresa.telefono.strip())},
+        {"label": "Dirección", "ok": bool(empresa.direccion.strip())},
+    ]
+    completos = sum(1 for i in items if i["ok"])
+    pct = round(completos / len(items) * 100) if items else 0
+    return {"pct": pct, "items": items, "completos": completos, "total": len(items)}

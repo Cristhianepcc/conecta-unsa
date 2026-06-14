@@ -1,0 +1,12 @@
+{% comment %}Fecha límite con urgencia. Contexto: fecha, dias (días restantes o None).{% endcomment %}
+{% if dias is None %}
+<span class="text-slate-400">Sin fecha</span>
+{% elif dias < 0 %}
+<span class="inline-flex items-center gap-1 text-peligro font-medium"><i data-lucide="calendar-x" class="w-3.5 h-3.5"></i> Vencida</span>
+{% elif dias == 0 %}
+<span class="inline-flex items-center gap-1 text-peligro font-medium"><i data-lucide="alarm-clock" class="w-3.5 h-3.5"></i> Vence hoy</span>
+{% elif dias <= 3 %}
+<span class="inline-flex items-center gap-1 text-alerta font-medium"><i data-lucide="alarm-clock" class="w-3.5 h-3.5"></i> Vence en {{ dias }} día{{ dias|pluralize }}</span>
+{% else %}
+<span class="inline-flex items-center gap-1 text-slate-600"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> {{ fecha }}</span>
+{% endif %}

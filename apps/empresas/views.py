@@ -8,11 +8,20 @@ from apps.convocatorias.models import (
     ESTADO_OBSERVADA,
     Convocatoria,
 )
-from apps.convocatorias.services import faltantes_nivel_1, validar_legal
+from apps.convocatorias.services import (
+    desglose_transparencia,
+    faltantes_nivel_1,
+    validar_legal,
+)
 from apps.usuarios.decorators import empresa_required
 
 from .forms import EmpresaForm, ReclutadorForm
-from .services import empresa_de, metricas_empresa, registrar_empresa
+from .services import (
+    completitud_empresa,
+    empresa_de,
+    metricas_empresa,
+    registrar_empresa,
+)
 
 
 @empresa_required
@@ -27,9 +36,46 @@ def dashboard(request):
         return render(request, "empresas/dashboard.html", contexto)
 
     contexto["puede_publicar"] = empresa.puede_publicar
+    contexto["completitud"] = completitud_empresa(empresa)
     if empresa.puede_publicar:
+        from django.utils import timezone
+
+        hoy = timezone.localdate()
         contexto["metricas"] = metricas_empresa(empresa)
-        contexto["convocatorias"] = empresa.convocatorias.all()
+        convs = list(empresa.convocatorias.all())
+        conteos = {"todas": len(convs)}
+        suma_pct = 0
+        agg = {}
+        for c in convs:
+            desg = desglose_transparencia(c)
+            # Coaching de transparencia: qué falta y cuánto sumaría (CA-6).
+            c.faltan_transp = [i for i in desg if not i["presente"]]
+            # Urgencia de la fecha límite (días restantes; None si no tiene).
+            c.dias_restantes = (c.fecha_limite - hoy).days if c.fecha_limite else None
+            conteos[c.estado] = conteos.get(c.estado, 0) + 1
+            suma_pct += c.transparencia_pct
+            # Agregado real de transparencia para el panel lateral.
+            for item in desg:
+                a = agg.setdefault(
+                    item["criterio"],
+                    {"etiqueta": item["etiqueta"], "puntos": item["puntos"], "cumplen": 0},
+                )
+                if item["presente"]:
+                    a["cumplen"] += 1
+        contexto["convocatorias"] = convs
+        contexto["conteos"] = conteos
+        if convs:
+            criterios = sorted(
+                agg.values(), key=lambda a: (a["cumplen"] / len(convs), -a["puntos"])
+            )
+            for a in criterios:
+                a["total"] = len(convs)
+                a["falta"] = len(convs) - a["cumplen"]
+            contexto["transparencia_resumen"] = {
+                "promedio": round(suma_pct / len(convs)),
+                "total": len(convs),
+                "criterios": criterios[:4],
+            }
     return render(request, "empresas/dashboard.html", contexto)
 
 

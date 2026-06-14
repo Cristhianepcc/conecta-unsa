@@ -1,0 +1,11 @@
+{% comment %}Chip de tendencia 7 días. Contexto: delta (int o None).{% endcomment %}
+{% if delta is not None %}
+<span class="inline-flex items-center gap-0.5 text-xs font-medium
+  {% if delta > 0 %}text-exito{% elif delta < 0 %}text-peligro{% else %}text-slate-400{% endif %}"
+  title="Variación respecto a los 7 días previos">
+  <i data-lucide="{% if delta > 0 %}trending-up{% elif delta < 0 %}trending-down{% else %}minus{% endif %}" class="w-3 h-3"></i>
+  {% if delta > 0 %}+{% endif %}{{ delta }}%
+</span>
+{% else %}
+<span class="text-xs text-slate-300">7 días</span>
+{% endif %}
