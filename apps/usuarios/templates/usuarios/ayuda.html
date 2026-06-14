@@ -1,0 +1,72 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Ayuda — CONECTA UNSA{% endblock %}
+{% block dashboard_title %}Ayuda{% endblock %}
+{% block sidebar_items %}{% include "usuarios/_sidebar_egresado.html" with seccion="ayuda" %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-3xl">
+
+  <!-- ===== Guía rápida ===== -->
+  <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+      <i data-lucide="rocket" class="w-4 h-4 text-granate-700"></i> Cómo aprovechar CONECTA UNSA
+    </h2>
+    <p class="mt-2 text-sm text-slate-500">Cuatro pasos para sacarle el máximo a tu cuenta.</p>
+    <ol class="mt-5 space-y-4">
+      {% for paso in pasos %}
+      <li class="flex items-start gap-3">
+        <span class="shrink-0 h-7 w-7 rounded-full bg-granate-50 text-granate-700 grid place-items-center text-sm font-bold">{{ forloop.counter }}</span>
+        <div>
+          <p class="text-sm font-semibold text-slate-800">{{ paso.titulo }}</p>
+          <p class="text-sm text-slate-600">{{ paso.texto }}</p>
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    <div class="mt-5 flex flex-wrap gap-2">
+      <a href="{% url 'usuarios:perfil' %}" class="inline-flex items-center gap-1.5 rounded-xl bg-granate-700 px-4 py-2 text-sm font-semibold text-white hover:bg-granate-800">
+        <i data-lucide="user-cog" class="w-4 h-4"></i> Completar mi perfil
+      </a>
+      <a href="{% url 'usuarios:dashboard' %}" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Ver oportunidades
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== Preguntas frecuentes ===== -->
+  <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" x-data="{ abierta: 0 }">
+    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+      <i data-lucide="help-circle" class="w-4 h-4 text-granate-700"></i> Preguntas frecuentes
+    </h2>
+    <div class="mt-4 divide-y divide-slate-100">
+      {% for faq in faqs %}
+      <div class="py-1">
+        <button type="button" @click="abierta = abierta === {{ forloop.counter }} ? null : {{ forloop.counter }}"
+                class="flex w-full items-center justify-between gap-3 py-3 text-left"
+                :aria-expanded="abierta === {{ forloop.counter }}">
+          <span class="text-sm font-medium text-slate-800">{{ faq.q }}</span>
+          <i data-lucide="chevron-down" class="w-4 h-4 shrink-0 text-slate-400 transition-transform"
+             :class="abierta === {{ forloop.counter }} && 'rotate-180'"></i>
+        </button>
+        <div x-show="abierta === {{ forloop.counter }}" x-transition x-cloak>
+          <p class="pb-4 pr-7 text-sm text-slate-600 leading-relaxed">{{ faq.a }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ===== Soporte ===== -->
+  <section class="mt-6 rounded-2xl border border-granate-100 bg-granate-50/50 p-5 flex items-start gap-3">
+    <span class="shrink-0 h-9 w-9 rounded-full bg-white text-granate-700 grid place-items-center">
+      <i data-lucide="life-buoy" class="w-4 h-4"></i>
+    </span>
+    <div>
+      <p class="text-sm font-semibold text-slate-800">¿Necesitas más ayuda?</p>
+      <p class="text-sm text-slate-600">Escríbenos a
+        <a href="mailto:bolsadetrabajo@unsa.edu.pe" class="font-medium text-granate-700 underline">bolsadetrabajo@unsa.edu.pe</a>.
+        El equipo de la Bolsa de Trabajo UNSA te responderá.</p>
+    </div>
+  </section>
+</div>
+{% endblock %}

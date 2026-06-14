@@ -133,3 +133,37 @@ class InAppTests(BaseNotif):
         self.client.force_login(user)
         self.client.get("/notificaciones/")
         self.assertEqual(services.no_leidas(user), 0)
+
+
+class MensajesInstitucionalesTests(BaseNotif):
+    """Bandeja institucional: canal dedicado a comunicados oficiales (P1)."""
+
+    def _egresado(self, username="eg", estado="egresado"):
+        user = User.objects.create_user(username, email=f"{username}@gmail.com", password="x")
+        talento, _ = PerfilTalento.objects.get_or_create(usuario=user)
+        talento.carrera = self.sistemas
+        talento.estado_academico = estado
+        talento.save()
+        return user
+
+    def test__solo_muestra_los_institucionales(self):
+        """La bandeja institucional solo lista mensajes de tipo general; ignora operativos."""
+        user = self._egresado()
+        services.notificar(user, "Comunicado oficial UNSA", tipo="general")
+        services.notificar(user, "Nueva convocatoria para ti", tipo="nueva_pertinente")
+        self.client.force_login(user)
+        resp = self.client.get("/notificaciones/institucionales/")
+        self.assertEqual(resp.status_code, 200)
+        # La bandeja solo contiene comunicados (tipo general); ignora los operativos.
+        mensajes = resp.context["mensajes"]
+        self.assertEqual([m.mensaje for m in mensajes], ["Comunicado oficial UNSA"])
+
+    def test__abrir_marca_leidos_los_institucionales(self):
+        """Al abrir la bandeja, los comunicados quedan marcados como leídos."""
+        user = self._egresado()
+        services.notificar(user, "Comunicado oficial UNSA", tipo="general")
+        self.client.force_login(user)
+        self.client.get("/notificaciones/institucionales/")
+        self.assertEqual(
+            Notificacion.objects.filter(usuario=user, tipo="general", leido=False).count(), 0
+        )

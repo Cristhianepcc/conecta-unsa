@@ -272,6 +272,42 @@ def historial(request):
     )
 
 
+@egresado_required
+def ayuda(request):
+    """Centro de ayuda del egresado: guía rápida + preguntas frecuentes."""
+    pasos = [
+        {"titulo": "Completa tu perfil",
+         "texto": "Carrera, estado académico y credenciales: mientras más completo, mejores recomendaciones recibes."},
+        {"titulo": "Revisa tus oportunidades",
+         "texto": "El Panel ordena las convocatorias por afinidad con tu perfil y te explica el porqué de cada una."},
+        {"titulo": "Guarda y postula",
+         "texto": "Guarda las que te interesen y postula directo al medio de la empresa (enlace o correo)."},
+        {"titulo": "Ajusta tus preferencias",
+         "texto": "Marca tipos preferidos o silencia los que no te interesan y elige cada cuánto quieres tu resumen."},
+    ]
+    faqs = [
+        {"q": "¿De dónde salen las convocatorias que veo?",
+         "a": "Solo ves convocatorias verificadas y para las que calificas: el sistema filtra por ley y por tu carrera, "
+              "y las ordena por afinidad. No hay publicidad ni ofertas sin revisar."},
+        {"q": "¿Qué significa el % de compatibilidad?",
+         "a": "Es una estimación explicable (sin IA) basada en tu carrera, estado y credenciales frente a lo que pide la "
+              "convocatoria. Los chips de «¿por qué te la recomendamos?» muestran qué pesó."},
+        {"q": "¿Qué es el semáforo de transparencia?",
+         "a": "Mide cuánta información útil publicó la empresa (salario, modalidad, ubicación). Verde = alta transparencia; "
+              "rojo = información mínima. Te ayuda a decidir con confianza."},
+        {"q": "¿Cómo postulo a una oportunidad?",
+         "a": "CONECTA no gestiona la selección. Al pulsar «Postular» te llevamos al medio que indicó la empresa: su sitio "
+              "web o un correo con el asunto ya preparado para que adjuntes tu CV."},
+        {"q": "¿Por qué no me llegan correos / me llegan muchos?",
+         "a": "El resumen es un único correo consolidado. Ajusta la frecuencia (o desactívalo) en Mi perfil › Preferencias, "
+              "y silencia ahí los tipos que no quieras recibir."},
+        {"q": "¿Mis datos académicos son correctos y quién los ve?",
+         "a": "Carrera y estado provienen del padrón institucional (solo lectura). Tu credencial pública solo muestra lo que "
+              "tú decides compartir mediante su enlace verificable."},
+    ]
+    return render(request, "usuarios/ayuda.html", {"pasos": pasos, "faqs": faqs})
+
+
 # --- 07 Perfil de talento y credenciales ------------------------------------
 @egresado_required
 def perfil(request):

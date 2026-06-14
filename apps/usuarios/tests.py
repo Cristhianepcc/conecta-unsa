@@ -303,3 +303,22 @@ class PerfilTalentoTests(TestCase):
         self.client.logout()
         resp = self.client.get(reverse("usuarios:credencial_publica", args=[slug]))
         self.assertEqual(resp.status_code, 404)
+
+
+# --- Ayuda (P0) -------------------------------------------------------------
+class AyudaTests(TestCase):
+    def test__egresado_ve_ayuda_con_faq(self):
+        """El egresado accede a la ayuda con guía rápida y preguntas frecuentes."""
+        user = User.objects.create_user("eg_ayuda", email="eg_ayuda@gmail.com", password="x")
+        self.client.force_login(user)
+        resp = self.client.get(reverse("usuarios:ayuda"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Preguntas frecuentes")
+
+    def test__reclutador_no_entra_a_ayuda_de_egresado(self):
+        """La ayuda del egresado es exclusiva de su rol."""
+        user = User.objects.create_user("recl_ayuda", password="x")
+        user.perfil.rol = ROL_RECLUTADOR
+        user.perfil.save()
+        self.client.force_login(user)
+        self.assertEqual(self.client.get(reverse("usuarios:ayuda")).status_code, 403)
