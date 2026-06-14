@@ -1,0 +1,5 @@
+{% comment %}Fila de dato de una ficha. Contexto: label, valor. Muestra «—» si vacío.{% endcomment %}
+<div>
+  <dt class="text-xs uppercase tracking-wide text-slate-400">{{ label }}</dt>
+  <dd class="mt-0.5 text-sm text-slate-700">{{ valor|default:"—" }}</dd>
+</div>

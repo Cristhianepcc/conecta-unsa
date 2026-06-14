@@ -8,8 +8,13 @@ from .services import marcar_leidas
 def lista(request):
     """Centro de notificaciones (campana). Al abrirlo se marcan como leídas."""
     notificaciones = list(request.user.notificaciones.all()[:50])
+    sin_leer = sum(1 for n in notificaciones if not n.leido)  # antes de marcar
     marcar_leidas(request.user)
-    return render(request, "notificaciones/lista.html", {"notificaciones": notificaciones})
+    return render(
+        request,
+        "notificaciones/lista.html",
+        {"notificaciones": notificaciones, "sin_leer": sin_leer},
+    )
 
 
 @login_required

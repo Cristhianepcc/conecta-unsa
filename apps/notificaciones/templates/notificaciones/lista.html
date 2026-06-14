@@ -6,6 +6,10 @@
 
 {% block dashboard_content %}
 <div class="max-w-2xl">
+  <p class="mb-4 text-sm text-slate-500">
+    {% if sin_leer %}{{ sin_leer }} sin leer{% else %}Todo al día{% endif %}
+  </p>
+
   <ul class="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white overflow-hidden">
     {% for n in notificaciones %}
     <li>

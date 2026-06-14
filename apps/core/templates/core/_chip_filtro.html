@@ -1,0 +1,8 @@
+{% comment %}Chip de filtro de la bandeja. Contexto: key, label, n (conteo), filtro (activo), q (búsqueda).{% endcomment %}
+<a href="?filtro={{ key }}{% if q %}&q={{ q|urlencode }}{% endif %}"
+   {% if filtro == key %}aria-current="true"{% endif %}
+   class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 border transition
+          {% if filtro == key %}border-granate-600 bg-granate-700 text-white font-semibold{% else %}border-slate-200 bg-white text-slate-600 hover:border-granate-300 hover:text-granate-700{% endif %}">
+  {{ label }}
+  <span class="rounded-full px-1.5 text-xs {% if filtro == key %}bg-white/20 text-white{% else %}bg-slate-100 text-slate-500{% endif %}">{{ n }}</span>
+</a>

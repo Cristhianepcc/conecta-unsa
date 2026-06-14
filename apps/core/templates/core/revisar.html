@@ -2,47 +2,197 @@
 
 {% block title %}Revisar: {{ conv.titulo }} — CONECTA UNSA{% endblock %}
 {% block dashboard_title %}Revisar convocatoria{% endblock %}
+{% block user_role %}Bolsa de Trabajo{% endblock %}
 {% block sidebar_items %}{% include "core/_sidebar_admin.html" with seccion="panel" %}{% endblock %}
 
 {% block dashboard_content %}
-<section class="max-w-3xl">
-  <a href="{% url 'core:panel_admin' %}" class="text-sm text-slate-500 hover:underline">← Volver a la bandeja</a>
-  <h1 class="mt-3 text-2xl font-bold text-granate-700">{{ conv.titulo }}</h1>
-  <p class="text-slate-600">{{ conv.empresa }} · {{ conv.get_tipo_display }} ·
-    estado: {{ conv.get_estado_display }} · transparencia {{ conv.transparencia_pct }}%</p>
+<section class="max-w-6xl">
+  <nav class="text-sm text-slate-500" aria-label="Ruta">
+    <a href="{{ request.GET.next|default:'' }}{% if not request.GET.next %}{% url 'core:panel_admin' %}{% endif %}" class="hover:text-granate-700 hover:underline">Bandeja</a>
+    <span class="mx-1 text-slate-300">/</span>
+    <span class="text-slate-700">Revisar</span>
+  </nav>
 
-  {% if alertas %}
-  <div class="mt-4 rounded-lg border border-alerta/30 bg-alerta/5 p-4 text-sm">
-    <p class="font-semibold text-alerta">Alertas</p>
-    <ul class="mt-1 list-disc pl-5 text-slate-700">
-      {% if 'duplicado' in alertas %}<li>Posible duplicado
-        {% if duplicados %}— {{ duplicados.0.1|floatformat:0 }}% de similitud con
-        «{{ duplicados.0.0.titulo }}»{% endif %}</li>{% endif %}
-      {% if 'incompleta' in alertas %}<li>Información incompleta (faltan campos fundamentales)</li>{% endif %}
-      {% if 'baja_transparencia' in alertas %}<li>Baja transparencia (&lt;50%)</li>{% endif %}
-      {% if 'exceso_difusion' in alertas %}<li>Posible exceso de difusión de la empresa</li>{% endif %}
-    </ul>
+  <!-- Encabezado -->
+  <div class="mt-3 flex flex-wrap items-start justify-between gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-bold text-granate-700">{{ conv.titulo }}</h1>
+      <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+        <span class="font-medium text-slate-700">{{ conv.empresa }}</span>
+        {% if conv.empresa.verificada %}
+        <span class="inline-flex items-center gap-1 text-exito"><i data-lucide="badge-check" class="w-4 h-4"></i><span class="sr-only">Empresa </span>verificada</span>
+        {% elif conv.empresa.es_referencial %}
+        <span class="text-slate-400">· referencial</span>
+        {% endif %}
+        <span class="text-slate-300">·</span> {{ conv.get_tipo_display }}
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      {% include "empresas/_estado_badge.html" with estado=conv.estado label=conv.get_estado_display %}
+    </div>
   </div>
-  {% endif %}
 
-  {% if conv.descripcion %}
-  <div class="mt-6"><h2 class="font-semibold text-slate-800">Descripción</h2>
-    <p class="mt-1 text-sm text-slate-700 whitespace-pre-line">{{ conv.descripcion }}</p></div>
-  {% endif %}
+  <div class="mt-6 grid gap-6 lg:grid-cols-3">
+    <!-- Columna principal -->
+    <div class="lg:col-span-2 space-y-6">
 
-  <!-- Acciones -->
-  <form method="post" class="mt-8 space-y-4">
-    {% csrf_token %}
-    <div>
-      <label for="comentario" class="text-sm font-medium text-slate-700">Comentario (para observar/rechazar)</label>
-      <textarea name="comentario" id="comentario" rows="3"
-                class="w-full mt-1 border border-slate-300 rounded-lg p-2 text-sm">{{ conv.comentario_revision }}</textarea>
+      {% if alertas %}
+      <div class="rounded-xl border border-alerta/30 bg-alerta/5 p-4">
+        <p class="flex items-center gap-2 text-sm font-semibold text-alerta">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i> Alertas a revisar
+        </p>
+        <ul class="mt-2 space-y-1.5 text-sm text-slate-700">
+          {% if 'duplicado' in alertas %}<li class="flex gap-2"><i data-lucide="copy" class="w-4 h-4 mt-0.5 shrink-0 text-peligro"></i>
+            Posible duplicado{% if duplicados %} — {{ duplicados.0.1|floatformat:0 }}% de similitud con «{{ duplicados.0.0.titulo }}»{% endif %} (ver comparación abajo)</li>{% endif %}
+          {% if 'incompleta' in alertas %}<li class="flex gap-2"><i data-lucide="file-warning" class="w-4 h-4 mt-0.5 shrink-0 text-alerta"></i>
+            Información incompleta{% if faltantes %} — falta: {{ faltantes|join:", " }}{% endif %}</li>{% endif %}
+          {% if 'baja_transparencia' in alertas %}<li class="flex gap-2"><i data-lucide="eye-off" class="w-4 h-4 mt-0.5 shrink-0 text-alerta"></i>
+            Baja transparencia ({{ conv.transparencia_pct }}%, &lt;50%)</li>{% endif %}
+          {% if 'exceso_difusion' in alertas %}<li class="flex gap-2"><i data-lucide="megaphone" class="w-4 h-4 mt-0.5 shrink-0 text-dorado"></i>
+            Posible exceso de difusión de la empresa (≥ límite en 30 días)</li>{% endif %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Ficha -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <h2 class="font-semibold text-slate-800">Detalle de la convocatoria</h2>
+        <dl class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          {% include "core/_dato.html" with label="Modalidad" valor=conv.get_modalidad_display %}
+          {% include "core/_dato.html" with label="Ubicación" valor=conv.ubicacion %}
+          {% include "core/_dato.html" with label="Duración estimada" valor=conv.duracion_estimada %}
+          <div>
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Fecha límite</dt>
+            <dd class="mt-0.5 text-sm text-slate-700">{{ conv.fecha_limite|date:"d/m/Y"|default:"—" }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Remuneración</dt>
+            <dd class="mt-0.5 text-sm text-slate-700">
+              {% if conv.salario_confidencial %}<span class="text-alerta">Confidencial</span>
+              {% elif conv.banda_salarial_min or conv.banda_salarial_max %}S/ {{ conv.banda_salarial_min|default:"?" }} – {{ conv.banda_salarial_max|default:"?" }}
+              {% elif conv.subvencion_remuneracion %}S/ {{ conv.subvencion_remuneracion }}
+              {% else %}—{% endif %}
+            </dd>
+          </div>
+          {% include "core/_dato.html" with label="N.º de vacantes" valor=conv.vacantes %}
+          {% if conv.jornada_horas %}<div><dt class="text-xs uppercase tracking-wide text-slate-400">Jornada</dt><dd class="mt-0.5 text-sm text-slate-700">{{ conv.jornada_horas }} h/sem</dd></div>{% endif %}
+          {% include "core/_dato.html" with label="Régimen" valor=conv.regimen %}
+          <div>
+            <dt class="text-xs uppercase tracking-wide text-slate-400">No discriminación</dt>
+            <dd class="mt-0.5 text-sm">
+              {% if conv.no_discriminacion %}<span class="text-exito">✓ Declarada</span>{% else %}<span class="text-peligro">✗ No declarada</span>{% endif %}
+            </dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Medio de postulación</dt>
+            <dd class="mt-0.5 text-sm text-slate-700 break-words">
+              {% if conv.medio_postulacion %}
+                {% if '://' in conv.medio_postulacion %}<a href="{{ conv.medio_postulacion }}" target="_blank" rel="noopener" class="text-granate-700 hover:underline">{{ conv.medio_postulacion }}</a>
+                {% else %}{{ conv.medio_postulacion }}{% endif %}
+              {% else %}—{% endif %}
+              {% if conv.email_contacto %} · <a href="mailto:{{ conv.email_contacto }}" class="text-granate-700 hover:underline">{{ conv.email_contacto }}</a>{% endif %}
+            </dd>
+          </div>
+          {% if conv.carreras_objetivo.exists %}
+          <div class="sm:col-span-2">
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Carreras objetivo</dt>
+            <dd class="mt-1 flex flex-wrap gap-1.5">
+              {% for c in conv.carreras_objetivo.all %}<span class="rounded-full bg-slate-100 text-slate-600 text-xs px-2 py-0.5">{{ c }}</span>{% endfor %}
+            </dd>
+          </div>
+          {% endif %}
+        </dl>
+
+        {% if conv.descripcion %}
+        <div class="mt-5 pt-5 border-t border-slate-100">
+          <h3 class="text-xs uppercase tracking-wide text-slate-400">Descripción y requisitos</h3>
+          <p class="mt-1 text-sm text-slate-700 whitespace-pre-line">{{ conv.descripcion }}</p>
+        </div>
+        {% endif %}
+        {% if conv.beneficios %}
+        <div class="mt-4">
+          <h3 class="text-xs uppercase tracking-wide text-slate-400">Beneficios</h3>
+          <p class="mt-1 text-sm text-slate-700 whitespace-pre-line">{{ conv.beneficios }}</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Comparador de duplicado -->
+      {% if duplicados %}
+      <div class="rounded-xl border border-peligro/40 bg-peligro/5 p-5">
+        <h2 class="flex items-center gap-2 font-semibold text-peligro">
+          <i data-lucide="copy" class="w-4 h-4"></i> Posible duplicado · {{ duplicados.0.1|floatformat:0 }}% de similitud
+        </h2>
+        <div class="mt-4 grid sm:grid-cols-2 gap-4 text-sm">
+          <div class="rounded-lg border border-slate-200 bg-white p-3">
+            <p class="text-xs uppercase tracking-wide text-slate-400">Esta convocatoria</p>
+            <p class="mt-1 font-medium text-slate-800">{{ conv.titulo }}</p>
+            <p class="mt-1 text-xs text-slate-500">Creada {{ conv.creada_en|date:"d/m/Y" }} · transparencia {{ conv.transparencia_pct }}%</p>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-3">
+            <p class="text-xs uppercase tracking-wide text-slate-400">Ya registrada</p>
+            <a href="{% url 'core:revisar_convocatoria' duplicados.0.0.id %}" class="mt-1 block font-medium text-granate-700 hover:underline">{{ duplicados.0.0.titulo }}</a>
+            <p class="mt-1 text-xs text-slate-500">Creada {{ duplicados.0.0.creada_en|date:"d/m/Y" }} · {{ duplicados.0.0.get_estado_display }}</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Empresa -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <h2 class="font-semibold text-slate-800">Empresa</h2>
+        <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+          <div><dt class="text-xs uppercase tracking-wide text-slate-400">Razón social</dt><dd class="mt-0.5 text-slate-700">{{ conv.empresa.razon_social }}</dd></div>
+          <div><dt class="text-xs uppercase tracking-wide text-slate-400">RUC</dt><dd class="mt-0.5 text-slate-700 tabular-nums">{{ conv.empresa.ruc }}</dd></div>
+          <div><dt class="text-xs uppercase tracking-wide text-slate-400">Estado</dt><dd class="mt-0.5 text-slate-700">{{ conv.empresa.get_estado_display }}{% if conv.empresa.es_referencial %} · referencial{% endif %}</dd></div>
+          {% if conv.empresa.web or conv.empresa.linkedin %}
+          <div><dt class="text-xs uppercase tracking-wide text-slate-400">Enlaces</dt><dd class="mt-0.5 flex gap-3">
+            {% if conv.empresa.web %}<a href="{{ conv.empresa.web }}" target="_blank" rel="noopener" class="text-granate-700 hover:underline">Web</a>{% endif %}
+            {% if conv.empresa.linkedin %}<a href="{{ conv.empresa.linkedin }}" target="_blank" rel="noopener" class="text-granate-700 hover:underline">LinkedIn</a>{% endif %}
+          </dd></div>
+          {% endif %}
+        </dl>
+      </div>
     </div>
-    <div class="flex flex-wrap gap-3">
-      <button name="accion" value="aprobar" class="rounded-lg bg-exito px-5 py-2.5 text-white font-medium hover:opacity-90">Aprobar y publicar</button>
-      <button name="accion" value="observar" class="rounded-lg bg-alerta px-5 py-2.5 text-white font-medium hover:opacity-90">Observar</button>
-      <button name="accion" value="rechazar" class="rounded-lg bg-peligro px-5 py-2.5 text-white font-medium hover:opacity-90">Rechazar</button>
-    </div>
-  </form>
+
+    <!-- Panel de acciones (sticky) -->
+    <aside class="lg:sticky lg:top-20 h-max">
+      <form method="post" x-data='{ c: "{{ conv.comentario_revision|escapejs }}" }'
+            class="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
+        <div>
+          <p class="text-xs uppercase tracking-wide text-slate-400">Transparencia</p>
+          <div class="mt-2">{% include "convocatorias/_transparencia.html" with et=conv.etiqueta_transparencia pct=conv.transparencia_pct variant="bar" %}</div>
+        </div>
+
+        <div class="pt-1">
+          <label for="comentario" class="text-sm font-medium text-slate-700">Comentario</label>
+          <p class="text-xs text-slate-400">Obligatorio para observar; opcional al rechazar.</p>
+          <textarea name="comentario" id="comentario" rows="4" x-model="c"
+                    placeholder="Motivo de la observación o rechazo…"
+                    class="w-full mt-1.5 border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-granate-200 focus:border-granate-400"></textarea>
+        </div>
+
+        <div class="space-y-2">
+          <button name="accion" value="aprobar"
+                  class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-exito px-4 py-2.5 text-white font-medium hover:opacity-90"
+                  @click="$el.closest('form').dataset.submitting='1'">
+            <i data-lucide="check" class="w-4 h-4"></i> Aprobar y publicar
+          </button>
+          <button name="accion" value="observar" :disabled="!c.trim()"
+                  :title="!c.trim() ? 'Escribe un comentario para observar' : ''"
+                  class="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-alerta/50 text-alerta px-4 py-2.5 font-medium hover:bg-alerta/5 disabled:opacity-40 disabled:cursor-not-allowed">
+            <i data-lucide="message-square-warning" class="w-4 h-4"></i> Observar
+          </button>
+          <button name="accion" value="rechazar"
+                  @click="if (!confirm('¿Rechazar esta convocatoria? Es una acción definitiva.')) $event.preventDefault()"
+                  class="w-full inline-flex items-center justify-center gap-2 rounded-lg text-peligro px-4 py-2.5 text-sm font-medium hover:bg-peligro/5">
+            <i data-lucide="x" class="w-4 h-4"></i> Rechazar
+          </button>
+        </div>
+      </form>
+    </aside>
+  </div>
 </section>
 {% endblock %}

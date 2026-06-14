@@ -40,7 +40,7 @@ def terminos(request):
 @admin_required
 def panel_admin(request):
     """Bandeja priorizada + métricas para la Bolsa de Trabajo (feature 12)."""
-    from django.db.models import Avg
+    from django.db.models import Avg, Q
 
     from apps.convocatorias import flujo
     from apps.convocatorias.models import (
@@ -50,10 +50,21 @@ def panel_admin(request):
         Convocatoria,
     )
 
+    q = request.GET.get("q", "").strip()
+    filtro = request.GET.get("filtro") or "todas"
+
     por_revisar = (
         Convocatoria.objects.filter(estado__in=[ESTADO_PENDIENTE, ESTADO_OBSERVADA])
         .select_related("empresa")
+        .order_by("creada_en")  # FIFO: lo más antiguo (más urgente) primero
     )
+    if q:
+        por_revisar = por_revisar.filter(
+            Q(titulo__icontains=q)
+            | Q(empresa__razon_social__icontains=q)
+            | Q(empresa__nombre_comercial__icontains=q)
+        )
+
     bandeja, con_duplicado = [], 0
     for conv in por_revisar:
         alertas = flujo.calcular_alertas(conv)
@@ -62,10 +73,28 @@ def panel_admin(request):
             con_duplicado += 1
         bandeja.append({"conv": conv, "alertas": alertas, "duplicados": duplicados})
 
+    # Conteos para los chips de filtro (sobre el resultado de búsqueda, sin filtrar)
+    conteos = {
+        "todas": len(bandeja),
+        "pendiente": sum(1 for it in bandeja if it["conv"].estado == ESTADO_PENDIENTE),
+        "observada": sum(1 for it in bandeja if it["conv"].estado == ESTADO_OBSERVADA),
+        "duplicado": sum(1 for it in bandeja if it["duplicados"]),
+        "limpias": sum(1 for it in bandeja if not it["alertas"]),
+    }
+
+    predicados = {
+        "pendiente": lambda it: it["conv"].estado == ESTADO_PENDIENTE,
+        "observada": lambda it: it["conv"].estado == ESTADO_OBSERVADA,
+        "duplicado": lambda it: bool(it["duplicados"]),
+        "limpias": lambda it: not it["alertas"],
+    }
+    if filtro in predicados:
+        bandeja = [it for it in bandeja if predicados[filtro](it)]
+
     publicadas = Convocatoria.objects.filter(estado=ESTADO_PUBLICADA)
     metricas = {
         "recibidas": Convocatoria.objects.exclude(estado="borrador").count(),
-        "pendientes": por_revisar.filter(estado=ESTADO_PENDIENTE).count(),
+        "pendientes": Convocatoria.objects.filter(estado=ESTADO_PENDIENTE).count(),
         "validadas": publicadas.count(),
         "duplicados": con_duplicado,
         "indice_transparencia": round(
@@ -73,8 +102,29 @@ def panel_admin(request):
         ),
     }
     return render(
-        request, "core/panel_admin.html", {"bandeja": bandeja, "metricas": metricas}
+        request,
+        "core/panel_admin.html",
+        {
+            "bandeja": bandeja,
+            "metricas": metricas,
+            "conteos": conteos,
+            "filtro": filtro,
+            "q": q,
+        },
     )
+
+
+def _destino_bandeja(request):
+    """URL de retorno a la bandeja preservando filtro/búsqueda (`next` seguro)."""
+    from django.urls import reverse
+    from django.utils.http import url_has_allowed_host_and_scheme
+
+    nxt = request.POST.get("next") or request.GET.get("next")
+    if nxt and url_has_allowed_host_and_scheme(
+        nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return nxt
+    return reverse("core:panel_admin")
 
 
 @admin_required
@@ -106,7 +156,16 @@ def revisar_convocatoria(request, pk):
         except flujo.TransicionInvalida as e:
             messages.error(request, str(e))
             return redirect("core:revisar_convocatoria", pk=pk)
-        return redirect("core:panel_admin")
+        return redirect(_destino_bandeja(request))
+
+    from apps.convocatorias.services import faltantes_nivel_1
+
+    etiquetas = {
+        f.name: f.verbose_name
+        for f in Convocatoria._meta.get_fields()
+        if hasattr(f, "verbose_name")
+    }
+    faltantes = [etiquetas.get(c, c) for c in faltantes_nivel_1(conv)]
 
     return render(
         request,
@@ -115,5 +174,6 @@ def revisar_convocatoria(request, pk):
             "conv": conv,
             "alertas": flujo.calcular_alertas(conv),
             "duplicados": flujo.detectar_duplicado(conv),
+            "faltantes": faltantes,
         },
     )

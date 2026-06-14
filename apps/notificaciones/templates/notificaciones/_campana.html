@@ -1,9 +1,48 @@
-{% comment %}Campana de notificaciones para el header. Incluir con {% include 'notificaciones/_campana.html' %}.{% endcomment %}
-<a href="{% url 'notificaciones:lista' %}" class="relative inline-flex items-center" aria-label="Notificaciones">
-  <span aria-hidden="true">🔔</span>
-  {% if notificaciones_no_leidas %}
-  <span class="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-dorado text-granate-900 text-[10px] font-bold h-4 min-w-4 px-1">
-    {{ notificaciones_no_leidas }}
-  </span>
-  {% endif %}
-</a>
+{% comment %}Campana de notificaciones (dropdown). Incluir con {% include 'notificaciones/_campana.html' %}.{% endcomment %}
+<div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
+  <button type="button" @click="open = !open" :aria-expanded="open" aria-haspopup="true"
+          class="relative inline-flex items-center text-slate-500 hover:text-granate-700" aria-label="Notificaciones">
+    <i data-lucide="bell" class="w-5 h-5"></i>
+    {% if notificaciones_no_leidas %}
+    <span class="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-dorado text-granate-900 text-[10px] font-bold h-4 min-w-4 px-1">
+      {{ notificaciones_no_leidas }}
+    </span>
+    {% endif %}
+  </button>
+
+  <div x-cloak x-show="open" @click.outside="open = false"
+       x-transition.opacity.duration.150ms
+       class="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden">
+    <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-slate-100">
+      <span class="text-sm font-semibold text-slate-800">Notificaciones</span>
+      {% if notificaciones_no_leidas %}
+      <form method="post" action="{% url 'notificaciones:marcar_leidas' %}">
+        {% csrf_token %}
+        <button class="text-xs text-granate-700 hover:underline">Marcar todas como leídas</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <ul class="max-h-80 overflow-y-auto divide-y divide-slate-100">
+      {% for n in notificaciones_recientes %}
+      <li class="{% if not n.leido %}bg-granate-50/50{% endif %}">
+        {% if n.url %}
+        <a href="{{ n.url }}" class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50">{% include "notificaciones/_fila.html" with n=n %}</a>
+        {% else %}
+        <div class="flex items-start gap-3 px-4 py-3">{% include "notificaciones/_fila.html" with n=n %}</div>
+        {% endif %}
+      </li>
+      {% empty %}
+      <li class="px-4 py-8 text-center text-sm text-slate-400">
+        <i data-lucide="bell-off" class="w-5 h-5 mx-auto mb-1.5"></i>
+        Sin notificaciones
+      </li>
+      {% endfor %}
+    </ul>
+
+    <a href="{% url 'notificaciones:lista' %}"
+       class="block px-4 py-2.5 text-center text-sm font-medium text-granate-700 hover:bg-slate-50 border-t border-slate-100">
+      Ver todas
+    </a>
+  </div>
+</div>

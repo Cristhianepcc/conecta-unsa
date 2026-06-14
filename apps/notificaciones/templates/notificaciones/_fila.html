@@ -1,0 +1,17 @@
+{% comment %}Contenido de una fila de notificación. Contexto: n (Notificacion).{% endcomment %}
+<span class="shrink-0 mt-0.5 h-9 w-9 rounded-full grid place-items-center
+  {% if n.tipo == 'observada' %}bg-alerta/10 text-alerta
+  {% elif n.tipo == 'nueva_pertinente' %}bg-exito/10 text-exito
+  {% elif n.tipo == 'fecha_limite' %}bg-peligro/10 text-peligro
+  {% else %}bg-granate-50 text-granate-700{% endif %}">
+  {% if n.tipo == 'observada' %}<i data-lucide="wrench" class="w-4 h-4"></i>
+  {% elif n.tipo == 'nueva_pertinente' %}<i data-lucide="sparkles" class="w-4 h-4"></i>
+  {% elif n.tipo == 'fecha_limite' %}<i data-lucide="calendar-clock" class="w-4 h-4"></i>
+  {% elif n.tipo == 'resumen' %}<i data-lucide="mail" class="w-4 h-4"></i>
+  {% else %}<i data-lucide="bell" class="w-4 h-4"></i>{% endif %}
+</span>
+<span class="min-w-0 flex-1">
+  <span class="block text-sm text-slate-700 {% if not n.leido %}font-medium{% endif %}">{{ n.mensaje }}</span>
+  <span class="block text-xs text-slate-400 mt-0.5">hace {{ n.creado_en|timesince }}</span>
+</span>
+{% if not n.leido %}<span class="shrink-0 mt-1.5 h-2 w-2 rounded-full bg-granate-600" title="No leída"></span>{% endif %}
