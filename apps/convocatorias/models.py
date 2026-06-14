@@ -135,6 +135,21 @@ class Convocatoria(models.Model):
         return self.tipo == constants.TIPO_VOLUNTARIADO
 
     @property
+    def dias_para_cierre(self):
+        """Días que faltan para la fecha límite (None si no hay; negativo si ya pasó)."""
+        if self.fecha_limite is None:
+            return None
+        from django.utils import timezone
+
+        return (self.fecha_limite - timezone.localdate()).days
+
+    @property
+    def cierra_pronto(self) -> bool:
+        """True si cierra en 3 días o menos (y aún no venció)."""
+        d = self.dias_para_cierre
+        return d is not None and 0 <= d <= 3
+
+    @property
     def activa(self) -> bool:
         """Publicada y aún dentro de su fecha límite (flujo-admin.md §1)."""
         from django.utils import timezone

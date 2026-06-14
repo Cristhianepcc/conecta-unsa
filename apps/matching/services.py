@@ -95,12 +95,12 @@ def puntuar(usuario, conv):
         if conv.tipo in tipos_potenciados:
             peso = PESO_CREDENCIAL_VERIFICADA if cred.verificada else PESO_CREDENCIAL
             puntaje += peso
-            etiqueta = cred.detalle or cred.get_tipo_display()
-            motivos.append(f"coincide con tu credencial: {etiqueta}")
+            # Motivo conciso: solo la credencial (sin repetir "coincide con tu credencial").
+            motivos.append(cred.detalle or cred.get_tipo_display())
 
     if conv.tipo in (perfil.tipos_preferidos or []):
         puntaje += PESO_TIPO_PREFERIDO
-        motivos.append("es un tipo de convocatoria que prefieres")
+        motivos.append("tipo que prefieres")
 
     return puntaje, motivos
 
