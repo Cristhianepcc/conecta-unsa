@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Ingresar — CONECTA UNSA{% endblock %}
+
+{% block content %}
+<section class="max-w-md mx-auto px-4 py-12" x-data="{ puerta: 'unsa' }">
+  <h1 class="text-2xl font-bold text-granate-700 text-center">Ingresar a CONECTA UNSA</h1>
+  <p class="mt-2 text-center text-sm text-slate-500">Bolsa de Trabajo · estudiantes, egresados y empresas</p>
+
+  <!-- Pestañas: las 2 puertas (la pestaña NO otorga el rol) -->
+  <div class="mt-8 grid grid-cols-2 rounded-lg border border-slate-200 p-1 bg-slate-50" role="tablist">
+    <button type="button" role="tab" @click="puerta = 'unsa'"
+            :class="puerta === 'unsa' ? 'bg-granate-700 text-white' : 'text-slate-600'"
+            class="rounded-md py-2 text-sm font-medium transition">Soy de la UNSA</button>
+    <button type="button" role="tab" @click="puerta = 'empresa'"
+            :class="puerta === 'empresa' ? 'bg-granate-700 text-white' : 'text-slate-600'"
+            class="rounded-md py-2 text-sm font-medium transition">Soy empresa</button>
+  </div>
+
+  <!-- Puerta UNSA: Google -->
+  <div x-show="puerta === 'unsa'" class="mt-6">
+    <p class="text-sm text-slate-600 mb-4">Usa tu correo institucional <strong>@unsa.edu.pe</strong>
+      (en la demo se acepta cualquier Gmail).</p>
+    <a href="{% url 'google_login' %}"
+       class="flex items-center justify-center gap-3 w-full rounded-lg border border-slate-300 bg-white py-3 font-medium text-slate-700 hover:bg-slate-50">
+      <span aria-hidden="true" class="font-bold text-granate-700">G</span>
+      Continuar con Google
+    </a>
+  </div>
+
+  <!-- Puerta Empresa: usuario/contraseña -->
+  <div x-show="puerta === 'empresa'" class="mt-6" x-cloak>
+    <form method="post" action="{% url 'usuarios:login_empresa' %}" class="space-y-4">
+      {% csrf_token %}
+      {% for field in form_empresa %}
+      <div>
+        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<p class="mt-1 text-xs text-peligro">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <button type="submit"
+              class="w-full rounded-lg bg-granate-700 py-3 font-medium text-white hover:bg-granate-800">
+        Ingresar
+      </button>
+    </form>
+    <p class="mt-4 text-sm text-slate-500">¿Tu empresa aún no tiene cuenta?
+      <a href="{% url 'empresas:registro' %}" class="text-granate-700 font-medium underline">Regístrala aquí</a>.</p>
+  </div>
+
+  <p class="mt-8 text-center text-xs text-slate-400">
+    Al ingresar aceptas nuestra Política de Privacidad (Ley 29733).
+  </p>
+</section>
+
+<style>[x-cloak]{display:none!important}</style>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  form input[type="text"], form input[type="password"], form input[type="email"] {
+    width: 100%; border: 1px solid #cbd5e1; border-radius: 0.5rem;
+    padding: 0.6rem 0.75rem; margin-top: 0.25rem;
+  }
+</style>
+{% endblock %}

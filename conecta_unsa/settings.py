@@ -128,6 +128,36 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
+# Login / logout (puertas en la feature 02-autenticacion)
+LOGIN_URL = "usuarios:login"
+LOGIN_REDIRECT_URL = "usuarios:post_login"
+LOGOUT_REDIRECT_URL = "core:home"
+
+# allauth: el ruteo de rol lo decide el adapter (la pestaña NO otorga permisos).
+ACCOUNT_ADAPTER = "apps.usuarios.adapters.CuentaAdapter"
+SOCIALACCOUNT_ADAPTER = "apps.usuarios.adapters.AdaptadorSocial"
+
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*"]
+ACCOUNT_EMAIL_VERIFICATION = "none"  # demo; en prod se valida vía Google Workspace
+SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        # TODO producción: agregar "hd": "unsa.edu.pe" para restringir el dominio
+        # a la comunidad UNSA (auth-roles.md §3). En demo se acepta cualquier Gmail (CA-7).
+        "APP": {
+            "client_id": os.environ.get("GOOGLE_CLIENT_ID", ""),
+            "secret": os.environ.get("GOOGLE_CLIENT_SECRET", ""),
+            "key": "",
+        },
+    }
+}
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -176,6 +206,10 @@ if not DEBUG:
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "CONECTA UNSA <no-reply@conecta-unsa.pe>"
+)
+# En dev (sin RESEND_API_KEY) los correos —incluido el reset de empresa— van a consola.
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
 )
 
 

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Panel administrativo — CONECTA UNSA{% endblock %}
+
+{% block nav %}
+  <a href="{% url 'usuarios:logout' %}" class="hover:underline">Cerrar sesión</a>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 py-12">
+  <h1 class="text-2xl font-bold text-granate-700">Panel administrativo</h1>
+  <p class="mt-2 text-slate-600">Bolsa de Trabajo · revisión y difusión de convocatorias.</p>
+  <p class="mt-6 text-sm text-slate-400">La cola de revisión y la configuración llegan en la feature 12.</p>
+</section>
+{% endblock %}
