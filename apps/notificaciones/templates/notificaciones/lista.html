@@ -5,23 +5,72 @@
 {% block sidebar_items %}{% include "partials/_sidebar_por_rol.html" with seccion="notificaciones" %}{% endblock %}
 
 {% block dashboard_content %}
-<div class="max-w-2xl">
-  <p class="mb-4 text-sm text-slate-500">
-    {% if sin_leer %}{{ sin_leer }} sin leer{% else %}Todo al día{% endif %}
-  </p>
+<div class="mx-auto max-w-3xl">
 
-  <ul class="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white overflow-hidden">
+  {# ===== Encabezado ===== #}
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Notificaciones</h1>
+      <p class="mt-1.5 text-sm text-slate-500">Tu centro de actividad en CONECTA UNSA.</p>
+    </div>
+    {% if sin_leer %}
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-granate-50 px-3 py-1 text-xs font-semibold text-granate-700">
+      <span class="h-1.5 w-1.5 rounded-full bg-granate-600"></span>{{ sin_leer }} sin leer
+    </span>
+    {% else %}
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-exito/10 px-3 py-1 text-xs font-semibold text-exito">
+      <i data-lucide="check" class="w-3.5 h-3.5"></i> Todo al día
+    </span>
+    {% endif %}
+  </div>
+
+  {# ===== Feed de notificaciones ===== #}
+  <ul class="mt-6 space-y-3">
     {% for n in notificaciones %}
     <li>
       <a href="{{ n.url|default:'#' }}"
-         class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 {% if not n.leido %}bg-granate-50{% endif %}">
-        {% include "notificaciones/_fila.html" with n=n %}
+         class="group block rounded-2xl border p-4 sm:p-5 shadow-sm transition hover:shadow-md
+                {% if not n.leido %}border-granate-200 bg-granate-50/30{% else %}border-slate-200 bg-white{% endif %}">
+        <div class="flex items-start gap-4">
+          {# Badge de tipo (color sutil) #}
+          <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl
+            {% if n.tipo == 'observada' %}bg-alerta/10 text-alerta
+            {% elif n.tipo == 'nueva_pertinente' %}bg-exito/10 text-exito
+            {% elif n.tipo == 'fecha_limite' %}bg-peligro/10 text-peligro
+            {% else %}bg-granate-50 text-granate-700{% endif %}">
+            <i data-lucide="{% if n.tipo == 'observada' %}wrench{% elif n.tipo == 'nueva_pertinente' %}sparkles{% elif n.tipo == 'fecha_limite' %}calendar-clock{% elif n.tipo == 'resumen' %}mail{% else %}bell{% endif %}" class="w-5 h-5"></i>
+          </span>
+
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                {% if n.tipo == 'observada' %}bg-alerta/10 text-alerta
+                {% elif n.tipo == 'nueva_pertinente' %}bg-exito/10 text-exito
+                {% elif n.tipo == 'fecha_limite' %}bg-peligro/10 text-peligro
+                {% else %}bg-slate-100 text-slate-600{% endif %}">{{ n.get_tipo_display }}</span>
+              {% if not n.leido %}
+              <span class="inline-flex items-center gap-1 text-xs font-semibold text-granate-700">
+                <span class="h-1.5 w-1.5 rounded-full bg-granate-600"></span> Nuevo
+              </span>
+              {% endif %}
+            </div>
+            <p class="mt-1.5 text-sm font-medium text-slate-800 leading-relaxed">{{ n.mensaje }}</p>
+            <p class="mt-1.5 text-xs text-slate-500">hace {{ n.creado_en|timesince }}</p>
+          </div>
+
+          {% if n.url %}
+          <i data-lucide="chevron-right" class="mt-1 w-4 h-4 shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500"></i>
+          {% endif %}
+        </div>
       </a>
     </li>
     {% empty %}
-    <li class="px-4 py-10 text-sm text-slate-400 text-center">
-      <i data-lucide="bell-off" class="w-6 h-6 mx-auto mb-2"></i>
-      No tienes notificaciones.
+    <li class="rounded-2xl border border-dashed border-slate-300 px-4 py-16 text-center">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-granate-50 text-granate-700">
+        <i data-lucide="bell-off" class="w-7 h-7"></i>
+      </div>
+      <p class="mt-4 font-semibold text-slate-700">Sin notificaciones</p>
+      <p class="mt-1 text-sm text-slate-500">Aquí verás avisos de convocatorias, fechas límite y comunicados.</p>
     </li>
     {% endfor %}
   </ul>
