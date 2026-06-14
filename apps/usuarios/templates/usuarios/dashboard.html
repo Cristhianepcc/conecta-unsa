@@ -76,14 +76,39 @@
       <div class="rounded-xl border border-slate-200 bg-white p-5">
         <h3 class="font-semibold text-slate-800 flex items-center gap-2"><i data-lucide="calendar-days" class="w-4 h-4 text-granate-700"></i> Resumen semanal</h3>
         <p class="text-xs text-slate-400 mt-1">Lo que llegaría a tu correo:</p>
-        <ul class="mt-3 space-y-2 text-sm">
+        <ul class="mt-3 divide-y divide-slate-100">
           {% for c in resumen %}
-          <li><a href="{% url 'convocatorias:detalle' c.id %}" class="text-granate-700 hover:underline">{{ c.titulo }}</a></li>
+          <li class="py-2 first:pt-0">
+            <a href="{% url 'convocatorias:detalle' c.id %}" class="group block">
+              <span class="flex items-center gap-2">
+                <span class="h-1.5 w-1.5 rounded-full {% if c.etiqueta_transparencia == 'alta' %}bg-exito{% elif c.etiqueta_transparencia == 'media' %}bg-alerta{% else %}bg-peligro{% endif %}"></span>
+                <span class="text-sm text-slate-700 group-hover:text-granate-700 truncate">{{ c.titulo }}</span>
+              </span>
+              <span class="ml-3.5 block text-xs text-slate-400 truncate">{{ c.empresa }}</span>
+            </a>
+          </li>
           {% empty %}
-          <li class="text-slate-400">Sin novedades esta semana.</li>
+          <li class="py-2 text-sm text-slate-400">Sin novedades esta semana.</li>
           {% endfor %}
         </ul>
       </div>
+
+      <!-- Credencial pública -->
+      <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold text-slate-800 flex items-center gap-2"><i data-lucide="id-card" class="w-4 h-4 text-granate-700"></i> Credencial pública</h3>
+          <span class="inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-2 py-0.5
+            {% if talento.cred_activa %}bg-exito/10 text-exito{% else %}bg-slate-100 text-slate-500{% endif %}">
+            <span class="h-1.5 w-1.5 rounded-full {% if talento.cred_activa %}bg-exito{% else %}bg-slate-400{% endif %}"></span>
+            {% if talento.cred_activa %}Activa{% else %}Inactiva{% endif %}
+          </span>
+        </div>
+        <p class="text-sm text-slate-500 mt-2">Tu carta de presentación verificada, con enlace compartible.</p>
+        <a href="{% url 'usuarios:credencial_config' %}" class="mt-3 inline-block text-sm text-granate-700 underline">
+          {% if talento.cred_activa %}Ver / compartir enlace →{% else %}Activar credencial →{% endif %}
+        </a>
+      </div>
+
       <div class="rounded-xl border border-slate-200 bg-white p-5">
         <h3 class="font-semibold text-slate-800 flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-granate-700"></i> Tus preferencias</h3>
         <p class="text-sm text-slate-500 mt-1">Ajusta carreras de interés, tipos y frecuencia.</p>
