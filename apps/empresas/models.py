@@ -43,8 +43,14 @@ class Empresa(models.Model):
     direccion = models.CharField("dirección", max_length=255, blank=True)
     web = models.URLField("web", blank=True)
     linkedin = models.URLField("LinkedIn", blank=True)
-    logo_url = models.URLField("logo (URL)", blank=True)
-    banner_url = models.URLField("banner (URL)", blank=True)
+    # Imagen subida (persistida en el volumen de MEDIA_ROOT) o, alternativamente,
+    # un enlace externo. La subida tiene prioridad (ver logo_src / banner_src).
+    logo_img = models.ImageField("logo (imagen)", upload_to="empresas/logos/", blank=True)
+    banner_img = models.ImageField("banner (imagen)", upload_to="empresas/banners/", blank=True)
+    # Acepta una URL externa o una ruta interna (p. ej. /static/... del seed),
+    # por eso es CharField y no URLField. La imagen subida tiene prioridad.
+    logo_url = models.CharField("logo (URL o ruta)", max_length=300, blank=True)
+    banner_url = models.CharField("banner (URL o ruta)", max_length=300, blank=True)
     video_url = models.URLField("video (URL)", blank=True)
     descripcion = models.TextField("descripción", blank=True)
 
@@ -60,6 +66,20 @@ class Empresa(models.Model):
 
     def __str__(self):
         return self.nombre_comercial or self.razon_social
+
+    @property
+    def logo_src(self) -> str:
+        """URL del logo para mostrar: prioriza la imagen subida; si no, el enlace."""
+        if self.logo_img:
+            return self.logo_img.url
+        return self.logo_url
+
+    @property
+    def banner_src(self) -> str:
+        """URL del banner para mostrar: prioriza la imagen subida; si no, el enlace."""
+        if self.banner_img:
+            return self.banner_img.url
+        return self.banner_url
 
     @property
     def es_referencial(self) -> bool:
