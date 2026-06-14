@@ -22,6 +22,7 @@ from .services import (
     activar_credencial_publica,
     asegurar_perfil,
     asegurar_perfil_talento,
+    completitud_perfil,
     registrar_consentimiento,
     resolver_rol_y_destino,
     revocar_credencial_publica,
@@ -226,6 +227,7 @@ def perfil(request):
             "pref_form": pref_form,
             "cred_form": cred_form,
             "credenciales": talento.credenciales.all(),
+            "completitud": completitud_perfil(talento),
         },
     )
 

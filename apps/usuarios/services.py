@@ -108,3 +108,24 @@ def revocar_credencial_publica(perfil_talento) -> None:
     """Apaga la URL pública; conserva el slug para no reasignarlo (CA-7)."""
     perfil_talento.cred_activa = False
     perfil_talento.save(update_fields=["cred_activa"])
+
+
+def completitud_perfil(perfil_talento) -> dict:
+    """Medidor de completitud del perfil ('mejora progresiva'): % + checklist de pasos."""
+    n_cred = perfil_talento.credenciales.count()
+    items = [
+        {"label": "Define tu carrera", "done": bool(perfil_talento.carrera_id)},
+        {"label": "Indica tu estado académico", "done": bool(perfil_talento.estado_academico)},
+        {"label": "Agrega tu primera credencial", "done": n_cred >= 1},
+        {"label": "Suma 3 o más credenciales", "done": n_cred >= 3},
+        {"label": "Elige tus tipos preferidos", "done": bool(perfil_talento.tipos_preferidos)},
+        {"label": "Activa tu credencial pública", "done": perfil_talento.cred_activa},
+    ]
+    total = len(items)
+    hechos = sum(1 for it in items if it["done"])
+    return {
+        "pct": round(hechos / total * 100),
+        "hechos": hechos,
+        "total": total,
+        "items": items,
+    }
