@@ -250,6 +250,10 @@ class Command(BaseCommand):
             or Carrera.objects.first()
         )
         talento.estado_academico = "egresado"
+        # Identidad verificada contra el padrón académico (Eje 2 · interoperabilidad).
+        # Coincide con apps.integraciones.padron.PADRON_DEMO["12345678"].
+        talento.dni = "12345678"
+        talento.identidad_verificada = True
         talento.frecuencia = "semanal"
         talento.tipos_preferidos = ["trainee", "empleo", "practica_profesional"]
         talento.save()

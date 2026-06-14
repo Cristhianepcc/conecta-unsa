@@ -50,8 +50,11 @@ def panel_admin(request):
         Convocatoria,
     )
 
+    from django.utils import timezone
+
     q = request.GET.get("q", "").strip()
     filtro = request.GET.get("filtro") or "todas"
+    orden = request.GET.get("orden") or "antiguedad"
 
     por_revisar = (
         Convocatoria.objects.filter(estado__in=[ESTADO_PENDIENTE, ESTADO_OBSERVADA])
@@ -65,13 +68,23 @@ def panel_admin(request):
             | Q(empresa__nombre_comercial__icontains=q)
         )
 
+    ahora = timezone.now()
     bandeja, con_duplicado = [], 0
     for conv in por_revisar:
         alertas = flujo.calcular_alertas(conv)
         duplicados = flujo.detectar_duplicado(conv)
         if duplicados:
             con_duplicado += 1
-        bandeja.append({"conv": conv, "alertas": alertas, "duplicados": duplicados})
+        riesgo = "alto" if duplicados else ("medio" if alertas else "ok")
+        bandeja.append(
+            {
+                "conv": conv,
+                "alertas": alertas,
+                "duplicados": duplicados,
+                "riesgo": riesgo,
+                "dias": (ahora - conv.creada_en).days,
+            }
+        )
 
     # Conteos para los chips de filtro (sobre el resultado de búsqueda, sin filtrar)
     conteos = {
@@ -90,6 +103,10 @@ def panel_admin(request):
     }
     if filtro in predicados:
         bandeja = [it for it in bandeja if predicados[filtro](it)]
+
+    if orden == "riesgo":
+        rango = {"alto": 2, "medio": 1, "ok": 0}
+        bandeja.sort(key=lambda it: (-rango[it["riesgo"]], it["conv"].creada_en))
 
     publicadas = Convocatoria.objects.filter(estado=ESTADO_PUBLICADA)
     metricas = {
@@ -110,8 +127,43 @@ def panel_admin(request):
             "conteos": conteos,
             "filtro": filtro,
             "q": q,
+            "orden": orden,
         },
     )
+
+
+@admin_required
+def aprobar_lote(request):
+    """Aprueba en lote las convocatorias seleccionadas (solo las sin alertas)."""
+    if request.method != "POST":
+        return redirect("core:panel_admin")
+
+    from apps.convocatorias import flujo
+    from apps.convocatorias.models import (
+        ESTADO_OBSERVADA,
+        ESTADO_PENDIENTE,
+        Convocatoria,
+    )
+
+    ids = request.POST.getlist("ids")
+    convs = Convocatoria.objects.filter(
+        id__in=ids, estado__in=[ESTADO_PENDIENTE, ESTADO_OBSERVADA]
+    )
+    aprobadas = 0
+    for conv in convs:
+        if flujo.calcular_alertas(conv):  # seguridad: nunca aprobar con alertas en lote
+            continue
+        try:
+            flujo.aprobar(conv)
+            aprobadas += 1
+        except flujo.TransicionInvalida:
+            pass
+
+    if aprobadas:
+        messages.success(request, f"{aprobadas} convocatoria(s) publicada(s).")
+    else:
+        messages.info(request, "No se aprobó ninguna convocatoria.")
+    return redirect(_destino_bandeja(request))
 
 
 def _destino_bandeja(request):

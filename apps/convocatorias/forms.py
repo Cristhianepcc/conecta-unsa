@@ -22,4 +22,12 @@ class ConvocatoriaForm(forms.ModelForm):
             "descripcion": forms.Textarea(attrs={"rows": 5}),
             "beneficios": forms.Textarea(attrs={"rows": 3}),
             "cronograma": forms.Textarea(attrs={"rows": 3}),
+            "medio_postulacion": forms.TextInput(
+                attrs={"placeholder": "https://empresa.pe/empleos  ó  rrhh@empresa.pe"}
+            ),
+        }
+        help_texts = {
+            "medio_postulacion": "Un enlace de postulación (https://…) o un correo para recibir CVs "
+            "(ej. rrhh@empresa.pe). El postulante saldrá a este medio; CONECTA no gestiona la selección.",
+            "email_contacto": "Correo de contacto de la empresa (anti-spam y trazabilidad).",
         }

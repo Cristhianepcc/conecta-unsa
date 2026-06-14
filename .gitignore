@@ -30,3 +30,6 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+
+# Trabajo temporal (screenshots, scripts de apoyo)
+tmp/

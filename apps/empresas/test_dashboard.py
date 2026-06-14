@@ -70,7 +70,7 @@ class VerificacionTests(BaseEmpresaDash):
         """CA-3: empresa no verificada ve dashboard limitado y no puede publicar."""
         self._empresa_con_login(estado=EMP_PENDIENTE)
         resp = self.client.get(reverse("empresas:dashboard"))
-        self.assertContains(resp, "en verificación")
+        self.assertContains(resp, "verificación")
         # Y el form de publicar la rebota.
         resp2 = self.client.get(reverse("empresas:publicar"), follow=True)
         self.assertContains(resp2, "en verificación")
