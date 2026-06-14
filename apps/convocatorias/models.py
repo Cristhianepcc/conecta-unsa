@@ -106,6 +106,10 @@ class Convocatoria(models.Model):
     estado = models.CharField("estado", max_length=20, choices=ESTADOS, default=ESTADO_BORRADOR)
     transparencia_pct = models.PositiveIntegerField("transparencia (%)", default=0)
 
+    # Flujo admin (feature 06)
+    comentario_revision = models.TextField("comentario de revisión", blank=True)
+    fecha_publicacion = models.DateTimeField("fecha de publicación", null=True, blank=True)
+
     creada_en = models.DateTimeField("creada", auto_now_add=True)
     actualizada_en = models.DateTimeField("actualizada", auto_now=True)
 
@@ -128,6 +132,17 @@ class Convocatoria(models.Model):
     @property
     def es_voluntariado(self) -> bool:
         return self.tipo == constants.TIPO_VOLUNTARIADO
+
+    @property
+    def activa(self) -> bool:
+        """Publicada y aún dentro de su fecha límite (flujo-admin.md §1)."""
+        from django.utils import timezone
+
+        if self.estado != ESTADO_PUBLICADA:
+            return False
+        if self.fecha_limite is None:
+            return True
+        return self.fecha_limite >= timezone.localdate()
 
     def recalcular_transparencia(self, guardar: bool = True) -> int:
         """Recalcula y (opcionalmente) persiste `transparencia_pct`."""

@@ -86,4 +86,6 @@ PARAMETROS_LEGALES_BASE = [
     ("tope_jornada_practica_preprofesional", "30", "Tope de jornada (h/sem) práctica preprofesional."),
     ("tope_jornada_practica_profesional", "48", "Tope de jornada (h/sem) práctica profesional."),
     ("plazo_max_egreso_meses", "12", "Plazo máx. de egreso para práctica profesional (meses)."),
+    ("umbral_similitud_duplicado", "0.6", "Umbral pg_trgm (0-1) para marcar posible duplicado."),
+    ("limite_difusion_30d", "5", "Máx. de convocatorias por empresa en 30 días antes de alertar exceso."),
 ]
