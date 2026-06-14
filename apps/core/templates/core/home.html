@@ -159,11 +159,23 @@
     {% include "core/_valor.html" with icono="megaphone" titulo="Difusión responsable" texto="Controlamos la frecuencia para evitar saturación informativa." %}
     {% include "core/_valor.html" with icono="lock" titulo="Datos institucionales" texto="Tu información está protegida y no se comparte con terceros." %}
   </div>
-  <!-- Semáforo explicado -->
-  <div class="mt-8 grid gap-3 sm:grid-cols-3 max-w-3xl">
-    <div class="rounded-lg bg-exito/5 border border-exito/20 p-3 text-sm"><span class="font-semibold text-exito">🟢 Alta (≥80%)</span> · mayor difusión</div>
-    <div class="rounded-lg bg-alerta/5 border border-alerta/20 p-3 text-sm"><span class="font-semibold text-alerta">🟡 Media (50–79%)</span> · difusión normal</div>
-    <div class="rounded-lg bg-peligro/5 border border-peligro/20 p-3 text-sm"><span class="font-semibold text-peligro">🔴 Baja (&lt;50%)</span> · menor visibilidad</div>
+  <!-- Semáforo de transparencia -->
+  <div class="mt-8 rounded-xl border border-slate-200 bg-white p-6 max-w-3xl">
+    <p class="text-sm font-medium text-slate-700">Cada convocatoria muestra su nivel de transparencia</p>
+    <div class="mt-4 grid gap-4 sm:grid-cols-3">
+      <div class="flex items-start gap-3">
+        <span class="mt-1 h-3 w-3 rounded-full bg-exito shrink-0"></span>
+        <div><p class="text-sm font-semibold text-slate-800">Alta · ≥ 80%</p><p class="text-xs text-slate-500">Mayor difusión</p></div>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="mt-1 h-3 w-3 rounded-full bg-alerta shrink-0"></span>
+        <div><p class="text-sm font-semibold text-slate-800">Media · 50–79%</p><p class="text-xs text-slate-500">Difusión normal</p></div>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="mt-1 h-3 w-3 rounded-full bg-peligro shrink-0"></span>
+        <div><p class="text-sm font-semibold text-slate-800">Baja · &lt; 50%</p><p class="text-xs text-slate-500">Menor visibilidad</p></div>
+      </div>
+    </div>
   </div>
 </section>
 
