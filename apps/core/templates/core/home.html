@@ -8,7 +8,7 @@
 <section class="relative bg-gradient-to-b from-granate-50 to-white overflow-hidden">
   <div class="max-w-6xl mx-auto px-4 pt-14 pb-28 grid lg:grid-cols-2 gap-10 items-center">
     <div>
-      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-800 leading-[1.1]">
+      <h1 class="text-3xl sm:text-4xl lg:text-[2.7rem] font-bold tracking-tight text-slate-800 leading-[1.12]">
         Oportunidades laborales relevantes para
         <span class="text-granate-700">egresados UNSA</span>
       </h1>
@@ -116,9 +116,12 @@
 
 <!-- ===== CONVOCATORIAS DESTACADAS (reales) ===== -->
 {% if destacadas %}
-<section class="bg-slate-50 border-y border-slate-100">
+<section class="bg-white border-t border-slate-100">
   <div class="max-w-6xl mx-auto px-4 py-14">
-    <h2 class="text-2xl font-bold text-slate-800">Convocatorias destacadas</h2>
+    <div class="flex items-end justify-between gap-4">
+      <h2 class="text-2xl font-bold text-slate-800">Convocatorias destacadas</h2>
+      <a href="{% url 'usuarios:login' %}" class="text-sm text-granate-700 font-medium hover:underline whitespace-nowrap">Ver todas →</a>
+    </div>
     <div class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {% for c in destacadas %}
       <article class="rounded-xl bg-white border border-slate-200 p-5 flex flex-col hover:shadow-sm transition">
@@ -191,10 +194,10 @@
         Cada semana te acercamos las oportunidades más relevantes según tu área de interés.
       </p>
       <dl class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-        <div><dd class="text-2xl font-bold">{{ resumen.nuevas }}</dd><dt class="text-xs text-white/70">nuevas convocatorias</dt></div>
-        <div><dd class="text-2xl font-bold">{{ resumen.empresas }}</dd><dt class="text-xs text-white/70">empresas publicaron</dt></div>
-        <div><dd class="text-2xl font-bold">{{ resumen.areas }}</dd><dt class="text-xs text-white/70">áreas profesionales</dt></div>
-        <div><dd class="text-2xl font-bold">{{ resumen.vistas }}</dd><dt class="text-xs text-white/70">visualizaciones</dt></div>
+        <div><i data-lucide="briefcase" class="w-5 h-5 mx-auto text-white/80"></i><dd class="mt-1 text-2xl font-bold">{{ resumen.nuevas }}</dd><dt class="text-xs text-white/70">nuevas convocatorias</dt></div>
+        <div><i data-lucide="building-2" class="w-5 h-5 mx-auto text-white/80"></i><dd class="mt-1 text-2xl font-bold">{{ resumen.empresas }}</dd><dt class="text-xs text-white/70">empresas publicaron</dt></div>
+        <div><i data-lucide="layers" class="w-5 h-5 mx-auto text-white/80"></i><dd class="mt-1 text-2xl font-bold">{{ resumen.areas }}</dd><dt class="text-xs text-white/70">áreas profesionales</dt></div>
+        <div><i data-lucide="eye" class="w-5 h-5 mx-auto text-white/80"></i><dd class="mt-1 text-2xl font-bold">{{ resumen.vistas }}</dd><dt class="text-xs text-white/70">visualizaciones</dt></div>
       </dl>
       <a href="{% url 'usuarios:login' %}"
          class="mt-6 inline-flex items-center gap-2 rounded-lg bg-white text-granate-700 px-5 py-2.5 font-medium hover:bg-white/90">
