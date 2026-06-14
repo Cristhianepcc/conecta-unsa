@@ -1,20 +1,50 @@
 {% comment %}Formulario de convocatoria en 3 bloques con campos dinámicos por tipo (Alpine)
-y barra de transparencia en vivo. Contexto: form, puntos_transp (dict criterio→%).{% endcomment %}
+y barra de transparencia en vivo. Contexto: form, puntos_transp (dict criterio→%).
+Estilos de input escopados a .form-pro (no alteran el .campo global).{% endcomment %}
 {{ puntos_transp|json_script:"puntos-transp" }}
-<div x-data="formConvocatoria()" @input="recalc()" @change="recalc()" class="space-y-6">
+
+<style>
+  /* Inputs modernos, solo dentro de este formulario (no toca el resto del sitio) */
+  .form-pro .campo label { display:block; font-size:.8rem; font-weight:600; color:#475569; margin-bottom:.45rem; letter-spacing:.01em; }
+  .form-pro .campo input:not([type="checkbox"]):not([type="radio"]),
+  .form-pro .campo select,
+  .form-pro .campo textarea {
+    width:100%; margin-top:0; background:#FAFAFA; border:1px solid #E6E8EE; border-radius:.75rem;
+    padding:.7rem .9rem; min-height:2.875rem; font-size:.9rem; color:#0f172a;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+  }
+  .form-pro .campo textarea { min-height:auto; line-height:1.55; }
+  .form-pro .campo input:not([type="checkbox"]):not([type="radio"])::placeholder,
+  .form-pro .campo textarea::placeholder { color:#94a3b8; }
+  .form-pro .campo input:not([type="checkbox"]):not([type="radio"]):hover,
+  .form-pro .campo select:hover, .form-pro .campo textarea:hover { border-color:#cbd5e1; }
+  .form-pro .campo input:focus, .form-pro .campo select:focus, .form-pro .campo textarea:focus {
+    outline:none; background:#fff; border-color:#7A1F2C; box-shadow:0 0 0 4px rgba(122,31,44,.10);
+  }
+  /* Fila de checkbox tipo "switch sutil" */
+  .form-pro .check-row { display:flex; align-items:flex-start; gap:.65rem; padding:.75rem .9rem;
+    border:1px solid #EDEFF3; border-radius:.75rem; background:#FAFAFA; transition:border-color .15s, background .15s; }
+  .form-pro .check-row:hover { border-color:#e2e8f0; background:#fff; }
+</style>
+
+<div x-data="formConvocatoria()" @input="recalc()" @change="recalc()" class="form-pro space-y-6">
   {% if form.non_field_errors %}
-  <div class="rounded-xl border border-peligro/30 bg-peligro/5 p-3 text-sm text-peligro">{{ form.non_field_errors }}</div>
+  <div class="rounded-xl border border-peligro/30 bg-peligro/5 p-4 text-sm text-peligro">{{ form.non_field_errors }}</div>
   {% endif %}
 
-  {# ===== Bloque 1 · Esencial ===== #}
-  <fieldset class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
-    <legend class="flex items-center gap-2 px-1">
-      <span class="grid h-7 w-7 place-items-center rounded-lg bg-granate-50 text-granate-700 text-sm font-bold">1</span>
-      <span class="text-base font-semibold text-slate-800">Esencial</span>
+  {# ===== Bloque 1 · Datos esenciales ===== #}
+  <fieldset class="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm">
+    <legend class="float-none w-full mb-6">
+      <div class="flex items-center gap-3">
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-granate-700 text-white text-sm font-bold">1</span>
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 leading-tight">Datos esenciales</h2>
+          <p class="text-sm text-slate-500">Lo mínimo para publicar: tipo, puesto y cómo postular.</p>
+        </div>
+      </div>
     </legend>
-    <p class="mt-1 text-sm text-slate-500">Lo mínimo para publicar: tipo, puesto y cómo postular.</p>
 
-    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
       <div class="campo sm:col-span-2"><label for="{{ form.tipo.id_for_label }}">Tipo de convocatoria</label>
         <select name="tipo" id="{{ form.tipo.id_for_label }}" x-model="tipo">
           {% for value, label in form.tipo.field.choices %}
@@ -30,20 +60,24 @@ y barra de transparencia en vivo. Contexto: form, puntos_transp (dict criterio�
       {% endif %}{% endfor %}
     </div>
 
-    <label class="mt-4 flex items-start gap-2 text-sm">{{ form.no_discriminacion }}
-      <span class="text-slate-600">{{ form.no_discriminacion.label }} (Ley 26772)</span></label>
+    <label class="check-row mt-5 text-sm cursor-pointer">{{ form.no_discriminacion }}
+      <span class="text-slate-600">{{ form.no_discriminacion.label }} <span class="text-slate-400">(Ley 26772)</span></span></label>
     {{ form.no_discriminacion.errors }}
   </fieldset>
 
   {# ===== Bloque 2 · Según el tipo (campos dinámicos) ===== #}
-  <fieldset class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm" x-show="tipo" x-cloak>
-    <legend class="flex items-center gap-2 px-1">
-      <span class="grid h-7 w-7 place-items-center rounded-lg bg-granate-50 text-granate-700 text-sm font-bold">2</span>
-      <span class="text-base font-semibold text-slate-800">Según el tipo</span>
+  <fieldset class="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm" x-show="tipo" x-cloak>
+    <legend class="float-none w-full mb-6">
+      <div class="flex items-center gap-3">
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-granate-700 text-white text-sm font-bold">2</span>
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 leading-tight">Según el tipo</h2>
+          <p class="text-sm text-slate-500" x-text="ayudaTipo()"></p>
+        </div>
+      </div>
     </legend>
-    <p class="mt-1 text-sm text-slate-500" x-text="ayudaTipo()"></p>
 
-    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
       {# Remuneración: todos los tipos pagados (no voluntariado) #}
       <div class="campo" x-show="tipo && tipo !== 'voluntariado'">
         <label for="{{ form.subvencion_remuneracion.id_for_label }}">{{ form.subvencion_remuneracion.label }}</label>
@@ -61,7 +95,7 @@ y barra de transparencia en vivo. Contexto: form, puntos_transp (dict criterio�
       </div>
 
       {# Convenio + ciclo/egreso: prácticas #}
-      <label class="campo flex items-start gap-2 text-sm pt-2" x-show="['practica_preprofesional','practica_profesional'].includes(tipo)">
+      <label class="campo check-row text-sm cursor-pointer self-end" x-show="['practica_preprofesional','practica_profesional'].includes(tipo)">
         {{ form.requiere_convenio }}<span class="text-slate-600">{{ form.requiere_convenio.label }}</span>
       </label>
       <div class="campo" x-show="tipo === 'practica_preprofesional'">
@@ -90,53 +124,60 @@ y barra de transparencia en vivo. Contexto: form, puntos_transp (dict criterio�
       </div>
 
       {# Seguro: prácticas / empleo / trainee #}
-      <label class="campo flex items-start gap-2 text-sm pt-2" x-show="['practica_preprofesional','practica_profesional','empleo','trainee'].includes(tipo)">
+      <label class="campo check-row text-sm cursor-pointer self-end" x-show="['practica_preprofesional','practica_profesional','empleo','trainee'].includes(tipo)">
         {{ form.incluye_seguro }}<span class="text-slate-600">{{ form.incluye_seguro.label }}</span>
       </label>
       {# No vínculo: CAS / consultoría #}
-      <label class="campo flex items-start gap-2 text-sm pt-2" x-show="['cas','consultoria'].includes(tipo)">
+      <label class="campo check-row text-sm cursor-pointer self-end" x-show="['cas','consultoria'].includes(tipo)">
         {{ form.no_vinculo }}<span class="text-slate-600">{{ form.no_vinculo.label }}</span>
       </label>
     </div>
 
-    <p class="mt-4 flex items-start gap-2 rounded-lg bg-info/5 p-3 text-xs text-slate-600" x-show="tipo === 'voluntariado'" x-cloak>
+    <p class="mt-5 flex items-start gap-2 rounded-xl bg-info/5 p-3.5 text-xs text-slate-600" x-show="tipo === 'voluntariado'" x-cloak>
       <i data-lucide="info" class="w-4 h-4 text-info shrink-0 mt-0.5"></i>
       El voluntariado no admite remuneración por ley; deja los montos en blanco.
     </p>
   </fieldset>
 
-  {# ===== Bloque 3 · Mejora (transparencia en vivo) ===== #}
-  <fieldset class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
-    <legend class="flex items-center gap-2 px-1">
-      <span class="grid h-7 w-7 place-items-center rounded-lg bg-granate-50 text-granate-700 text-sm font-bold">3</span>
-      <span class="text-base font-semibold text-slate-800">Mejora tu transparencia</span>
+  {# ===== Bloque 3 · Mejora tu transparencia (con barra en vivo) ===== #}
+  <fieldset class="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm">
+    <legend class="float-none w-full mb-6">
+      <div class="flex items-center gap-3">
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-granate-700 text-white text-sm font-bold">3</span>
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 leading-tight">Mejora tu transparencia</h2>
+          <p class="text-sm text-slate-500">Opcional, pero sube tu % y te ayuda a llegar a más egresados.</p>
+        </div>
+      </div>
     </legend>
-    <p class="mt-1 text-sm text-slate-500">Opcional, pero sube tu % y hace que llegues a más egresados.</p>
 
     {# Barra de transparencia en vivo #}
-    <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-      <div class="flex items-center justify-between text-sm">
-        <span class="font-medium text-slate-700">Transparencia estimada</span>
-        <span class="text-lg font-bold tabular-nums"
+    <div class="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5">
+      <div class="flex items-end justify-between gap-3">
+        <div>
+          <p class="text-sm font-semibold text-slate-700">Transparencia estimada</p>
+          <p class="text-xs text-slate-500 mt-0.5">Se calcula en vivo mientras completas el formulario.</p>
+        </div>
+        <span class="text-3xl font-extrabold tabular-nums leading-none"
               :class="pct >= 80 ? 'text-exito' : (pct >= 50 ? 'text-alerta' : 'text-peligro')"
               x-text="pct + '%'">0%</span>
       </div>
-      <div class="mt-2 h-2 rounded-full bg-slate-200 overflow-hidden">
-        <div class="h-full rounded-full transition-all duration-300"
+      <div class="mt-3 h-2.5 rounded-full bg-slate-200/80 overflow-hidden">
+        <div class="h-full rounded-full transition-all duration-500 ease-out"
              :class="pct >= 80 ? 'bg-exito' : (pct >= 50 ? 'bg-alerta' : 'bg-peligro')"
              :style="`width: ${pct}%`"></div>
       </div>
-      <p class="mt-2 text-xs text-slate-600" x-show="proximo" x-cloak>
-        <i data-lucide="arrow-up-circle" class="inline w-3.5 h-3.5 align-text-bottom text-granate-700"></i>
+      <p class="mt-3 flex items-center gap-1.5 text-xs font-medium text-granate-700" x-show="proximo" x-cloak>
+        <i data-lucide="arrow-up-circle" class="w-4 h-4 shrink-0"></i>
         <span x-text="proximo"></span>
       </p>
-      <p class="mt-2 text-xs text-exito" x-show="!proximo" x-cloak>
-        <i data-lucide="check-circle-2" class="inline w-3.5 h-3.5 align-text-bottom"></i>
+      <p class="mt-3 flex items-center gap-1.5 text-xs font-medium text-exito" x-show="!proximo" x-cloak>
+        <i data-lucide="check-circle-2" class="w-4 h-4 shrink-0"></i>
         ¡Excelente! Cumples todos los criterios de transparencia.
       </p>
     </div>
 
-    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+    <div class="mt-6 grid gap-x-6 gap-y-5 sm:grid-cols-2">
       {% for f in form %}{% if f.name in "banda_salarial_min,banda_salarial_max,vacantes" %}
       <div class="campo"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>
       {% endif %}{% endfor %}
@@ -144,10 +185,13 @@ y barra de transparencia en vivo. Contexto: form, puntos_transp (dict criterio�
       <div class="campo sm:col-span-2"><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</div>
       {% endif %}{% endfor %}
     </div>
-    <label class="mt-4 flex items-start gap-2 text-sm">{{ form.salario_confidencial }}
-      <span class="text-slate-600">{{ form.salario_confidencial.label }} <span class="text-slate-400">(oculta la banda y baja tu transparencia)</span></span></label>
-    <label class="mt-3 flex items-start gap-2 text-sm">{{ form.discapacidad }}
-      <span class="text-slate-600">{{ form.discapacidad.label }}</span></label>
+
+    <div class="mt-5 grid gap-3 sm:grid-cols-2">
+      <label class="check-row text-sm cursor-pointer">{{ form.salario_confidencial }}
+        <span class="text-slate-600">{{ form.salario_confidencial.label }} <span class="text-slate-400">(oculta la banda y baja tu transparencia)</span></span></label>
+      <label class="check-row text-sm cursor-pointer">{{ form.discapacidad }}
+        <span class="text-slate-600">{{ form.discapacidad.label }}</span></label>
+    </div>
   </fieldset>
 </div>
 
