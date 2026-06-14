@@ -30,6 +30,7 @@ urlpatterns = [
         name="pwa_sw",
     ),
     # Apps del proyecto
+    path("api/", include("apps.integraciones.urls")),
     path("taxonomia/", include("apps.taxonomia.urls")),
     path("usuarios/", include("apps.usuarios.urls")),
     path("empresas/", include("apps.empresas.urls")),

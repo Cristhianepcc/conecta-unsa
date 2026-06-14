@@ -123,6 +123,7 @@ class ConsentimientoTests(TestCase):
                 "carrera": Carrera.objects.first().id,
                 "estado_academico": "egresado",
                 "consentimiento": "on",
+                "consentimiento_matching": "on",
             },
             follow=True,
         )
@@ -204,7 +205,12 @@ class PerfilTalentoTests(TestCase):
         carrera = Carrera.objects.first()
         resp = self.client.post(
             reverse("usuarios:completar_perfil"),
-            {"carrera": carrera.id, "estado_academico": "egresado", "consentimiento": "on"},
+            {
+                "carrera": carrera.id,
+                "estado_academico": "egresado",
+                "consentimiento": "on",
+                "consentimiento_matching": "on",
+            },
             follow=True,
         )
         self.assertRedirects(resp, reverse("usuarios:dashboard"))

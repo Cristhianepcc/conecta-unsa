@@ -3,36 +3,206 @@
 {% block title %}Completa tu perfil — CONECTA UNSA{% endblock %}
 
 {% block content %}
-<section class="max-w-md mx-auto px-4 py-12">
+<section class="max-w-md mx-auto px-4 py-12" x-data="perfilDni()">
   <h1 class="text-2xl font-bold text-granate-700">Completa tu perfil</h1>
   <p class="mt-2 text-sm text-slate-600">
-    Es tu primer ingreso. Indica tu carrera y estado académico para recibir convocatorias
-    pertinentes. <span class="text-slate-400">(En la demo es autodeclarado; en producción
-    vendría verificado por la UNSA.)</span>
+    Es tu primer ingreso. Valida tu identidad con tu DNI y jalaremos tu carrera
+    desde la base académica de la UNSA. <span class="text-slate-400">(Si tu DNI no
+    está en el padrón de demostración, puedes autodeclarar tus datos.)</span>
   </p>
 
   <form method="post" class="mt-6 space-y-5">
     {% csrf_token %}
+
+    <!-- Modal de consentimiento (Eje 5 · Ley 29733): autorizar el uso de datos
+         para el matching ANTES de entrar. Es obligatorio: no se cierra hasta
+         aceptar los consentimientos obligatorios. -->
+    <div x-show="consentAbierto" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         role="dialog" aria-modal="true" aria-labelledby="consent_titulo">
+      <div class="absolute inset-0 bg-slate-900/50"></div>
+      <div x-transition class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div class="flex items-center gap-2 text-granate-700">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+          <h2 id="consent_titulo" class="text-lg font-bold">Antes de empezar</h2>
+        </div>
+        <p class="mt-2 text-sm text-slate-600">
+          Para ofrecerte oportunidades pertinentes necesitamos tu autorización. Puedes
+          revisar nuestra
+          <a href="{% url 'core:privacidad' %}" target="_blank" class="text-granate-700 underline">Política de Privacidad</a>.
+        </p>
+
+        <div class="mt-5 space-y-4">
+          <label class="flex items-start gap-3 text-sm text-slate-700">
+            <input type="checkbox" name="consentimiento" x-model="cDatos"
+                   class="mt-0.5 rounded border-slate-300 text-granate-700 focus:ring-granate-300">
+            <span>Acepto el <strong>tratamiento de mis datos personales</strong> conforme a la
+              Ley 29733. <span class="text-peligro">*</span></span>
+          </label>
+          <label class="flex items-start gap-3 text-sm text-slate-700">
+            <input type="checkbox" name="consentimiento_matching" x-model="cMatching"
+                   class="mt-0.5 rounded border-slate-300 text-granate-700 focus:ring-granate-300">
+            <span>Autorizo el uso de mi <strong>carrera y credenciales para el matching
+              inteligente</strong>. <span class="text-peligro">*</span></span>
+          </label>
+          <label class="flex items-start gap-3 text-sm text-slate-700">
+            <input type="checkbox" name="consentimiento_credencial_publica"
+                   class="mt-0.5 rounded border-slate-300 text-granate-700 focus:ring-granate-300">
+            <span>Quiero activar mi <strong>credencial pública</strong>
+              <span class="text-slate-400">(opcional; puedo cambiarlo luego)</span>.</span>
+          </label>
+        </div>
+
+        <p class="mt-4 text-xs text-slate-400"><span class="text-peligro">*</span> Obligatorio para continuar.</p>
+
+        <button type="button"
+                @click="consentAbierto = false"
+                :disabled="!(cDatos && cMatching)"
+                :class="!(cDatos && cMatching) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-granate-800'"
+                class="mt-5 w-full rounded-lg bg-granate-700 py-3 font-medium text-white">
+          Acepto y continuar
+        </button>
+      </div>
+    </div>
+
+    <!-- DNI con validación en tiempo real (Eje 2 · interoperabilidad) -->
+    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <label for="id_dni" class="block text-sm font-medium text-slate-700">Validar identidad con la UNSA</label>
+      <div class="mt-2 relative">
+        <input type="text" name="dni" id="id_dni"
+               inputmode="numeric" pattern="[0-9]{8}" maxlength="8" autocomplete="off"
+               x-model="dni" @input="alValidar()"
+               placeholder="Ingresa tu DNI — validaremos tu carrera con la UNSA"
+               aria-describedby="dni_estado"
+               class="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-granate-200 focus:border-granate-400">
+        <span class="absolute right-3 top-1/2 -translate-y-1/2">
+          <i x-show="estado === 'validando'" x-cloak data-lucide="loader-2" class="w-5 h-5 text-slate-400 animate-spin"></i>
+          <i x-show="estado === 'validado'" x-cloak data-lucide="check-circle-2" class="w-5 h-5 text-exito"></i>
+          <i x-show="estado === 'no_encontrado' || estado === 'formato'" x-cloak data-lucide="alert-circle" class="w-5 h-5 text-alerta"></i>
+        </span>
+      </div>
+
+      <!-- Mensajes de estado -->
+      <p id="dni_estado" class="mt-2 text-xs" role="status" aria-live="polite">
+        <span x-show="estado === ''" class="text-slate-400">Escribe los 8 dígitos de tu DNI.</span>
+        <span x-show="estado === 'validando'" x-cloak class="text-slate-500">Validando con la base académica de la UNSA…</span>
+        <template x-if="estado === 'validado'">
+          <span class="text-exito font-medium">
+            ✅ Validado con la UNSA · <span x-text="resultado.nombres"></span> · <span x-text="resultado.carrera"></span>
+          </span>
+        </template>
+        <span x-show="estado === 'no_encontrado'" x-cloak class="text-alerta">
+          ⚠️ DNI no encontrado en el padrón — puedes continuar autodeclarando tus datos.
+        </span>
+        <span x-show="estado === 'formato'" x-cloak class="text-alerta">
+          ⚠️ El DNI debe tener 8 dígitos.
+        </span>
+      </p>
+    </div>
+
+    <!-- Carrera y estado: se autocompletan y bloquean si el DNI valida -->
     <div class="campo">
-      <label for="{{ form.carrera.id_for_label }}">{{ form.carrera.label }}</label>
+      <label for="{{ form.carrera.id_for_label }}">{{ form.carrera.label }}
+        <span x-show="estado === 'validado'" x-cloak class="ml-1 text-xs font-normal text-exito">· Dato institucional (solo lectura)</span>
+      </label>
       {{ form.carrera }}
+      <p class="mt-1 text-xs text-slate-400">
+        <i data-lucide="building-2" class="inline w-3 h-3 align-text-bottom"></i>
+        Se completa automáticamente al validar tu DNI con la base académica de la UNSA.
+      </p>
       {% for e in form.carrera.errors %}<p class="text-xs text-peligro mt-1">{{ e }}</p>{% endfor %}
     </div>
     <div class="campo">
-      <label for="{{ form.estado_academico.id_for_label }}">{{ form.estado_academico.label }}</label>
+      <label for="{{ form.estado_academico.id_for_label }}">{{ form.estado_academico.label }}
+        <span x-show="estado === 'validado'" x-cloak class="ml-1 text-xs font-normal text-exito">· Dato institucional (solo lectura)</span>
+      </label>
       {{ form.estado_academico }}
+      <p class="mt-1 text-xs text-slate-400">
+        <i data-lucide="building-2" class="inline w-3 h-3 align-text-bottom"></i>
+        Dato académico provisto por la UNSA; si no validas tu DNI, puedes indicarlo manualmente.
+      </p>
       {% for e in form.estado_academico.errors %}<p class="text-xs text-peligro mt-1">{{ e }}</p>{% endfor %}
     </div>
-    <label class="flex items-start gap-3 text-sm text-slate-700">
-      {{ form.consentimiento }}
-      <span>{{ form.consentimiento.label }}</span>
-    </label>
+
+    <!-- Recordatorio de los consentimientos aceptados (editable reabriendo el modal) -->
+    <p class="text-xs text-slate-500">
+      <i data-lucide="check-circle-2" class="inline w-3.5 h-3.5 text-exito align-text-bottom"></i>
+      Consentimientos aceptados.
+      <button type="button" @click="consentAbierto = true" class="text-granate-700 underline">Revisar</button>
+    </p>
     {% for e in form.consentimiento.errors %}<p class="text-xs text-peligro">{{ e }}</p>{% endfor %}
+    {% for e in form.consentimiento_matching.errors %}<p class="text-xs text-peligro">{{ e }}</p>{% endfor %}
 
     <button type="submit"
             class="w-full rounded-lg bg-granate-700 py-3 font-medium text-white hover:bg-granate-800">
-      Continuar
+      Activar mi perfil
     </button>
   </form>
 </section>
+
+<script>
+  function perfilDni() {
+    return {
+      // --- Consentimiento (Eje 5) ---
+      consentAbierto: true,
+      cDatos: false,
+      cMatching: false,
+
+      // --- Validación de DNI (Eje 2) ---
+      dni: '',
+      estado: '',          // '' | 'validando' | 'validado' | 'no_encontrado' | 'formato'
+      resultado: {},
+      _timer: null,
+
+      alValidar() {
+        clearTimeout(this._timer);
+        const v = (this.dni || '').replace(/\D/g, '').slice(0, 8);
+        this.dni = v;
+        if (v.length < 8) {
+          this.estado = '';
+          this._bloquear(false);
+          return;
+        }
+        this.estado = 'validando';
+        this._timer = setTimeout(() => this._consultar(v), 300);
+      },
+
+      async _consultar(dni) {
+        try {
+          const res = await fetch(`/api/validar-dni/?dni=${encodeURIComponent(dni)}`);
+          const data = await res.json();
+          if (data.estado === 'validado') {
+            this.resultado = data;
+            this.estado = 'validado';
+            const carrera = document.getElementById('id_carrera');
+            const estado = document.getElementById('id_estado_academico');
+            if (carrera) carrera.value = data.carrera_id;
+            if (estado) estado.value = data.estado_academico;
+            this._bloquear(true);
+          } else if (data.estado === 'formato_invalido') {
+            this.estado = 'formato';
+            this._bloquear(false);
+          } else {
+            this.estado = 'no_encontrado';
+            this._bloquear(false);
+          }
+        } catch (e) {
+          this.estado = '';
+          this._bloquear(false);
+        }
+      },
+
+      _bloquear(lock) {
+        // El servidor revalida el DNI; el bloqueo es ayuda de usabilidad.
+        ['id_carrera', 'id_estado_academico'].forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.disabled = lock;
+          el.classList.toggle('bg-slate-100', lock);
+          el.classList.toggle('cursor-not-allowed', lock);
+        });
+      },
+    };
+  }
+</script>
 {% endblock %}

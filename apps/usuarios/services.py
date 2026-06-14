@@ -64,11 +64,21 @@ def resolver_rol_y_destino(user) -> str:
     return DESTINO_POR_ROL.get(rol, "usuarios:dashboard")
 
 
-def registrar_consentimiento(perfil: Perfil) -> None:
-    """Marca el consentimiento informado de datos (Ley 29733 / NFR-PRIV-1)."""
+def registrar_consentimiento(perfil: Perfil, matching: bool = False) -> None:
+    """Marca el consentimiento informado de datos (Ley 29733 / NFR-PRIV-1).
+
+    `matching=True` registra además la autorización explícita para el matching
+    inteligente (Eje 5), con su propia marca de tiempo para auditoría.
+    """
+    ahora = timezone.now()
     perfil.consentimiento_datos = True
-    perfil.consentimiento_en = timezone.now()
-    perfil.save(update_fields=["consentimiento_datos", "consentimiento_en"])
+    perfil.consentimiento_en = ahora
+    campos = ["consentimiento_datos", "consentimiento_en"]
+    if matching:
+        perfil.consentimiento_matching = True
+        perfil.consentimiento_matching_en = ahora
+        campos += ["consentimiento_matching", "consentimiento_matching_en"]
+    perfil.save(update_fields=campos)
 
 
 # --- 07 Perfil de talento / credencial pública ------------------------------

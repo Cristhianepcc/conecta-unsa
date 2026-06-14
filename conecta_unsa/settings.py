@@ -69,6 +69,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "apps.core",
     "apps.taxonomia",
+    "apps.integraciones",
     "apps.usuarios",
     "apps.empresas",
     "apps.convocatorias",

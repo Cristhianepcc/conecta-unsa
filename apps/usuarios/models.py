@@ -35,6 +35,11 @@ class Perfil(models.Model):
     rol = models.CharField("rol", max_length=20, choices=ROLES, default=ROL_EGRESADO)
     consentimiento_datos = models.BooleanField("consentimiento de datos", default=False)
     consentimiento_en = models.DateTimeField("consentimiento otorgado", null=True, blank=True)
+    # Consentimiento específico para el matching inteligente (Eje 5 · Ley 29733).
+    consentimiento_matching = models.BooleanField("consentimiento para matching", default=False)
+    consentimiento_matching_en = models.DateTimeField(
+        "consentimiento de matching otorgado", null=True, blank=True
+    )
     perfil_completo = models.BooleanField("perfil completo", default=False)
 
     creado_en = models.DateTimeField("creado", auto_now_add=True)
@@ -112,6 +117,13 @@ class PerfilTalento(models.Model):
         "estado académico", max_length=20,
         choices=constants.ESTADOS_ACADEMICOS, blank=True,
     )
+
+    # Interoperabilidad (Eje 2): identidad validada contra el padrón académico UNSA.
+    # `dni` es dato personal (Ley 29733): NUNCA se expone en la credencial pública.
+    identidad_verificada = models.BooleanField(
+        "identidad verificada (padrón UNSA)", default=False
+    )
+    dni = models.CharField("DNI", max_length=8, blank=True, null=True)
 
     # Preferencias (afinan el feed; todo funciona sin configurarlas)
     carreras_extra = models.ManyToManyField(

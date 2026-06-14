@@ -122,16 +122,52 @@ def logout_view(request):
 
 @login_required
 def completar_perfil(request):
-    """Primer ingreso del egresado: carrera + estado académico + consentimiento (CA-1 / CA-6)."""
+    """Primer ingreso del egresado: identidad académica + consentimiento (CA-1 / CA-6).
+
+    Interoperabilidad (Eje 2): si el DNI valida contra el padrón UNSA, la carrera y
+    el estado académico se toman del resultado verificado (solo lectura). Si no, el
+    egresado los autodeclara. El servidor revalida el DNI: no confía en el cliente.
+    """
+    from apps.integraciones.padron import consultar_dni
+
     perfil = asegurar_perfil(request.user)
     talento = asegurar_perfil_talento(request.user)
     if request.method == "POST":
         form = CompletarPerfilForm(request.POST)
         if form.is_valid():
-            talento.carrera = form.cleaned_data["carrera"]
-            talento.estado_academico = form.cleaned_data["estado_academico"]
-            talento.save(update_fields=["carrera", "estado_academico"])
-            registrar_consentimiento(perfil)
+            dni = (form.cleaned_data.get("dni") or "").strip()
+            resultado = consultar_dni(dni) if dni else None
+
+            if resultado is not None:
+                # Dato institucional verificado (solo lectura).
+                talento.carrera_id = resultado.carrera_id
+                talento.estado_academico = resultado.estado_academico
+                talento.dni = dni
+                talento.identidad_verificada = True
+            else:
+                # Autodeclarado: la carrera y el estado son obligatorios en este camino.
+                carrera = form.cleaned_data.get("carrera")
+                estado = form.cleaned_data.get("estado_academico")
+                if not carrera or not estado:
+                    messages.error(
+                        request,
+                        "Valida tu DNI con la UNSA o indica tu carrera y estado académico.",
+                    )
+                    return render(request, "usuarios/completar_perfil.html", {"form": form})
+                talento.carrera = carrera
+                talento.estado_academico = estado
+                talento.dni = dni or None
+                talento.identidad_verificada = False
+
+            talento.save(
+                update_fields=["carrera", "estado_academico", "dni", "identidad_verificada"]
+            )
+            registrar_consentimiento(
+                perfil, matching=form.cleaned_data.get("consentimiento_matching", False)
+            )
+            # Credencial pública: opt-in opcional declarado en el modal de consentimiento.
+            if form.cleaned_data.get("consentimiento_credencial_publica"):
+                activar_credencial_publica(talento)
             perfil.perfil_completo = True
             perfil.save(update_fields=["perfil_completo"])
             messages.success(request, "¡Perfil activado! Bienvenido a CONECTA UNSA.")
