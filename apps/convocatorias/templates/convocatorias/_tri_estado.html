@@ -1,0 +1,19 @@
+{% comment %}Control segmentado Sí / No / No especificar para campos NullBoolean
+(reemplaza el <select> de 3 estados). Contexto: field (BoundField del modelo).
+Envía true/false/"" por un input oculto; Django lo mapea a True/False/None.{% endcomment %}
+<div class="campo" x-data="{ v: '{% if field.value == True %}true{% elif field.value == False %}false{% endif %}' }">
+  <label>{{ field.label }}</label>
+  <input type="hidden" name="{{ field.html_name }}" :value="v">
+  <div class="seg-tri" role="group" aria-label="{{ field.label }}">
+    <button type="button" @click="v='true'" :aria-pressed="v==='true'" :class="{ 'seg-on': v==='true' }">
+      <i data-lucide="check" class="w-3.5 h-3.5"></i> Sí
+    </button>
+    <button type="button" @click="v='false'" :aria-pressed="v==='false'" :class="{ 'seg-on': v==='false' }">
+      <i data-lucide="x" class="w-3.5 h-3.5"></i> No
+    </button>
+    <button type="button" @click="v=''" :aria-pressed="v===''" :class="{ 'seg-on': v==='' }">
+      No especificar
+    </button>
+  </div>
+  {{ field.errors }}
+</div>

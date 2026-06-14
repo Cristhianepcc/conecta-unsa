@@ -25,6 +25,15 @@ Estilos de input escopados a .form-pro (no alteran el .campo global).{% endcomme
   .form-pro .check-row { display:flex; align-items:flex-start; gap:.65rem; padding:.75rem .9rem;
     border:1px solid #EDEFF3; border-radius:.75rem; background:#FAFAFA; transition:border-color .15s, background .15s; }
   .form-pro .check-row:hover { border-color:#e2e8f0; background:#fff; }
+  /* Control segmentado Sí / No / No especificar (tri-estado) */
+  .form-pro .seg-tri { display:flex; width:100%; gap:.25rem; padding:.25rem; border-radius:.75rem;
+    background:#F1F3F7; border:1px solid #E6E8EE; }
+  .form-pro .seg-tri button { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:.35rem;
+    min-height:2.25rem; padding:.4rem .5rem; border-radius:.55rem; font-size:.85rem; font-weight:500;
+    color:#64748b; transition:background .15s, color .15s, box-shadow .15s; }
+  .form-pro .seg-tri button:hover { color:#0f172a; }
+  .form-pro .seg-tri button.seg-on { background:#fff; color:#7A1F2C; font-weight:600;
+    box-shadow:0 1px 2px rgba(15,23,42,.10); }
 </style>
 
 {% comment %}El estado Alpine (x-data="formConvocatoria()") vive en el <form> que incluye
@@ -142,9 +151,8 @@ este parcial, para que el botón "Enviar" —fuera de este div— pueda leer lis
       </div>
 
       {# Convenio + ciclo/egreso: prácticas #}
-      <div class="campo" x-show="['practica_preprofesional','practica_profesional'].includes(tipo)">
-        <label for="{{ form.requiere_convenio.id_for_label }}">{{ form.requiere_convenio.label }}</label>
-        {{ form.requiere_convenio }}{{ form.requiere_convenio.errors }}
+      <div x-show="['practica_preprofesional','practica_profesional'].includes(tipo)">
+        {% include "convocatorias/_tri_estado.html" with field=form.requiere_convenio %}
       </div>
       <div class="campo" x-show="tipo === 'practica_preprofesional'">
         <label for="{{ form.ciclo_minimo.id_for_label }}">{{ form.ciclo_minimo.label }}</label>
@@ -172,9 +180,8 @@ este parcial, para que el botón "Enviar" —fuera de este div— pueda leer lis
       </div>
 
       {# Seguro: prácticas / empleo / trainee #}
-      <div class="campo" x-show="['practica_preprofesional','practica_profesional','empleo','trainee'].includes(tipo)">
-        <label for="{{ form.incluye_seguro.id_for_label }}">{{ form.incluye_seguro.label }}</label>
-        {{ form.incluye_seguro }}{{ form.incluye_seguro.errors }}
+      <div x-show="['practica_preprofesional','practica_profesional','empleo','trainee'].includes(tipo)">
+        {% include "convocatorias/_tri_estado.html" with field=form.incluye_seguro %}
       </div>
       {# No vínculo: CAS / consultoría #}
       <label class="campo check-row text-sm cursor-pointer self-end" x-show="['cas','consultoria'].includes(tipo)">
