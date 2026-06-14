@@ -141,12 +141,12 @@ class LandingTests(TestCase):
         resp = self.client.get(reverse("core:home"))
         self.assertContains(resp, "Ingenierías")
 
-    def test_ca4__semaforo_explicado(self):
-        """CA-4: la landing explica el semáforo de transparencia (alta/media/baja)."""
+    def test_ca4__transparencia_explicada(self):
+        """CA-4: la landing explica la transparencia y muestra el % (semáforo) en las tarjetas."""
         resp = self.client.get(reverse("core:home"))
-        self.assertContains(resp, "nivel de transparencia")
-        self.assertContains(resp, "Alta")
-        self.assertContains(resp, "Baja")
+        self.assertContains(resp, "Transparencia en cada convocatoria")
+        self.assertContains(resp, "Información verificada")
+        self.assertContains(resp, "80%")  # badge de transparencia en convocatoria destacada
 
     def test_ca5__footer_institucional(self):
         """CA-5: footer con privacidad, términos y contacto."""
