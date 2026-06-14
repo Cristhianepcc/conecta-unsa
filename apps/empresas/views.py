@@ -64,6 +64,20 @@ def dashboard(request):
                     a["cumplen"] += 1
         contexto["convocatorias"] = convs
         contexto["conteos"] = conteos
+        # Banda de atención: lo accionable primero (observadas / por vencer ≤7 días).
+        observadas = [c for c in convs if c.estado == ESTADO_OBSERVADA]
+        por_vencer = [
+            c
+            for c in convs
+            if c.estado == "publicada"
+            and c.dias_restantes is not None
+            and 0 <= c.dias_restantes <= 7
+        ]
+        contexto["atencion"] = {
+            "observadas": len(observadas),
+            "obs_unica": observadas[0] if len(observadas) == 1 else None,
+            "por_vencer": len(por_vencer),
+        }
         if convs:
             criterios = sorted(
                 agg.values(), key=lambda a: (a["cumplen"] / len(convs), -a["puntos"])

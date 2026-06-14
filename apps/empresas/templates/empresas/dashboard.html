@@ -1,15 +1,20 @@
 {% extends "dashboard_base.html" %}
 
 {% block title %}Panel de empresa — CONECTA UNSA{% endblock %}
-{% block dashboard_title %}Inicio{% endblock %}
+{% block dashboard_title %}Mis convocatorias{% endblock %}
 {% block user_role %}{{ empresa.razon_social|default:"Empresa" }}{% endblock %}
 {% block sidebar_promo %}Comunicamos oportunidades, conectamos futuro.{% endblock %}
 {% block sidebar_items %}{% include "empresas/_sidebar_empresa.html" with seccion="dashboard" %}{% endblock %}
 
 {% block topbar_actions %}
+  {% if empresa.verificada %}
+    <span class="hidden sm:inline-flex items-center gap-1.5 text-xs rounded-full bg-exito/10 text-exito px-2.5 py-1 font-medium">
+      <i data-lucide="badge-check" class="w-3.5 h-3.5"></i> Verificada
+    </span>
+  {% endif %}
   {% if empresa.puede_publicar %}
     <a href="{% url 'empresas:publicar' %}"
-       class="hidden sm:inline-flex items-center gap-2 rounded-lg bg-granate-700 px-4 py-2 text-sm font-medium text-white hover:bg-granate-800">
+       class="inline-flex items-center gap-2 rounded-lg bg-granate-700 px-4 py-2 text-sm font-medium text-white hover:bg-granate-800">
       <i data-lucide="plus" class="w-4 h-4"></i> Publicar
     </a>
   {% endif %}
@@ -17,25 +22,6 @@
 
 {% block dashboard_content %}
 <div class="max-w-6xl space-y-6">
-
-  <!-- Bienvenida -->
-  <div class="flex flex-wrap items-start justify-between gap-3">
-    <div class="min-w-0">
-      <h2 class="text-2xl font-bold text-slate-800">
-        Bienvenido, <span class="text-granate-700">{{ empresa.razon_social|default:"empresa" }}</span>
-      </h2>
-      <p class="mt-1 text-sm text-slate-500">Gestiona tus convocatorias y mide su alcance entre los egresados de la UNSA.</p>
-    </div>
-    {% if empresa.verificada %}
-      <span class="inline-flex items-center gap-1.5 text-sm rounded-full bg-exito/10 text-exito px-3 py-1 font-medium">
-        <i data-lucide="badge-check" class="w-4 h-4"></i> Empresa verificada
-      </span>
-    {% else %}
-      <span class="inline-flex items-center gap-1.5 text-sm rounded-full bg-alerta/10 text-alerta px-3 py-1 font-medium">
-        <i data-lucide="clock" class="w-4 h-4"></i> En verificación
-      </span>
-    {% endif %}
-  </div>
 
   {% if not puede_publicar %}
   <!-- CA-3: dashboard limitado, con timeline del trámite y tareas útiles -->
@@ -87,40 +73,61 @@
   {% else %}
 
   <div x-data="{ filtro: 'todas' }" class="space-y-6">
-  <!-- Métricas -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-    <button type="button" @click="filtro = (filtro === 'publicada' ? 'todas' : 'publicada')"
-            :class="filtro === 'publicada' ? 'ring-2 ring-granate-200 border-granate-300' : 'border-slate-200'"
-            class="text-left rounded-xl border bg-white p-4 flex items-center gap-3 hover:border-granate-300 hover:shadow-sm transition"
-            title="Filtrar convocatorias publicadas">
-      <span class="h-11 w-11 shrink-0 rounded-lg bg-granate-50 text-granate-700 grid place-items-center"><i data-lucide="megaphone" class="w-5 h-5"></i></span>
-      <div><p class="text-2xl font-bold text-slate-800 leading-none">{{ metricas.activas }}</p><p class="text-xs text-slate-500 mt-1">Publicaciones activas</p></div>
-    </button>
-    <div class="rounded-xl border border-slate-200 bg-white p-4 flex items-center gap-3">
-      <span class="h-11 w-11 shrink-0 rounded-lg bg-exito/10 text-exito grid place-items-center"><i data-lucide="users" class="w-5 h-5"></i></span>
-      <div><p class="text-2xl font-bold text-slate-800 leading-none">{{ metricas.alcance }}</p><p class="text-xs text-slate-500 mt-1">Egresados alcanzados</p></div>
+
+  <!-- Banda de atención: lo accionable primero -->
+  {% if atencion.observadas or atencion.por_vencer %}
+  <div class="rounded-xl border border-alerta/30 bg-alerta/5 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+    <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-alerta/15 text-alerta"><i data-lucide="alert-triangle" class="w-5 h-5"></i></span>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-semibold text-slate-800">Requiere tu atención</p>
+      <p class="text-sm text-slate-600">
+        {% if atencion.observadas %}<strong class="text-alerta">{{ atencion.observadas }}</strong> por corregir{% endif %}
+        {% if atencion.observadas and atencion.por_vencer %} · {% endif %}
+        {% if atencion.por_vencer %}<strong class="text-alerta">{{ atencion.por_vencer }}</strong> por vencer esta semana{% endif %}
+      </p>
     </div>
-    <div class="rounded-xl border border-slate-200 bg-white p-4 flex items-center gap-3">
-      <span class="h-11 w-11 shrink-0 rounded-lg bg-info/10 text-info grid place-items-center"><i data-lucide="eye" class="w-5 h-5"></i></span>
-      <div>
-        <p class="text-2xl font-bold text-slate-800 leading-none">{{ metricas.vistas.total }}</p>
-        <p class="text-xs text-slate-500 mt-1 flex items-center gap-1.5">Vistas {% include "empresas/_delta.html" with delta=metricas.vistas.delta %}</p>
-      </div>
-    </div>
-    <div class="rounded-xl border border-slate-200 bg-white p-4 flex items-center gap-3">
-      <span class="h-11 w-11 shrink-0 rounded-lg bg-dorado/10 text-dorado grid place-items-center"><i data-lucide="bookmark" class="w-5 h-5"></i></span>
-      <div>
-        <p class="text-2xl font-bold text-slate-800 leading-none">{{ metricas.guardadas.total }}</p>
-        <p class="text-xs text-slate-500 mt-1 flex items-center gap-1.5">Guardadas {% include "empresas/_delta.html" with delta=metricas.guardadas.delta %}</p>
-      </div>
+    <div class="flex flex-wrap gap-2 shrink-0">
+      {% if atencion.obs_unica %}
+        <a href="{% url 'empresas:editar' atencion.obs_unica.id %}"
+           class="inline-flex items-center gap-1.5 rounded-lg bg-alerta px-3 py-1.5 text-sm font-medium text-white hover:opacity-90">
+          <i data-lucide="wrench" class="w-4 h-4"></i> Corregir
+        </a>
+      {% elif atencion.observadas %}
+        <button type="button"
+                @click="filtro='observada'; document.getElementById('lista-conv')?.scrollIntoView({behavior:'smooth', block:'start'})"
+                class="inline-flex items-center gap-1.5 rounded-lg bg-alerta px-3 py-1.5 text-sm font-medium text-white hover:opacity-90">
+          <i data-lucide="wrench" class="w-4 h-4"></i> Ver {{ atencion.observadas }} por corregir
+        </button>
+      {% endif %}
     </div>
   </div>
+  {% endif %}
+
+  <!-- Métricas (strip compacto) -->
+  <dl class="rounded-xl border border-slate-200 bg-white grid grid-cols-2 sm:grid-cols-4">
+    <div class="px-5 py-3 border-slate-100 border-r border-b sm:border-b-0">
+      <dt class="flex items-center gap-1.5 text-xs text-slate-500"><i data-lucide="megaphone" class="w-3.5 h-3.5"></i> Activas</dt>
+      <dd class="mt-1 text-xl font-bold text-slate-800 leading-none">{{ metricas.activas }}</dd>
+    </div>
+    <div class="px-5 py-3 border-slate-100 border-b sm:border-b-0 sm:border-r">
+      <dt class="flex items-center gap-1.5 text-xs text-slate-500"><i data-lucide="users" class="w-3.5 h-3.5"></i> Alcance</dt>
+      <dd class="mt-1 text-xl font-bold text-slate-800 leading-none">{{ metricas.alcance }}</dd>
+    </div>
+    <div class="px-5 py-3 border-slate-100 border-r">
+      <dt class="flex items-center gap-1.5 text-xs text-slate-500"><i data-lucide="eye" class="w-3.5 h-3.5"></i> Vistas</dt>
+      <dd class="mt-1 flex items-baseline gap-2"><span class="text-xl font-bold text-slate-800 leading-none">{{ metricas.vistas.total }}</span>{% include "empresas/_delta.html" with delta=metricas.vistas.delta %}</dd>
+    </div>
+    <div class="px-5 py-3">
+      <dt class="flex items-center gap-1.5 text-xs text-slate-500"><i data-lucide="bookmark" class="w-3.5 h-3.5"></i> Guardadas</dt>
+      <dd class="mt-1 flex items-baseline gap-2"><span class="text-xl font-bold text-slate-800 leading-none">{{ metricas.guardadas.total }}</span>{% include "empresas/_delta.html" with delta=metricas.guardadas.delta %}</dd>
+    </div>
+  </dl>
 
   <!-- Cuerpo: convocatorias + panel lateral -->
   <div class="grid gap-6 lg:grid-cols-3">
 
     <!-- Convocatorias -->
-    <div class="lg:col-span-2 rounded-xl border border-slate-200 bg-white">
+    <div id="lista-conv" class="scroll-mt-20 lg:col-span-2 rounded-xl border border-slate-200 bg-white">
       <div class="flex items-center justify-between gap-3 p-4 border-b border-slate-100">
         <h3 class="font-semibold text-slate-800">Mis convocatorias</h3>
         <a href="{% url 'empresas:publicar' %}"
@@ -156,14 +163,15 @@
           <tbody class="divide-y divide-slate-100">
             {% for c in convocatorias %}
             <tr x-show="filtro==='todas' || filtro==='{{ c.estado }}'"
-                class="{% if c.estado == 'observada' %}bg-alerta/5{% endif %} hover:bg-slate-50/70">
+                class="group {% if c.estado == 'observada' %}bg-alerta/5{% endif %} hover:bg-slate-50/70">
               <td class="px-4 py-3 font-medium text-slate-800">{{ c.titulo }}</td>
               <td class="px-4 py-3">{% include "empresas/_estado_badge.html" with estado=c.estado label=c.get_estado_display %}</td>
               <td class="px-4 py-3">
                 <div class="space-y-1">
                   {% include "convocatorias/_transparencia.html" with et=c.etiqueta_transparencia pct=c.transparencia_pct variant="bar" %}
                   {% if c.faltan_transp %}
-                  <a href="{% url 'empresas:editar' c.id %}" class="flex items-center gap-1 text-xs text-slate-400 hover:text-granate-700">
+                  <a href="{% url 'empresas:editar' c.id %}"
+                     class="flex items-center gap-1 text-xs text-slate-400 hover:text-granate-700 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                     <i data-lucide="arrow-up" class="w-3 h-3"></i> +{{ c.faltan_transp.0.puntos }}% · {{ c.faltan_transp.0.etiqueta|lower }}
                   </a>
                   {% endif %}
@@ -237,6 +245,7 @@
           <i data-lucide="building-2" class="w-4 h-4 text-granate-700"></i> Estado de tu empresa
         </h3>
         <p class="text-sm text-slate-500 mt-2">Estado: <strong class="text-slate-700">{{ empresa.get_estado_display }}</strong></p>
+        {% if completitud.pct < 100 %}
         <div class="mt-4">
           <div class="flex items-center justify-between text-xs">
             <span class="text-slate-500">Perfil completo</span>
@@ -247,12 +256,15 @@
           </div>
         </div>
         <ul class="mt-3 space-y-1.5 text-sm">
-          {% for it in completitud.items %}
-          <li class="flex items-center gap-2 {% if it.ok %}text-slate-600{% else %}text-slate-400{% endif %}">
-            <i data-lucide="{% if it.ok %}check-circle-2{% else %}circle{% endif %}" class="w-4 h-4 shrink-0 {% if it.ok %}text-exito{% else %}text-slate-300{% endif %}"></i> {{ it.label }}
+          {% for it in completitud.items %}{% if not it.ok %}
+          <li class="flex items-center gap-2 text-slate-500">
+            <i data-lucide="circle" class="w-4 h-4 shrink-0 text-slate-300"></i> Falta: {{ it.label|lower }}
           </li>
-          {% endfor %}
+          {% endif %}{% endfor %}
         </ul>
+        {% else %}
+        <p class="mt-3 flex items-center gap-2 text-sm text-exito"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Perfil completo</p>
+        {% endif %}
       </div>
       <div class="rounded-xl border border-slate-200 bg-white p-5">
         <h3 class="flex items-center gap-2 font-semibold text-slate-800">
@@ -291,7 +303,8 @@
     </div>
   </div>
 
-  <!-- Guía rápida para publicar -->
+  <!-- Guía rápida para publicar: solo onboarding (sin convocatorias) -->
+  {% if not convocatorias %}
   <div class="rounded-xl border border-slate-200 bg-white p-5">
     <h3 class="flex items-center gap-2 font-semibold text-slate-800">
       <i data-lucide="map" class="w-4 h-4 text-granate-700"></i> Guía rápida para publicar
@@ -311,6 +324,7 @@
       </li>
     </ol>
   </div>
+  {% endif %}
   </div><!-- /x-data filtro -->
   {% endif %}
 </div>
