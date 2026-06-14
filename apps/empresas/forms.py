@@ -14,8 +14,7 @@ class EmpresaForm(forms.ModelForm):
         fields = [
             "ruc", "razon_social", "nombre_comercial", "tipo", "ciiu",
             "telefono", "direccion", "web", "linkedin",
-            "logo_img", "banner_img", "logo_url", "banner_url",
-            "video_url", "descripcion",
+            "logo_img", "banner_img", "video_url", "descripcion",
         ]
         widgets = {
             "logo_img": forms.ClearableFileInput(attrs={"accept": "image/*"}),
@@ -31,8 +30,7 @@ class EditarEmpresaForm(forms.ModelForm):
         fields = [
             "razon_social", "nombre_comercial", "tipo", "ciiu",
             "telefono", "direccion", "web", "linkedin",
-            "logo_img", "banner_img", "logo_url", "banner_url",
-            "video_url", "descripcion",
+            "logo_img", "banner_img", "video_url", "descripcion",
         ]
         widgets = {
             "logo_img": forms.ClearableFileInput(attrs={"accept": "image/*"}),

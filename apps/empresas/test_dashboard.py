@@ -151,8 +151,25 @@ class MetricasTests(BaseEmpresaDash):
         self.assertEqual(m["publicadas"], 1)
 
 
+import tempfile
+
+from django.test import override_settings
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class EditarPerfilTests(BaseEmpresaDash):
     """Edición del perfil de empresa: cierra el ciclo de la completitud."""
+
+    def _logo_png(self):
+        """Genera un PNG mínimo válido para subir como logo."""
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+
+        buf = BytesIO()
+        Image.new("RGB", (10, 10), "red").save(buf, "PNG")
+        return SimpleUploadedFile("logo.png", buf.getvalue(), content_type="image/png")
 
     def test_editar_perfil_sube_completitud(self):
         from .services import completitud_empresa
@@ -167,7 +184,8 @@ class EditarPerfilTests(BaseEmpresaDash):
                 "telefono": "054-111222",
                 "direccion": "Av. Siempre Viva 123",
                 "web": "https://acme.pe",
-                "logo_url": "https://acme.pe/logo.png",
+                # El logo ahora se sube como imagen (ya no como URL).
+                "logo_img": self._logo_png(),
                 "descripcion": "Empresa de software con sede en Arequipa.",
             },
             follow=True,
@@ -175,4 +193,5 @@ class EditarPerfilTests(BaseEmpresaDash):
         self.assertRedirects(resp, reverse("empresas:dashboard"))
         empresa.refresh_from_db()
         self.assertEqual(empresa.descripcion, "Empresa de software con sede en Arequipa.")
+        self.assertTrue(empresa.logo_img)  # la imagen quedó guardada
         self.assertEqual(completitud_empresa(empresa)["pct"], 100)

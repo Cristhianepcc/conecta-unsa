@@ -32,7 +32,7 @@
     {# ===== Identidad visual: logo + banner (subida con vista previa) ===== #}
     <section class="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
       <h3 class="font-semibold text-slate-800">Identidad visual</h3>
-      <p class="mt-1 text-sm text-slate-500">Sube tu logo y banner (se guardan en CONECTA UNSA), o pega un enlace si ya están alojados.</p>
+      <p class="mt-1 text-sm text-slate-500">Sube tu logo y banner; se guardan en CONECTA UNSA y los verán los egresados.</p>
 
       <div class="mt-5 grid gap-6 sm:grid-cols-2">
         {# Logo #}
@@ -49,12 +49,8 @@
                      @change="const f=$event.target.files[0]; if(f) preview=URL.createObjectURL(f)">
             </label>
           </div>
+          <p class="mt-2 text-xs text-slate-400">PNG, JPG o SVG · cuadrado, mín. 200×200 px.</p>
           {{ form.logo_img.errors }}
-          <label class="campo mt-3 block">
-            <span class="text-xs text-slate-500">…o pega un enlace (URL)</span>
-            {{ form.logo_url }}
-          </label>
-          {{ form.logo_url.errors }}
         </div>
 
         {# Banner #}
@@ -71,12 +67,8 @@
                      @change="const f=$event.target.files[0]; if(f) preview=URL.createObjectURL(f)">
             </label>
           </div>
+          <p class="mt-2 text-xs text-slate-400">PNG o JPG · apaisado, recomendado 1200×300 px.</p>
           {{ form.banner_img.errors }}
-          <label class="campo mt-3 block">
-            <span class="text-xs text-slate-500">…o pega un enlace (URL)</span>
-            {{ form.banner_url }}
-          </label>
-          {{ form.banner_url.errors }}
         </div>
       </div>
     </section>
