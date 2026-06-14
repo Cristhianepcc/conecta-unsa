@@ -16,7 +16,7 @@ from apps.convocatorias.services import (
 )
 from apps.usuarios.decorators import empresa_required
 
-from .forms import EmpresaForm, ReclutadorForm
+from .forms import EditarEmpresaForm, EmpresaForm, ReclutadorForm
 from .services import (
     completitud_empresa,
     empresa_de,
@@ -170,10 +170,32 @@ def editar_convocatoria(request, pk):
     )
 
 
+@empresa_required
+def editar_perfil(request):
+    """Edición del perfil público de la empresa (cierra el ciclo de la completitud)."""
+    empresa = empresa_de(request.user)
+    if empresa is None:
+        return redirect("empresas:dashboard")
+
+    if request.method == "POST":
+        form = EditarEmpresaForm(request.POST, request.FILES, instance=empresa)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Perfil de empresa actualizado.")
+            return redirect("empresas:dashboard")
+    else:
+        form = EditarEmpresaForm(instance=empresa)
+    return render(
+        request,
+        "empresas/editar_perfil.html",
+        {"form": form, "empresa": empresa, "completitud": completitud_empresa(empresa)},
+    )
+
+
 def registro(request):
     """Auto-registro de empresa: bloque A (empresa) + bloque B (reclutador). CA-1/CA-7 (feature 03)."""
     if request.method == "POST":
-        empresa_form = EmpresaForm(request.POST)
+        empresa_form = EmpresaForm(request.POST, request.FILES)
         reclutador_form = ReclutadorForm(request.POST)
         if empresa_form.is_valid() and reclutador_form.is_valid():
             registrar_empresa(

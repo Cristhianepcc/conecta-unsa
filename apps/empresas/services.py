@@ -108,7 +108,7 @@ def completitud_empresa(empresa: Empresa) -> dict:
     """
     items = [
         {"label": "Descripción de la empresa", "ok": bool(empresa.descripcion.strip())},
-        {"label": "Logo", "ok": bool(empresa.logo_url.strip())},
+        {"label": "Logo", "ok": bool(empresa.logo_img or empresa.logo_url.strip())},
         {"label": "Sitio web o LinkedIn", "ok": bool(empresa.web.strip() or empresa.linkedin.strip())},
         {"label": "Teléfono de contacto", "ok": bool(empresa.telefono.strip())},
         {"label": "Dirección", "ok": bool(empresa.direccion.strip())},
