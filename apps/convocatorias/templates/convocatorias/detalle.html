@@ -12,17 +12,17 @@
 
   <!-- ===== Encabezado del puesto ===== -->
   <div class="mt-4 rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-    {% if conv.empresa.banner_url %}
+    {% if conv.empresa.banner_src %}
     <div class="h-28 sm:h-36 bg-gradient-to-r from-granate-800 to-granate-700">
-      <img src="{{ conv.empresa.banner_url }}" alt="" class="h-full w-full object-cover opacity-90">
+      <img src="{{ conv.empresa.banner_src }}" alt="" class="h-full w-full object-cover opacity-90">
     </div>
     {% else %}
     <div class="h-3 bg-gradient-to-r from-granate-800 to-granate-600"></div>
     {% endif %}
     <div class="p-5 sm:p-7">
       <div class="flex flex-col sm:flex-row sm:items-start gap-4">
-        {% if conv.empresa.logo_url %}
-        <img src="{{ conv.empresa.logo_url }}" alt="" class="h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-2xl object-cover border border-slate-200 bg-white {% if conv.empresa.banner_url %}-mt-14 sm:-mt-16 ring-4 ring-white{% endif %}">
+        {% if conv.empresa.logo_src %}
+        <img src="{{ conv.empresa.logo_src }}" alt="" class="h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-2xl object-cover border border-slate-200 bg-white {% if conv.empresa.banner_src %}-mt-14 sm:-mt-16 ring-4 ring-white{% endif %}">
         {% else %}
         <span class="h-16 w-16 shrink-0 rounded-2xl bg-granate-100 text-granate-700 grid place-items-center text-2xl font-bold">{{ conv.empresa.nombre_comercial|default:conv.empresa.razon_social|slice:":1"|upper }}</span>
         {% endif %}

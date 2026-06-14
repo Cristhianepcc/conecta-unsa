@@ -5,8 +5,8 @@ Contexto: item.conv, item.match (int %), item.chips (list), guardadas_ids.{% end
          class="scroll-mt-24 flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-granate-200 transition">
   <!-- Encabezado -->
   <div class="flex items-start gap-3">
-    {% if conv.empresa.logo_url %}
-    <img src="{{ conv.empresa.logo_url }}" alt="" class="h-12 w-12 shrink-0 rounded-xl object-cover border border-slate-200">
+    {% if conv.empresa.logo_src %}
+    <img src="{{ conv.empresa.logo_src }}" alt="" class="h-12 w-12 shrink-0 rounded-xl object-cover border border-slate-200">
     {% else %}
     <span class="h-12 w-12 shrink-0 rounded-xl bg-granate-50 text-granate-700 grid place-items-center font-bold">
       {{ conv.empresa.nombre_comercial|default:conv.empresa.razon_social|slice:":1"|upper }}

@@ -135,8 +135,8 @@
       <div class="absolute inset-0 bg-gradient-to-r from-granate-900 via-granate-800/95 to-granate-800/30"></div>
       <div class="relative flex flex-col lg:flex-row lg:items-center gap-5">
         <div class="flex items-center gap-4 min-w-0">
-          {% if empresa.logo_url %}
-          <img src="{{ empresa.logo_url }}" alt="" class="h-14 w-14 shrink-0 rounded-2xl object-cover bg-white ring-2 ring-white/30">
+          {% if empresa.logo_src %}
+          <img src="{{ empresa.logo_src }}" alt="" class="h-14 w-14 shrink-0 rounded-2xl object-cover bg-white ring-2 ring-white/30">
           {% else %}
           <span class="h-14 w-14 shrink-0 rounded-2xl bg-white/15 text-white grid place-items-center text-xl font-bold ring-2 ring-white/30">
             {{ empresa.razon_social|first|upper }}
