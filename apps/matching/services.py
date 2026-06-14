@@ -27,9 +27,54 @@ PESO_CREDENCIAL = 10
 PESO_CREDENCIAL_VERIFICADA = 15  # mayor confianza (matching.md: verificado > autodeclarado)
 PESO_TIPO_PREFERIDO = 12
 
+# Etiqueta corta de cada credencial para los chips de "por qué te recomendamos".
+CHIP_CREDENCIAL = {
+    "idioma": "Idioma",
+    "representacion": "Liderazgo",
+    "tesis": "Investigación",
+    "articulo": "Investigación",
+    "practica_convalidada": "Experiencia previa",
+    "incubadora_jaku": "Innovación",
+    "intercambio": "Internacional",
+    "olimpiada": "Excelencia",
+    "voluntariado": "Voluntariado",
+}
+
 
 def _perfil_talento(usuario):
     return getattr(usuario, "perfil_talento", None)
+
+
+def compatibilidad(usuario, conv):
+    """% de compatibilidad (0-100) + chips de motivos cortos para la tarjeta de oportunidad.
+
+    Base por haber pasado los gates (elegibilidad + carrera); bonus por carrera propia,
+    credenciales afines y tipo preferido. Explicable (sin IA).
+    """
+    perfil = _perfil_talento(usuario)
+    pct = 55
+    chips: list[str] = []
+    if not perfil:
+        return pct, chips
+
+    if perfil.carrera_id and conv.carreras_objetivo.filter(id=perfil.carrera_id).exists():
+        pct += 15
+        chips.append(str(perfil.carrera))
+    elif perfil.carrera_id:
+        pct += 6  # llega por carrera afín de interés
+
+    for cred in perfil.credenciales.all():
+        if conv.tipo in RELEVANCIA_CREDENCIAL.get(cred.tipo, set()):
+            pct += 8 if cred.verificada else 6
+            chip = CHIP_CREDENCIAL.get(cred.tipo, cred.get_tipo_display())
+            if chip not in chips:
+                chips.append(chip)
+
+    if conv.tipo in (perfil.tipos_preferidos or []):
+        pct += 8
+        chips.append("Tipo preferido")
+
+    return min(pct, 100), chips
 
 
 def convocatorias_publicadas():

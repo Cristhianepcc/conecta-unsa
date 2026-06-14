@@ -1,0 +1,95 @@
+{% comment %}Tarjeta de oportunidad (feed del egresado).
+Contexto: item.conv, item.match (int %), item.chips (list), guardadas_ids.{% endcomment %}
+{% with conv=item.conv %}
+<article id="conv-{{ conv.id }}"
+         class="scroll-mt-24 flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-granate-200 transition">
+  <!-- Encabezado -->
+  <div class="flex items-start gap-3">
+    {% if conv.empresa.logo_url %}
+    <img src="{{ conv.empresa.logo_url }}" alt="" class="h-12 w-12 shrink-0 rounded-xl object-cover border border-slate-200">
+    {% else %}
+    <span class="h-12 w-12 shrink-0 rounded-xl bg-granate-50 text-granate-700 grid place-items-center font-bold">
+      {{ conv.empresa.nombre_comercial|default:conv.empresa.razon_social|slice:":1"|upper }}
+    </span>
+    {% endif %}
+    <div class="min-w-0 flex-1">
+      <a href="{% url 'convocatorias:detalle' conv.id %}" class="block font-semibold text-slate-800 hover:text-granate-700 leading-snug">
+        {{ conv.titulo }}
+      </a>
+      <p class="text-sm text-slate-500 truncate">
+        {{ conv.empresa }}
+        {% if conv.empresa.verificada %}<i data-lucide="badge-check" class="inline w-3.5 h-3.5 text-exito align-text-bottom" title="Empresa verificada"></i>{% endif %}
+      </p>
+    </div>
+    {% include "convocatorias/_transparencia.html" with et=conv.etiqueta_transparencia pct=conv.transparencia_pct variant="pill" %}
+  </div>
+
+  <!-- Compatibilidad (Match) -->
+  <div class="mt-4">
+    <div class="flex items-center justify-between text-xs">
+      <span class="font-semibold {% if item.match >= 80 %}text-exito{% elif item.match >= 60 %}text-granate-700{% else %}text-slate-500{% endif %}">
+        {{ item.match }}% compatible
+      </span>
+    </div>
+    <div class="mt-1 h-2 rounded-full bg-slate-100 overflow-hidden"
+         role="img" aria-label="Compatibilidad {{ item.match }} por ciento">
+      <div class="h-full rounded-full {% if item.match >= 80 %}bg-exito{% elif item.match >= 60 %}bg-granate-600{% else %}bg-slate-400{% endif %}"
+           style="width: {{ item.match }}%"></div>
+    </div>
+  </div>
+
+  <!-- Meta clave -->
+  <div class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+    <span class="inline-flex items-center gap-1.5 text-slate-600"><i data-lucide="briefcase" class="w-4 h-4 text-slate-400"></i>{{ conv.get_tipo_display }}</span>
+    {% if conv.modalidad %}<span class="inline-flex items-center gap-1.5 text-slate-600"><i data-lucide="monitor" class="w-4 h-4 text-slate-400"></i>{{ conv.get_modalidad_display }}</span>{% endif %}
+    {% if conv.ubicacion %}<span class="inline-flex items-center gap-1.5 text-slate-600"><i data-lucide="map-pin" class="w-4 h-4 text-slate-400"></i>{{ conv.ubicacion }}</span>{% endif %}
+    {% if conv.banda_salarial_min and conv.banda_salarial_max and not conv.salario_confidencial %}
+      <span class="inline-flex items-center gap-1.5 font-medium text-slate-700"><i data-lucide="wallet" class="w-4 h-4 text-granate-700"></i>S/ {{ conv.banda_salarial_min }}–{{ conv.banda_salarial_max }}</span>
+    {% elif conv.salario_confidencial %}
+      <span class="inline-flex items-center gap-1.5 text-slate-500"><i data-lucide="wallet" class="w-4 h-4 text-slate-400"></i>Confidencial</span>
+    {% endif %}
+    {% if conv.fecha_limite %}
+      <span class="inline-flex items-center gap-1.5 {% if conv.cierra_pronto %}text-peligro font-medium{% else %}text-slate-600{% endif %}"
+            title="Postula hasta {{ conv.fecha_limite|date:'j M Y' }}">
+        <i data-lucide="calendar-clock" class="w-4 h-4 {% if not conv.cierra_pronto %}text-slate-400{% endif %}"></i>
+        {% with d=conv.dias_para_cierre %}{% if d == 0 %}Cierra hoy{% elif d == 1 %}Cierra mañana{% elif d > 1 %}Cierra en {{ d }} días{% else %}Cerrada{% endif %}{% endwith %}
+      </span>
+    {% endif %}
+  </div>
+
+  <!-- ¿Por qué te recomendamos? -->
+  {% if item.chips %}
+  <div class="mt-4 rounded-xl bg-granate-50/60 p-3">
+    <p class="text-xs font-medium text-granate-700 flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ¿Por qué te la recomendamos?</p>
+    <div class="mt-2 flex flex-wrap gap-1.5">
+      {% for chip in item.chips %}
+      <span class="rounded-full bg-white border border-granate-100 text-granate-700 text-xs px-2.5 py-1">{{ chip }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Acciones -->
+  <div class="mt-5 flex items-center gap-3">
+    <a href="{% url 'convocatorias:detalle' conv.id %}"
+       class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-granate-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-granate-800">
+      Ver oportunidad <i data-lucide="arrow-right" class="w-4 h-4"></i>
+    </a>
+    <form method="post" action="{% url 'convocatorias:guardar' conv.id %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}#conv-{{ conv.id }}">
+      {% if conv.id in guardadas_ids %}
+      <button aria-label="Quitar de guardadas" title="Guardada"
+              class="inline-flex items-center justify-center h-10 w-10 rounded-xl border border-granate-700 text-granate-700 hover:bg-granate-50">
+        <i data-lucide="heart" class="w-5 h-5 fill-current"></i>
+      </button>
+      {% else %}
+      <button aria-label="Guardar oportunidad" title="Guardar"
+              class="inline-flex items-center justify-center h-10 w-10 rounded-xl border border-slate-300 text-slate-500 hover:border-granate-300 hover:text-granate-700">
+        <i data-lucide="heart" class="w-5 h-5"></i>
+      </button>
+      {% endif %}
+    </form>
+  </div>
+</article>
+{% endwith %}

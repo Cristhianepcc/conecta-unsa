@@ -120,8 +120,11 @@ class LandingTests(TestCase):
     def test_ca2__dos_puertas_en_landing(self):
         """CA-2: la landing ofrece entrada para egresado y para empresa."""
         resp = self.client.get(reverse("core:home"))
-        self.assertContains(resp, "Soy egresado")
-        self.assertContains(resp, "Soy empresa")
+        # Dos puertas de acceso en la landing (egresado y empresa).
+        self.assertContains(resp, "Egresado")
+        self.assertContains(resp, "Empresa")
+        self.assertContains(resp, reverse("usuarios:login"))
+        self.assertContains(resp, reverse("empresas:registro"))
 
     def test_ca3__categorias_desde_taxonomia(self):
         """CA-3: las categorías provienen de la taxonomía real con conteos reales."""
@@ -142,11 +145,11 @@ class LandingTests(TestCase):
         self.assertContains(resp, "Ingenierías")
 
     def test_ca4__transparencia_explicada(self):
-        """CA-4: la landing explica la transparencia y muestra el % (semáforo) en las tarjetas."""
+        """CA-4: la landing comunica la transparencia/verificación y el índice real."""
         resp = self.client.get(reverse("core:home"))
-        self.assertContains(resp, "Transparencia en cada convocatoria")
-        self.assertContains(resp, "Información verificada")
-        self.assertContains(resp, "80%")  # badge de transparencia en convocatoria destacada
+        self.assertContains(resp, "Convocatorias verificadas")
+        self.assertContains(resp, "información transparente")
+        self.assertContains(resp, "80%")  # índice de transparencia calculado del seed
 
     def test_ca5__footer_institucional(self):
         """CA-5: footer con privacidad, términos y contacto."""

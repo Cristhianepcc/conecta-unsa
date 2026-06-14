@@ -151,13 +151,14 @@ def dashboard(request):
 
     from collections import Counter
 
-    from apps.convocatorias.interacciones import ids_guardadas
+    from apps.convocatorias.interacciones import guardadas_de, ids_guardadas
     from apps.core import constants
+    from apps.matching.services import compatibilidad
 
     talento = asegurar_perfil_talento(request.user)
     full = matching_feed(request.user)  # [(conv, puntaje, motivos)] ordenado por afinidad
 
-    # Filtro por tipo + orden (CA-feed): chips estables sobre el conjunto completo.
+    # Filtro por tipo + orden (chips estables sobre el conjunto completo).
     labels = dict(constants.TIPOS_CONVOCATORIA)
     conteo = Counter(it[0].tipo for it in full)
     tipos_presentes = [
@@ -166,11 +167,17 @@ def dashboard(request):
 
     tipo = request.GET.get("tipo") or ""
     orden = request.GET.get("orden") or "afinidad"
-    items = [it for it in full if it[0].tipo == tipo] if tipo else list(full)
+    seleccion = [it for it in full if it[0].tipo == tipo] if tipo else list(full)
     if orden == "reciente":
-        items.sort(key=lambda it: it[0].creada_en, reverse=True)
+        seleccion.sort(key=lambda it: it[0].creada_en, reverse=True)
     elif orden == "transparencia":
-        items.sort(key=lambda it: it[0].transparencia_pct, reverse=True)
+        seleccion.sort(key=lambda it: it[0].transparencia_pct, reverse=True)
+
+    # Enriquecer con compatibilidad (% match) + chips de recomendación.
+    items = []
+    for conv, _puntaje, _motivos in seleccion:
+        pct, chips = compatibilidad(request.user, conv)
+        items.append({"conv": conv, "match": pct, "chips": chips})
 
     return render(
         request,
@@ -183,8 +190,10 @@ def dashboard(request):
             "orden": orden,
             "tipos_presentes": tipos_presentes,
             "completitud": completitud_perfil(talento),
-            "resumen": [conv for conv, _p, _m in full[:4]],
             "guardadas_ids": ids_guardadas(request.user),
+            # "Tu actividad" (sección inferior compacta)
+            "n_guardadas": guardadas_de(request.user).count(),
+            "resumen_n": len(full),
         },
     )
 

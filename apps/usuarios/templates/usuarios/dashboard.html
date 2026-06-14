@@ -2,119 +2,122 @@
 
 {% block title %}Mi panel — CONECTA UNSA{% endblock %}
 {% block dashboard_title %}Panel del egresado{% endblock %}
-
+{% block user_role %}{{ talento.get_estado_academico_display|default:"Egresado" }}{% endblock %}
 {% block sidebar_items %}{% include "usuarios/_sidebar_egresado.html" with seccion="dashboard" %}{% endblock %}
 
 {% block dashboard_content %}
-<div class="max-w-5xl">
-  <!-- Encabezado con resumen accionable -->
-  <h2 class="text-xl font-bold text-slate-800">
-    Hola, {{ request.user.get_full_name|default:request.user.email }}
-  </h2>
-  <p class="mt-1 text-sm text-slate-500">
-    {% if talento.carrera %}{{ talento.carrera }} · {{ talento.get_estado_academico_display }} · {% endif %}
-    <strong class="text-slate-700">{{ total }}</strong> convocatoria{{ total|pluralize }} para ti ·
-    perfil <strong class="text-granate-700">{{ completitud.pct }}%</strong> completo
-  </p>
-  {% if completitud.pct < 100 %}
-  <a href="{% url 'usuarios:perfil' %}" class="mt-2 inline-flex items-center gap-1.5 text-sm text-granate-700 font-medium hover:underline">
-    <i data-lucide="sparkles" class="w-4 h-4"></i> Completa tu perfil para mejores recomendaciones
-  </a>
-  {% endif %}
+<div class="max-w-screen-2xl space-y-6">
 
-  <div class="mt-6 grid gap-8 lg:grid-cols-3">
-    <!-- Feed -->
-    <div class="lg:col-span-2">
-      <div class="flex items-center justify-between gap-3">
-        <h3 class="text-lg font-semibold text-slate-800">Convocatorias para ti</h3>
-        <form method="get" class="flex items-center gap-2">
-          {% if tipo %}<input type="hidden" name="tipo" value="{{ tipo }}">{% endif %}
-          <label class="text-xs text-slate-400">Ordenar</label>
-          <select name="orden" onchange="this.form.submit()"
-                  class="text-sm border border-slate-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-granate-200">
-            <option value="afinidad" {% if orden == 'afinidad' %}selected{% endif %}>Afinidad</option>
-            <option value="reciente" {% if orden == 'reciente' %}selected{% endif %}>Más recientes</option>
-            <option value="transparencia" {% if orden == 'transparencia' %}selected{% endif %}>Transparencia</option>
-          </select>
-        </form>
+  <!-- ===== Header card ===== -->
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+    <div class="flex flex-col lg:flex-row lg:items-center gap-5">
+      <div class="flex items-center gap-4 min-w-0">
+        <span class="h-14 w-14 shrink-0 rounded-2xl bg-granate-100 text-granate-700 grid place-items-center text-xl font-bold">
+          {{ request.user.get_full_name|default:request.user.email|first|upper }}
+        </span>
+        <div class="min-w-0">
+          <h2 class="text-xl font-bold text-slate-800 truncate">Hola, {{ request.user.get_full_name|default:request.user.email }}</h2>
+          <p class="text-sm text-slate-500 truncate">
+            {% if talento.carrera %}{{ talento.carrera }} · {{ talento.get_estado_academico_display }}{% else %}Completa tu perfil{% endif %}
+          </p>
+        </div>
       </div>
 
-      <!-- Chips de filtro por tipo -->
-      {% if tipos_presentes %}
-      <div class="mt-3 flex flex-wrap gap-2 text-sm">
-        <a href="?orden={{ orden }}"
-           class="rounded-full px-3 py-1 {% if not tipo %}bg-granate-700 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
-          Todas
-        </a>
-        {% for t in tipos_presentes %}
-        <a href="?tipo={{ t.value }}&orden={{ orden }}"
-           class="rounded-full px-3 py-1 {% if tipo == t.value %}bg-granate-700 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
-          {{ t.label }} · {{ t.n }}
-        </a>
-        {% endfor %}
-      </div>
-      {% endif %}
-
-      <div class="mt-4 space-y-4">
-        {% for conv, puntaje, motivos in items %}
-          {% include "convocatorias/_tarjeta.html" with conv=conv motivos=motivos guardadas_ids=guardadas_ids %}
-        {% empty %}
-          <div class="rounded-xl border border-dashed border-slate-300 p-10 text-center">
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-granate-50 text-granate-700">
-              <i data-lucide="search-x" class="w-6 h-6"></i>
-            </div>
-            <p class="mt-3 font-medium text-slate-700">No hay convocatorias{% if tipo %} de este tipo{% endif %}</p>
-            <p class="mt-1 text-sm text-slate-500">Ajusta tus preferencias o quita el filtro.</p>
-            {% if tipo %}<a href="?orden={{ orden }}" class="mt-3 inline-block text-sm text-granate-700 underline">Ver todas</a>{% endif %}
+      <!-- Métricas + progreso -->
+      <div class="lg:ml-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:gap-6">
+        <div class="flex items-center gap-6">
+          <div class="text-center">
+            <p class="text-2xl font-bold text-granate-700 leading-none">{{ total }}</p>
+            <p class="text-xs text-slate-500 mt-1">oportunidades</p>
           </div>
-        {% endfor %}
+          <div class="h-10 w-px bg-slate-200 hidden sm:block"></div>
+          <div class="min-w-[9rem]">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500">Perfil</span>
+              <span class="font-semibold text-granate-700">{{ completitud.pct }}%</span>
+            </div>
+            <div class="mt-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full rounded-full bg-granate-600" style="width: {{ completitud.pct }}%"></div>
+            </div>
+          </div>
+        </div>
+        <a href="{% url 'usuarios:perfil' %}"
+           class="inline-flex items-center justify-center gap-2 rounded-xl bg-granate-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-granate-800 whitespace-nowrap">
+          <i data-lucide="user-round-pen" class="w-4 h-4"></i> Completar perfil
+        </a>
       </div>
     </div>
+  </section>
 
-    <!-- Lateral -->
-    <aside class="space-y-6">
-      <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <h3 class="font-semibold text-slate-800 flex items-center gap-2"><i data-lucide="calendar-days" class="w-4 h-4 text-granate-700"></i> Resumen semanal</h3>
-        <p class="text-xs text-slate-400 mt-1">Lo que llegaría a tu correo:</p>
-        <ul class="mt-3 divide-y divide-slate-100">
-          {% for c in resumen %}
-          <li class="py-2 first:pt-0">
-            <a href="{% url 'convocatorias:detalle' c.id %}" class="group block">
-              <span class="flex items-center gap-2">
-                {% include "convocatorias/_transparencia.html" with et=c.etiqueta_transparencia pct=c.transparencia_pct variant="dot" %}
-                <span class="text-sm text-slate-700 group-hover:text-granate-700 truncate">{{ c.titulo }}</span>
-              </span>
-              <span class="ml-3.5 block text-xs text-slate-400 truncate">{{ c.empresa }}</span>
-            </a>
-          </li>
-          {% empty %}
-          <li class="py-2 text-sm text-slate-400">Sin novedades esta semana.</li>
-          {% endfor %}
-        </ul>
-      </div>
-
-      <!-- Credencial pública -->
-      <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="flex items-center justify-between">
-          <h3 class="font-semibold text-slate-800 flex items-center gap-2"><i data-lucide="id-card" class="w-4 h-4 text-granate-700"></i> Credencial pública</h3>
-          <span class="inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-2 py-0.5
-            {% if talento.cred_activa %}bg-exito/10 text-exito{% else %}bg-slate-100 text-slate-500{% endif %}">
-            <span class="h-1.5 w-1.5 rounded-full {% if talento.cred_activa %}bg-exito{% else %}bg-slate-400{% endif %}"></span>
-            {% if talento.cred_activa %}Activa{% else %}Inactiva{% endif %}
-          </span>
-        </div>
-        <p class="text-sm text-slate-500 mt-2">Tu carta de presentación verificada, con enlace compartible.</p>
-        <a href="{% url 'usuarios:credencial_config' %}" class="mt-3 inline-block text-sm text-granate-700 underline">
-          {% if talento.cred_activa %}Ver / compartir enlace →{% else %}Activar credencial →{% endif %}
-        </a>
-      </div>
-
-      <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <h3 class="font-semibold text-slate-800 flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-granate-700"></i> Tus preferencias</h3>
-        <p class="text-sm text-slate-500 mt-1">Ajusta carreras de interés, tipos y frecuencia.</p>
-        <a href="{% url 'usuarios:perfil' %}" class="mt-3 inline-block text-sm text-granate-700 underline">Editar preferencias →</a>
-      </div>
-    </aside>
+  <!-- ===== Toolbar ===== -->
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h3 class="text-lg font-bold text-slate-800">Convocatorias para ti</h3>
+    <form method="get" class="flex items-center gap-2">
+      {% if tipo %}<input type="hidden" name="tipo" value="{{ tipo }}">{% endif %}
+      <label class="text-xs text-slate-500">Ordenar</label>
+      <select name="orden" onchange="this.form.submit()"
+              class="text-sm border border-slate-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-granate-200">
+        <option value="afinidad" {% if orden == 'afinidad' %}selected{% endif %}>Afinidad</option>
+        <option value="reciente" {% if orden == 'reciente' %}selected{% endif %}>Más recientes</option>
+        <option value="transparencia" {% if orden == 'transparencia' %}selected{% endif %}>Transparencia</option>
+      </select>
+    </form>
   </div>
+
+  {% if tipos_presentes %}
+  <div class="flex flex-wrap gap-2 text-sm">
+    <a href="?orden={{ orden }}" class="rounded-full px-3 py-1 {% if not tipo %}bg-granate-700 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">Todas · {{ total }}</a>
+    {% for t in tipos_presentes %}
+    <a href="?tipo={{ t.value }}&orden={{ orden }}" class="rounded-full px-3 py-1 {% if tipo == t.value %}bg-granate-700 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">{{ t.label }} · {{ t.n }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ===== Feed (2 columnas, foco principal) ===== -->
+  <div class="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
+    {% for item in items %}
+      {% include "convocatorias/_oportunidad.html" with item=item guardadas_ids=guardadas_ids %}
+    {% empty %}
+      <div class="lg:col-span-2 2xl:col-span-3 rounded-2xl border border-dashed border-slate-300 p-12 text-center">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-granate-50 text-granate-700">
+          <i data-lucide="search-x" class="w-6 h-6"></i>
+        </div>
+        <p class="mt-3 font-medium text-slate-700">No hay convocatorias{% if tipo %} de este tipo{% endif %}</p>
+        <p class="mt-1 text-sm text-slate-500">Ajusta tus preferencias o quita el filtro.</p>
+        {% if tipo %}<a href="?orden={{ orden }}" class="mt-3 inline-block text-sm text-granate-700 underline">Ver todas</a>{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- ===== Tu actividad (sección inferior compacta) ===== -->
+  <section class="pt-2">
+    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Tu actividad</h3>
+    <div class="mt-3 grid gap-4 sm:grid-cols-3">
+      <!-- Resumen semanal -->
+      <a href="{% url 'notificaciones:lista' %}" class="rounded-2xl border border-slate-200 bg-white p-4 hover:shadow-sm transition flex items-center gap-3">
+        <span class="h-10 w-10 shrink-0 rounded-xl bg-granate-50 text-granate-700 grid place-items-center"><i data-lucide="calendar-days" class="w-5 h-5"></i></span>
+        <span class="min-w-0">
+          <span class="block text-sm font-semibold text-slate-800">Resumen semanal</span>
+          <span class="block text-xs text-slate-500">{{ resumen_n }} oportunidad{{ resumen_n|pluralize:"es" }} esta semana</span>
+        </span>
+      </a>
+      <!-- Credencial pública -->
+      <a href="{% url 'usuarios:credencial_config' %}" class="rounded-2xl border border-slate-200 bg-white p-4 hover:shadow-sm transition flex items-center gap-3">
+        <span class="h-10 w-10 shrink-0 rounded-xl bg-granate-50 text-granate-700 grid place-items-center"><i data-lucide="id-card" class="w-5 h-5"></i></span>
+        <span class="min-w-0">
+          <span class="block text-sm font-semibold text-slate-800">Credencial pública</span>
+          <span class="block text-xs {% if talento.cred_activa %}text-exito{% else %}text-slate-500{% endif %}">{% if talento.cred_activa %}Activa · compartible{% else %}Inactiva · actívala{% endif %}</span>
+        </span>
+      </a>
+      <!-- Guardadas -->
+      <a href="{% url 'usuarios:guardadas' %}" class="rounded-2xl border border-slate-200 bg-white p-4 hover:shadow-sm transition flex items-center gap-3">
+        <span class="h-10 w-10 shrink-0 rounded-xl bg-granate-50 text-granate-700 grid place-items-center"><i data-lucide="heart" class="w-5 h-5"></i></span>
+        <span class="min-w-0">
+          <span class="block text-sm font-semibold text-slate-800">Guardadas</span>
+          <span class="block text-xs text-slate-500">{{ n_guardadas }} convocatoria{{ n_guardadas|pluralize }} guardada{{ n_guardadas|pluralize }}</span>
+        </span>
+      </a>
+    </div>
+  </section>
 </div>
 {% endblock %}
