@@ -1,0 +1,19 @@
+{% comment %}Badge de alerta de una convocatoria (texto + ícono, no solo color).
+Contexto: tipo (duplicado|incompleta|baja_transparencia|exceso_difusion), sim (opcional, % de similitud para duplicado).{% endcomment %}
+{% if tipo == 'duplicado' %}
+<span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium bg-peligro/10 text-peligro">
+  <i data-lucide="copy" class="w-3.5 h-3.5"></i>Duplicado{% if sim %} {% widthratio sim 1 100 %}%{% endif %}
+</span>
+{% elif tipo == 'incompleta' %}
+<span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium bg-alerta/10 text-alerta">
+  <i data-lucide="file-warning" class="w-3.5 h-3.5"></i>Incompleta
+</span>
+{% elif tipo == 'baja_transparencia' %}
+<span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium bg-alerta/10 text-alerta">
+  <i data-lucide="eye-off" class="w-3.5 h-3.5"></i>Baja transparencia
+</span>
+{% elif tipo == 'exceso_difusion' %}
+<span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium bg-dorado/15 text-dorado">
+  <i data-lucide="megaphone" class="w-3.5 h-3.5"></i>Exceso de difusión
+</span>
+{% endif %}

@@ -8,7 +8,9 @@
 {% block dashboard_content %}
 <section class="max-w-6xl">
   <nav class="text-sm text-slate-500" aria-label="Ruta">
-    <a href="{{ request.GET.next|default:'' }}{% if not request.GET.next %}{% url 'core:panel_admin' %}{% endif %}" class="hover:text-granate-700 hover:underline">Bandeja</a>
+    <a href="{{ request.GET.next|default:'' }}{% if not request.GET.next %}{% url 'core:panel_admin' %}{% endif %}" class="inline-flex items-center gap-1 hover:text-granate-700 hover:underline">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i> Bandeja
+    </a>
     <span class="mx-1 text-slate-300">/</span>
     <span class="text-slate-700">Revisar</span>
   </nav>
@@ -22,7 +24,7 @@
         {% if conv.empresa.verificada %}
         <span class="inline-flex items-center gap-1 text-exito"><i data-lucide="badge-check" class="w-4 h-4"></i><span class="sr-only">Empresa </span>verificada</span>
         {% elif conv.empresa.es_referencial %}
-        <span class="text-slate-400">· referencial</span>
+        <span class="text-slate-500">· referencial</span>
         {% endif %}
         <span class="text-slate-300">·</span> {{ conv.get_tipo_display }}
       </p>
@@ -37,36 +39,36 @@
     <div class="lg:col-span-2 space-y-6">
 
       {% if alertas %}
-      <div class="rounded-xl border border-alerta/30 bg-alerta/5 p-4">
+      <div class="rounded-2xl border border-alerta/30 bg-alerta/5 p-5 shadow-sm">
         <p class="flex items-center gap-2 text-sm font-semibold text-alerta">
-          <i data-lucide="alert-triangle" class="w-4 h-4"></i> Alertas a revisar
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i> {{ alertas|length }} alerta{{ alertas|length|pluralize }} a revisar
         </p>
-        <ul class="mt-2 space-y-1.5 text-sm text-slate-700">
+        <ul class="mt-3 space-y-2 text-sm text-slate-700">
           {% if 'duplicado' in alertas %}<li class="flex gap-2"><i data-lucide="copy" class="w-4 h-4 mt-0.5 shrink-0 text-peligro"></i>
-            Posible duplicado{% if duplicados %} — {{ duplicados.0.1|floatformat:0 }}% de similitud con «{{ duplicados.0.0.titulo }}»{% endif %} (ver comparación abajo)</li>{% endif %}
+            <span>Posible duplicado{% if duplicados %} — <strong>{% widthratio duplicados.0.1 1 100 %}%</strong> de similitud con «{{ duplicados.0.0.titulo }}»{% endif %} (ver comparación abajo)</span></li>{% endif %}
           {% if 'incompleta' in alertas %}<li class="flex gap-2"><i data-lucide="file-warning" class="w-4 h-4 mt-0.5 shrink-0 text-alerta"></i>
-            Información incompleta{% if faltantes %} — falta: {{ faltantes|join:", " }}{% endif %}</li>{% endif %}
+            <span>Información incompleta{% if faltantes %} — falta: {{ faltantes|join:", " }}{% endif %}</span></li>{% endif %}
           {% if 'baja_transparencia' in alertas %}<li class="flex gap-2"><i data-lucide="eye-off" class="w-4 h-4 mt-0.5 shrink-0 text-alerta"></i>
-            Baja transparencia ({{ conv.transparencia_pct }}%, &lt;50%)</li>{% endif %}
+            <span>Baja transparencia ({{ conv.transparencia_pct }}%, &lt;50%)</span></li>{% endif %}
           {% if 'exceso_difusion' in alertas %}<li class="flex gap-2"><i data-lucide="megaphone" class="w-4 h-4 mt-0.5 shrink-0 text-dorado"></i>
-            Posible exceso de difusión de la empresa (≥ límite en 30 días)</li>{% endif %}
+            <span>Posible exceso de difusión de la empresa (≥ límite en 30 días)</span></li>{% endif %}
         </ul>
       </div>
       {% endif %}
 
       <!-- Ficha -->
-      <div class="rounded-xl border border-slate-200 bg-white p-5">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 class="font-semibold text-slate-800">Detalle de la convocatoria</h2>
         <dl class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
           {% include "core/_dato.html" with label="Modalidad" valor=conv.get_modalidad_display %}
           {% include "core/_dato.html" with label="Ubicación" valor=conv.ubicacion %}
           {% include "core/_dato.html" with label="Duración estimada" valor=conv.duracion_estimada %}
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Fecha límite</dt>
+            <dt class="text-xs uppercase tracking-wide text-slate-500">Fecha límite</dt>
             <dd class="mt-0.5 text-sm text-slate-700">{{ conv.fecha_limite|date:"d/m/Y"|default:"—" }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Remuneración</dt>
+            <dt class="text-xs uppercase tracking-wide text-slate-500">Remuneración</dt>
             <dd class="mt-0.5 text-sm text-slate-700">
               {% if conv.salario_confidencial %}<span class="text-alerta">Confidencial</span>
               {% elif conv.banda_salarial_min or conv.banda_salarial_max %}S/ {{ conv.banda_salarial_min|default:"?" }} – {{ conv.banda_salarial_max|default:"?" }}
@@ -75,16 +77,16 @@
             </dd>
           </div>
           {% include "core/_dato.html" with label="N.º de vacantes" valor=conv.vacantes %}
-          {% if conv.jornada_horas %}<div><dt class="text-xs uppercase tracking-wide text-slate-400">Jornada</dt><dd class="mt-0.5 text-sm text-slate-700">{{ conv.jornada_horas }} h/sem</dd></div>{% endif %}
+          {% if conv.jornada_horas %}<div><dt class="text-xs uppercase tracking-wide text-slate-500">Jornada</dt><dd class="mt-0.5 text-sm text-slate-700">{{ conv.jornada_horas }} h/sem</dd></div>{% endif %}
           {% include "core/_dato.html" with label="Régimen" valor=conv.regimen %}
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-400">No discriminación</dt>
+            <dt class="text-xs uppercase tracking-wide text-slate-500">No discriminación</dt>
             <dd class="mt-0.5 text-sm">
-              {% if conv.no_discriminacion %}<span class="text-exito">✓ Declarada</span>{% else %}<span class="text-peligro">✗ No declarada</span>{% endif %}
+              {% if conv.no_discriminacion %}<span class="inline-flex items-center gap-1 text-exito"><i data-lucide="check" class="w-4 h-4"></i> Declarada</span>{% else %}<span class="inline-flex items-center gap-1 text-peligro"><i data-lucide="x" class="w-4 h-4"></i> No declarada</span>{% endif %}
             </dd>
           </div>
           <div class="sm:col-span-2">
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Medio de postulación</dt>
+            <dt class="text-xs uppercase tracking-wide text-slate-500">Medio de postulación</dt>
             <dd class="mt-0.5 text-sm text-slate-700 break-words">
               {% if conv.medio_postulacion %}
                 {% if '://' in conv.medio_postulacion %}<a href="{{ conv.medio_postulacion }}" target="_blank" rel="noopener" class="text-granate-700 hover:underline">{{ conv.medio_postulacion }}</a>
@@ -95,7 +97,7 @@
           </div>
           {% if conv.carreras_objetivo.exists %}
           <div class="sm:col-span-2">
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Carreras objetivo</dt>
+            <dt class="text-xs uppercase tracking-wide text-slate-500">Carreras objetivo</dt>
             <dd class="mt-1 flex flex-wrap gap-1.5">
               {% for c in conv.carreras_objetivo.all %}<span class="rounded-full bg-slate-100 text-slate-600 text-xs px-2 py-0.5">{{ c }}</span>{% endfor %}
             </dd>
@@ -105,13 +107,13 @@
 
         {% if conv.descripcion %}
         <div class="mt-5 pt-5 border-t border-slate-100">
-          <h3 class="text-xs uppercase tracking-wide text-slate-400">Descripción y requisitos</h3>
+          <h3 class="text-xs uppercase tracking-wide text-slate-500">Descripción y requisitos</h3>
           <p class="mt-1 text-sm text-slate-700 whitespace-pre-line">{{ conv.descripcion }}</p>
         </div>
         {% endif %}
         {% if conv.beneficios %}
         <div class="mt-4">
-          <h3 class="text-xs uppercase tracking-wide text-slate-400">Beneficios</h3>
+          <h3 class="text-xs uppercase tracking-wide text-slate-500">Beneficios</h3>
           <p class="mt-1 text-sm text-slate-700 whitespace-pre-line">{{ conv.beneficios }}</p>
         </div>
         {% endif %}
@@ -119,34 +121,49 @@
 
       <!-- Comparador de duplicado -->
       {% if duplicados %}
-      <div class="rounded-xl border border-peligro/40 bg-peligro/5 p-5">
-        <h2 class="flex items-center gap-2 font-semibold text-peligro">
-          <i data-lucide="copy" class="w-4 h-4"></i> Posible duplicado · {{ duplicados.0.1|floatformat:0 }}% de similitud
+      <div class="rounded-2xl border border-peligro/40 bg-peligro/5 p-5 shadow-sm">
+        <h2 class="flex flex-wrap items-center gap-2 font-semibold text-peligro">
+          <i data-lucide="copy" class="w-4 h-4"></i> Posible duplicado
         </h2>
+        <!-- Medidor de similitud -->
+        <div class="mt-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-500">Similitud del título (pg_trgm)</span>
+            <span class="font-bold tabular-nums text-peligro">{% widthratio duplicados.0.1 1 100 %}%</span>
+          </div>
+          <div class="mt-1.5 h-2 rounded-full bg-white overflow-hidden" role="img" aria-label="Similitud {% widthratio duplicados.0.1 1 100 %} por ciento">
+            <div class="h-full rounded-full bg-peligro" style="width: {% widthratio duplicados.0.1 1 100 %}%"></div>
+          </div>
+        </div>
         <div class="mt-4 grid sm:grid-cols-2 gap-4 text-sm">
-          <div class="rounded-lg border border-slate-200 bg-white p-3">
-            <p class="text-xs uppercase tracking-wide text-slate-400">Esta convocatoria</p>
+          <div class="rounded-xl border border-slate-200 bg-white p-3">
+            <p class="text-xs uppercase tracking-wide text-slate-500">Esta convocatoria</p>
             <p class="mt-1 font-medium text-slate-800">{{ conv.titulo }}</p>
             <p class="mt-1 text-xs text-slate-500">Creada {{ conv.creada_en|date:"d/m/Y" }} · transparencia {{ conv.transparencia_pct }}%</p>
           </div>
-          <div class="rounded-lg border border-slate-200 bg-white p-3">
-            <p class="text-xs uppercase tracking-wide text-slate-400">Ya registrada</p>
+          <div class="rounded-xl border border-slate-200 bg-white p-3">
+            <p class="text-xs uppercase tracking-wide text-slate-500">Ya registrada</p>
             <a href="{% url 'core:revisar_convocatoria' duplicados.0.0.id %}" class="mt-1 block font-medium text-granate-700 hover:underline">{{ duplicados.0.0.titulo }}</a>
             <p class="mt-1 text-xs text-slate-500">Creada {{ duplicados.0.0.creada_en|date:"d/m/Y" }} · {{ duplicados.0.0.get_estado_display }}</p>
           </div>
         </div>
+        {% if duplicados|length > 1 %}
+        <p class="mt-3 text-xs text-slate-500">+ {{ duplicados|length|add:"-1" }} otra(s) coincidencia(s) de la misma empresa en los últimos 30 días.</p>
+        {% endif %}
       </div>
       {% endif %}
 
       <!-- Empresa -->
-      <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <h2 class="font-semibold text-slate-800">Empresa</h2>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 class="flex items-center gap-2 font-semibold text-slate-800">
+          <i data-lucide="building-2" class="w-4 h-4 text-granate-700"></i> Empresa
+        </h2>
         <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-          <div><dt class="text-xs uppercase tracking-wide text-slate-400">Razón social</dt><dd class="mt-0.5 text-slate-700">{{ conv.empresa.razon_social }}</dd></div>
-          <div><dt class="text-xs uppercase tracking-wide text-slate-400">RUC</dt><dd class="mt-0.5 text-slate-700 tabular-nums">{{ conv.empresa.ruc }}</dd></div>
-          <div><dt class="text-xs uppercase tracking-wide text-slate-400">Estado</dt><dd class="mt-0.5 text-slate-700">{{ conv.empresa.get_estado_display }}{% if conv.empresa.es_referencial %} · referencial{% endif %}</dd></div>
+          <div><dt class="text-xs uppercase tracking-wide text-slate-500">Razón social</dt><dd class="mt-0.5 text-slate-700">{{ conv.empresa.razon_social }}</dd></div>
+          <div><dt class="text-xs uppercase tracking-wide text-slate-500">RUC</dt><dd class="mt-0.5 text-slate-700 tabular-nums">{{ conv.empresa.ruc }}</dd></div>
+          <div><dt class="text-xs uppercase tracking-wide text-slate-500">Estado</dt><dd class="mt-0.5 text-slate-700">{{ conv.empresa.get_estado_display }}{% if conv.empresa.es_referencial %} · referencial{% endif %}</dd></div>
           {% if conv.empresa.web or conv.empresa.linkedin %}
-          <div><dt class="text-xs uppercase tracking-wide text-slate-400">Enlaces</dt><dd class="mt-0.5 flex gap-3">
+          <div><dt class="text-xs uppercase tracking-wide text-slate-500">Enlaces</dt><dd class="mt-0.5 flex gap-3">
             {% if conv.empresa.web %}<a href="{{ conv.empresa.web }}" target="_blank" rel="noopener" class="text-granate-700 hover:underline">Web</a>{% endif %}
             {% if conv.empresa.linkedin %}<a href="{{ conv.empresa.linkedin }}" target="_blank" rel="noopener" class="text-granate-700 hover:underline">LinkedIn</a>{% endif %}
           </dd></div>
@@ -158,17 +175,17 @@
     <!-- Panel de acciones (sticky) -->
     <aside class="lg:sticky lg:top-20 h-max">
       <form method="post" x-data='{ c: "{{ conv.comentario_revision|escapejs }}" }'
-            class="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+            class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-sm">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ request.GET.next }}">
         <div>
-          <p class="text-xs uppercase tracking-wide text-slate-400">Transparencia</p>
+          <p class="text-xs uppercase tracking-wide text-slate-500">Transparencia</p>
           <div class="mt-2">{% include "convocatorias/_transparencia.html" with et=conv.etiqueta_transparencia pct=conv.transparencia_pct variant="bar" %}</div>
         </div>
 
         <div class="pt-1">
           <label for="comentario" class="text-sm font-medium text-slate-700">Comentario</label>
-          <p class="text-xs text-slate-400">Obligatorio para observar; opcional al rechazar.</p>
+          <p class="text-xs text-slate-500">Obligatorio para observar; opcional al rechazar.</p>
           <textarea name="comentario" id="comentario" rows="4" x-model="c"
                     placeholder="Motivo de la observación o rechazo…"
                     class="w-full mt-1.5 border border-slate-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-granate-200 focus:border-granate-400"></textarea>
