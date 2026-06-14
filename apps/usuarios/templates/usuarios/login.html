@@ -57,7 +57,7 @@
 
   <!-- ===== Panel de formulario ===== -->
   <main class="flex items-center justify-center p-6 sm:p-10 bg-white">
-    <div class="w-full max-w-md" x-data="{ puerta: 'unsa' }">
+    <div class="w-full max-w-md" x-data="{ puerta: '{{ puerta_inicial|default:"unsa" }}' }">
       <div class="flex justify-end">
         <a href="{% url 'core:como_funciona' %}" class="text-sm text-slate-400 hover:text-granate-700">¿Necesitas ayuda?</a>
       </div>
@@ -103,6 +103,11 @@
 
       <!-- Puerta Empresa: usuario / contraseña -->
       <div x-show="puerta==='empresa'" x-cloak class="mt-7">
+        {% if error_empresa %}
+        <div class="mb-4 flex items-center gap-2 rounded-lg border border-peligro/30 bg-peligro/5 px-3 py-2.5 text-sm text-peligro" role="alert">
+          <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i> {{ error_empresa }}
+        </div>
+        {% endif %}
         <form method="post" action="{% url 'usuarios:login_empresa' %}" class="space-y-4">
           {% csrf_token %}
           {% for field in form_empresa %}

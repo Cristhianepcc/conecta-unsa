@@ -40,8 +40,16 @@ def login_empresa(request):
     if form.is_valid():
         auth_login(request, form.get_user())
         return redirect("usuarios:post_login")
-    messages.error(request, "Usuario o contraseña incorrectos.")
-    return render(request, "usuarios/login.html", {"form_empresa": form})
+    # Error contextual dentro de la pestaña «Soy empresa», no como banner global.
+    return render(
+        request,
+        "usuarios/login.html",
+        {
+            "form_empresa": form,
+            "puerta_inicial": "empresa",
+            "error_empresa": "Usuario o contraseña incorrectos.",
+        },
+    )
 
 
 @login_required
