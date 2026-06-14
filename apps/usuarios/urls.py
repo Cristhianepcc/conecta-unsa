@@ -8,6 +8,7 @@ urlpatterns = [
     # 02 — Autenticación
     path("login/", views.login_view, name="login"),
     path("login/empresa/", views.login_empresa, name="login_empresa"),
+    path("demo/<str:rol>/", views.demo_login, name="demo_login"),
     path("post-login/", views.post_login, name="post_login"),
     path("logout/", views.logout_view, name="logout"),
     path("completar-perfil/", views.completar_perfil, name="completar_perfil"),

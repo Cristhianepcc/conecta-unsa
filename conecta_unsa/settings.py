@@ -35,6 +35,10 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = env_bool("DEBUG", True)
 
+# Modo demo: habilita accesos directos a los dashboards en el login (sin Google),
+# para que el jurado vea los flujos. ⚠️ NO usar en producción real (apagar con DEMO_MODE=False).
+DEMO_MODE = env_bool("DEMO_MODE", DEBUG)
+
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1,.railway.app")
 
 CSRF_TRUSTED_ORIGINS = env_list(

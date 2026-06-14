@@ -1,10 +1,13 @@
 """Vistas de autenticación (02) y perfil/credencial (07)."""
 
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
@@ -30,7 +33,59 @@ def login_view(request):
     """Pantalla de login con las 2 puertas (login.png)."""
     if request.user.is_authenticated:
         return redirect("usuarios:post_login")
-    return render(request, "usuarios/login.html", {"form_empresa": AuthenticationForm()})
+    return render(
+        request,
+        "usuarios/login.html",
+        {"form_empresa": AuthenticationForm(), "demo_mode": settings.DEMO_MODE},
+    )
+
+
+def demo_login(request, rol):
+    """Acceso directo a un dashboard para la DEMO (sin Google). Solo con DEMO_MODE=True.
+
+    ⚠️ Inseguro a propósito: existe únicamente para que el jurado vea los flujos de
+    egresado y administrativo. En producción real se apaga con DEMO_MODE=False.
+    """
+    if not settings.DEMO_MODE:
+        raise Http404("Disponible solo en modo demo.")
+
+    User = get_user_model()
+    if rol == "egresado":
+        from apps.taxonomia.models import Carrera
+
+        user, _ = User.objects.get_or_create(
+            username="demo_egresado",
+            defaults={"email": "demo.egresado@unsa.edu.pe",
+                      "first_name": "Demo", "last_name": "Egresado"},
+        )
+        perfil = asegurar_perfil(user)
+        perfil.perfil_completo = True
+        perfil.consentimiento_datos = True
+        perfil.save()
+        talento = asegurar_perfil_talento(user)
+        if not talento.carrera_id:
+            talento.carrera = (
+                Carrera.objects.filter(nombre="Ingeniería de Sistemas").first()
+                or Carrera.objects.first()
+            )
+            talento.estado_academico = "egresado"
+            talento.save()
+    elif rol == "admin":
+        from apps.core.models import AdminAllowlist
+        from .services import resolver_rol
+
+        email = "demo.admin@unsa.edu.pe"
+        AdminAllowlist.objects.get_or_create(email=email, defaults={"nota": "Admin demo"})
+        user, _ = User.objects.get_or_create(
+            username="demo_admin",
+            defaults={"email": email, "first_name": "Demo", "last_name": "Admin"},
+        )
+        resolver_rol(user)  # la allowlist lo promueve a admin
+    else:
+        raise Http404("Rol de demo no válido.")
+
+    auth_login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+    return redirect("usuarios:post_login")
 
 
 @require_http_methods(["POST"])
@@ -48,6 +103,7 @@ def login_empresa(request):
             "form_empresa": form,
             "puerta_inicial": "empresa",
             "error_empresa": "Usuario o contraseña incorrectos.",
+            "demo_mode": settings.DEMO_MODE,
         },
     )
 

@@ -5,7 +5,7 @@ Google (estrategia-pruebas.md). El login con Google se simula con force_login.
 """
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.core.models import AdminAllowlist
@@ -152,6 +152,33 @@ class LoginRenderTests(TestCase):
     def test__senal_crea_perfil_automaticamente(self):
         user = User.objects.create_user("auto", email="auto@gmail.com", password="x")
         self.assertTrue(Perfil.objects.filter(user=user).exists())
+
+
+class DemoLoginTests(TestCase):
+    """Accesos directos de demo (DEMO_MODE) para mostrar los flujos al jurado."""
+
+    @classmethod
+    def setUpTestData(cls):
+        from django.core.management import call_command
+
+        call_command("seed_taxonomia")
+
+    @override_settings(DEMO_MODE=True)
+    def test_demo_egresado_enruta_a_dashboard(self):
+        resp = self.client.get(reverse("usuarios:demo_login", args=["egresado"]), follow=True)
+        self.assertRedirects(resp, reverse("usuarios:dashboard"))
+        self.assertEqual(User.objects.get(username="demo_egresado").perfil.rol, ROL_EGRESADO)
+
+    @override_settings(DEMO_MODE=True)
+    def test_demo_admin_enruta_a_panel(self):
+        resp = self.client.get(reverse("usuarios:demo_login", args=["admin"]), follow=True)
+        self.assertRedirects(resp, reverse("core:panel_admin"))
+        self.assertEqual(User.objects.get(username="demo_admin").perfil.rol, ROL_ADMIN)
+
+    @override_settings(DEMO_MODE=False)
+    def test_demo_apagado_da_404(self):
+        resp = self.client.get(reverse("usuarios:demo_login", args=["egresado"]))
+        self.assertEqual(resp.status_code, 404)
 
 
 # --- 07 Perfil de talento y credencial pública ------------------------------
