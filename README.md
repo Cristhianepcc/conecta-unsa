@@ -30,6 +30,7 @@ operativa para la Bolsa de Trabajo — sin IA, con software público.
 | [proyecto.md](proyecto.md) | Equipo, integrantes, entregables de la hackathon |
 | [paginas.md](paginas.md) | Especificación de las 4 pantallas + mockups en `paginas/` |
 | [SEED.md](SEED.md) | **Siembra de datos**: `seed_demo`, empresas reales + logos/banners, cuentas y credenciales de demo |
+| [A-PRODUCCION.md](A-PRODUCCION.md) | **Checklist para subir a producción** (complementa `deploy.md`): commit de imágenes, env vars, sembrar la BBDD |
 
 ---
 

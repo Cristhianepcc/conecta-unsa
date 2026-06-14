@@ -31,6 +31,7 @@ specs/plan-paralelo.md, y dame un plan breve de cómo vas a proceder. Luego arra
 |---|---|
 | `README.md` | Índice general |
 | `SEED.md` | **Siembra de datos** de la demo (`seed_demo`), empresas reales + logos, cuentas y credenciales |
+| `A-PRODUCCION.md` | **Checklist para subir a producción** (commit de imágenes, env vars, sembrar la BBDD) |
 | `*.md` (raíz) | Capa de **decisiones/referencia** (propuesta, arquitectura, modelo-datos, matching, auth-roles, branding…) |
 | `specs/constitucion.md` | Principios, convención EARS, orden de ejecución, Definition of Done |
 | `specs/` (transversales) | glosario · modelo-datos canónico · NFR · estrategia-pruebas · seed-demo |

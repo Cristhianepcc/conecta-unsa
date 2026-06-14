@@ -34,6 +34,7 @@ python manage.py seed_imagenes --force
 | `seed_elegibilidad` | Matriz estado académico × tipo de convocatoria. | ✅ |
 | `seed_cuentas` | Una **cuenta de reclutador** (login por email) por cada empresa. | ✅ |
 | `seed_imagenes` | Mapea cada empresa a una **empresa real** y descarga su **logo + banner**. | ✅ |
+| `seed_notificaciones` | Notificaciones in-app de demo (campana viva: egresado, empresa, admin). | ✅ |
 
 `seed_demo` ejecuta la secuencia completa:
 
@@ -41,8 +42,9 @@ python manage.py seed_imagenes --force
 seed_taxonomia → seed_config → seed_elegibilidad
    → crea empresas + convocatorias de muestra
    → crea usuarios de demo (egresado, admin)
-   → seed_cuentas      (cuentas de empresa, login por email)
-   → seed_imagenes      (identidad real + logos + banners)
+   → seed_cuentas         (cuentas de empresa, login por email)
+   → seed_imagenes        (identidad real + logos + banners)
+   → seed_notificaciones  (campana in-app con no leídas)
 ```
 
 ---
@@ -57,6 +59,7 @@ seed_taxonomia → seed_config → seed_elegibilidad
 | Matriz de elegibilidad | 24 reglas | `matching.md` |
 | **Empresas** | 9 | **Empresas reales** (ver tabla) con logo, banner y datos completos |
 | **Convocatorias** | 20 | Variando tipo, carrera y % de transparencia (semáforo 🟢🟡🔴) |
+| **Notificaciones** | ~9 | In-app para egresado (con no leídas), empresa y admin |
 | Administrativo | 1+ | Correo en `AdminAllowlist` |
 
 **No se siembran perfiles de egresado** salvo las cuentas de demo: en producción
@@ -154,6 +157,30 @@ verificado para que el login por correo funcione.
 
 ---
 
+## Notificaciones (`seed_notificaciones`)
+
+Para que la **campana** no salga vacía, se siembran notificaciones in-app:
+
+- **`demo_egresado`** — convocatorias pertinentes (enlazan a su detalle), fecha límite
+  próxima, resumen semanal y un aviso general. Mezcla leídas/no leídas → el contador
+  de la campana muestra un número.
+- **`demo_empresa`** — convocatoria observada + bienvenida.
+- **`demo_admin`** — aviso de convocatorias pendientes de revisión.
+
+Los `creado_en` se escalonan (minutos/horas/días atrás) para que el orden cronológico
+se vea realista.
+
+---
+
+## Producción
+
+Para desplegar, ver el checklist [`A-PRODUCCION.md`](A-PRODUCCION.md). Punto clave:
+las imágenes están **versionadas en el repo** (las sirve WhiteNoise tras
+`collectstatic`); en producción `seed_demo` solo rellena la BBDD y **no vuelve a
+descargar** los logos.
+
+---
+
 ## Detalles de implementación
 
 - Los archivos viven en:
@@ -163,6 +190,7 @@ verificado para que el login por correo funcione.
   - `apps/matching/management/commands/seed_elegibilidad.py`
   - `apps/empresas/management/commands/seed_cuentas.py`
   - `apps/empresas/management/commands/seed_imagenes.py`
+  - `apps/notificaciones/management/commands/seed_notificaciones.py`
 - Las empresas se identifican por **RUC** (clave estable); `seed_imagenes` y
   `seed_cuentas` actualizan la misma empresa por RUC, así que el orden de ejecución
   no genera duplicados.
