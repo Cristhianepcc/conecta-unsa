@@ -2,9 +2,58 @@
 
 {% block title %}Registrar empresa — CONECTA UNSA{% endblock %}
 
+{% block extra_head %}
+<style>
+  .campo input, .campo select, .campo textarea {
+    width: 100%; border: 1px solid #cbd5e1; border-radius: 0.5rem;
+    padding: 0.55rem 0.75rem; margin-top: 0.2rem;
+  }
+  .campo label { font-size: 0.85rem; font-weight: 500; color: #334155; }
+  .campo .errorlist { color: #C0392B; font-size: 0.75rem; list-style: none; padding: 0; margin: 0.2rem 0 0; }
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="max-w-2xl mx-auto px-4 py-12">
+<section class="max-w-3xl mx-auto px-4 py-12">
   <h1 class="text-2xl font-bold text-granate-700">Registrar empresa</h1>
-  <p class="mt-6 text-sm text-slate-400">El formulario de registro (RUC + reclutador) llega en la feature 03.</p>
+  <p class="mt-2 text-sm text-slate-600">
+    Completa los datos de tu empresa y del reclutador. Tu cuenta será
+    <strong>verificada por la universidad</strong> antes de poder publicar convocatorias.
+  </p>
+
+  <form method="post" class="mt-8 space-y-10" novalidate>
+    {% csrf_token %}
+
+    <fieldset>
+      <legend class="text-lg font-semibold text-slate-800">Bloque A — Información de la empresa</legend>
+      <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {% for field in empresa_form %}
+        <div class="campo {% if field.name == 'descripcion' or field.name == 'direccion' %}sm:col-span-2{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend class="text-lg font-semibold text-slate-800">Bloque B — Reclutador y acceso</legend>
+      <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {% for field in reclutador_form %}
+        <div class="campo">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <button type="submit"
+            class="w-full sm:w-auto rounded-lg bg-granate-700 px-8 py-3 font-medium text-white hover:bg-granate-800">
+      Enviar registro
+    </button>
+  </form>
 </section>
 {% endblock %}
