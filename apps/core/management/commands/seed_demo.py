@@ -142,11 +142,17 @@ class Command(BaseCommand):
                 )
             empresas.append(empresa)
 
+        from django.utils.text import slugify
+
         hoy = timezone.localdate()
         n_conv = 0
         for idx, tipo, titulo, carreras_nombres, alta, estado in CONVOCATORIAS:
             empresa = empresas[idx]
             creada_por = CREADA_POR_EMPRESA if not empresa.es_referencial else CREADA_POR_ADMIN
+            # Medio de postulación realista: correo de RR.HH. de la empresa (la vista lo
+            # abre como mailto: → funciona en la demo). En producción es la URL/email real.
+            dominio = (slugify(empresa.nombre_comercial or empresa.razon_social) or "empresa") + ".pe"
+            email_emp = f"rrhh@{dominio}"
             datos = {
                 "tipo": tipo,
                 "descripcion": (
@@ -157,8 +163,8 @@ class Command(BaseCommand):
                 "ubicacion": "Arequipa",
                 "duracion_estimada": "6 meses",
                 "fecha_limite": hoy + timedelta(days=30),
-                "medio_postulacion": "https://demo.conecta-unsa.pe/postular",
-                "email_contacto": "rrhh@demo.pe",
+                "medio_postulacion": email_emp,
+                "email_contacto": email_emp,
                 "no_discriminacion": True,
                 "regimen": "D.L. 728" if tipo in (
                     constants.TIPO_EMPLEO, constants.TIPO_TRAINEE) else "",

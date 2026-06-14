@@ -92,6 +92,16 @@ class PostularTests(BaseDashboard):
         self.client.get(reverse("convocatorias:detalle", args=[conv.id]))
         self.assertIn(conv, list(historial_de(user)))
 
+    def test_ca3__postular_por_correo_abre_mailto(self):
+        """Si la empresa solo deja un correo, postular abre un mailto con asunto."""
+        conv = self._conv("Empleo correo", [self.sistemas])
+        conv.medio_postulacion = "rrhh@empresa.pe"
+        conv.save(update_fields=["medio_postulacion"])
+        self._login_egresado(self.sistemas)
+        resp = self.client.get(reverse("convocatorias:postular", args=[conv.id]))
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(resp.url.startswith("mailto:rrhh@empresa.pe?subject="))
+
 
 class GuardarTests(BaseDashboard):
     def test_ca4__guardar_y_listar(self):

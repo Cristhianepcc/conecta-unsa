@@ -122,9 +122,10 @@
         </dl>
 
         <div class="mt-5 space-y-2">
-          <a href="{% url 'convocatorias:postular' conv.id %}"
+          <a href="{% url 'convocatorias:postular' conv.id %}" target="_blank" rel="noopener"
              class="flex items-center justify-center gap-2 w-full rounded-xl bg-granate-700 px-5 py-3 font-semibold text-white hover:bg-granate-800">
-            Postular ahora <i data-lucide="external-link" class="w-4 h-4"></i>
+            {% if conv.medio_es_correo %}Postular por correo <i data-lucide="mail" class="w-4 h-4"></i>
+            {% else %}Postular ahora <i data-lucide="external-link" class="w-4 h-4"></i>{% endif %}
           </a>
           <form method="post" action="{% url 'convocatorias:guardar' conv.id %}">
             {% csrf_token %}
@@ -135,8 +136,14 @@
             </button>
           </form>
         </div>
-        <p class="mt-3 text-xs text-slate-400 leading-relaxed">
-          Al postular saldrás al medio externo indicado por la empresa. CONECTA UNSA no gestiona la selección.
+        {% if conv.medio_efectivo %}
+        <p class="mt-3 inline-flex items-start gap-1.5 text-xs text-slate-500 leading-relaxed">
+          {% if conv.medio_es_correo %}<i data-lucide="mail" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i><span>Envía tu CV a <span class="font-medium text-slate-700 break-all">{{ conv.medio_efectivo }}</span></span>
+          {% else %}<i data-lucide="external-link" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i><span>Postulas en el sitio web de la empresa.</span>{% endif %}
+        </p>
+        {% endif %}
+        <p class="mt-2 text-xs text-slate-400 leading-relaxed">
+          CONECTA UNSA no gestiona la selección; la postulación es directa con la empresa.
         </p>
       </div>
     </aside>

@@ -150,6 +150,17 @@ class Convocatoria(models.Model):
         return d is not None and 0 <= d <= 3
 
     @property
+    def medio_efectivo(self) -> str:
+        """Medio de postulación; si no hay, cae al email de contacto."""
+        return self.medio_postulacion or self.email_contacto or ""
+
+    @property
+    def medio_es_correo(self) -> bool:
+        """True si el medio de postulación es un correo (no una URL)."""
+        m = self.medio_efectivo
+        return bool(m) and "@" in m and not m.lower().startswith("http")
+
+    @property
     def activa(self) -> bool:
         """Publicada y aún dentro de su fecha límite (flujo-admin.md §1)."""
         from django.utils import timezone

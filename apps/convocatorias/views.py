@@ -1,6 +1,13 @@
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
+
+
+class RedirectExterno(HttpResponseRedirect):
+    """Redirección al medio de postulación: permite también mailto (Django bloquea mailto por defecto)."""
+
+    allowed_schemes = ["http", "https", "mailto"]
 
 from apps.matching.services import compatibilidad, puntuar
 
@@ -34,14 +41,23 @@ def postular(request, pk):
 
     La plataforma no gestiona la selección (decisión de la propuesta).
     """
+    from urllib.parse import quote
+
     conv = get_object_or_404(Convocatoria, pk=pk, estado=ESTADO_PUBLICADA)
     registrar_vista(request.user, conv)
-    destino = conv.medio_postulacion
+    destino = conv.medio_efectivo
     if not destino:
         return redirect("convocatorias:detalle", pk=pk)
-    if "@" in destino and not destino.startswith("http"):
-        destino = f"mailto:{destino}"
-    return redirect(destino)
+    if conv.medio_es_correo:
+        # Caso común: la empresa solo deja un correo para enviar el CV.
+        # Abrimos un borrador con el asunto pre-llenado (adjuntar CV lo hace el postulante).
+        asunto = quote(f"Postulación: {conv.titulo} — {conv.empresa}")
+        cuerpo = quote(
+            "Estimados,\n\nAdjunto mi CV para postular a esta convocatoria publicada en "
+            "CONECTA UNSA.\n\nSaludos cordiales."
+        )
+        destino = f"mailto:{destino}?subject={asunto}&body={cuerpo}"
+    return RedirectExterno(destino)
 
 
 @login_required
