@@ -40,8 +40,12 @@ python manage.py runserver
 
 - Landing: `/` · Login (2 puertas): `/usuarios/login/` · Registro empresa: `/empresas/registro/`
 - Panel admin a medida: `/panel-admin/` (rol admin por allowlist) · Django Admin: `/admin/`
-- Cron semanal (Railway): `python manage.py enviar_resumenes`
-- Caducidad diaria (Railway): `python manage.py caducar_vencidas`
+- Cron semanal (Railway): `python manage.py enviar_resumenes` — schedule sugerido `0 8 * * 1` (lunes 08:00)
+- Caducidad diaria (Railway): `python manage.py caducar_vencidas` — schedule sugerido `0 3 * * *` (03:00 diario)
+
+  > Se configuran como **servicios cron** en el dashboard de Railway apuntando al mismo deploy
+  > (no van en `railway.json`). Aun si el cron de caducidad fallara, el feed y el resumen ya
+  > excluyen vencidas por código (`matching.convocatorias_publicadas`, feature 13).
 
 ## Comandos de gestión
 `seed_demo` (todo), `seed_taxonomia`, `seed_config`, `seed_elegibilidad`,
