@@ -15,6 +15,7 @@ from apps.usuarios.models import (
     Credencial,
     PerfilTalento,
 )
+from apps.notificaciones.services import construir_resumen
 
 from . import services
 
@@ -139,3 +140,54 @@ class AlcanceTests(BaseMatching):
         self._egresado(self.sistemas, estado="estudiante", username="a3")  # no califica empleo
         self._egresado(self.medicina, estado="egresado", username="a4")    # otra carrera
         self.assertEqual(services.alcance(conv), 2)
+
+
+class VigenciaFeedTests(BaseMatching):
+    """Feature 13: vencidas fuera del feed y del resumen, aunque el cron no haya corrido."""
+
+    def test_ca1__vencida_no_aparece_en_feed(self):
+        """CA-1: una publicada con fecha límite pasada no entra al feed."""
+        vigente = self._conv(
+            constants.TIPO_EMPLEO, [self.sistemas], titulo="Vigente",
+            fecha_limite=date.today() + timedelta(days=10),
+        )
+        vencida = self._conv(
+            constants.TIPO_EMPLEO, [self.sistemas], titulo="Vencida",
+            fecha_limite=date.today() - timedelta(days=1),
+        )
+        user = self._egresado(self.sistemas, username="vig")
+        ids = [c.id for c, _p, _m in services.feed(user)]
+        self.assertIn(vigente.id, ids)
+        self.assertNotIn(vencida.id, ids)
+
+    def test_ca2__resumen_excluye_vencida(self):
+        """CA-2: el resumen semanal hereda el filtro de vigencia (vía matching.feed)."""
+        vigente = self._conv(
+            constants.TIPO_EMPLEO, [self.sistemas], titulo="Vigente",
+            fecha_limite=date.today() + timedelta(days=10),
+        )
+        vencida = self._conv(
+            constants.TIPO_EMPLEO, [self.sistemas], titulo="Vencida",
+            fecha_limite=date.today() - timedelta(days=1),
+        )
+        user = self._egresado(self.sistemas, username="res")
+        ids = [c.id for c in construir_resumen(user)]
+        self.assertIn(vigente.id, ids)
+        self.assertNotIn(vencida.id, ids)
+
+    def test_ca3__sin_fecha_limite_no_expira(self):
+        """CA-3: una convocatoria sin fecha límite (null) sigue apareciendo."""
+        sin_fecha = self._conv(
+            constants.TIPO_EMPLEO, [self.sistemas], titulo="Sin fecha", fecha_limite=None
+        )
+        user = self._egresado(self.sistemas, username="nofecha")
+        ids = [c.id for c, _p, _m in services.feed(user)]
+        self.assertIn(sin_fecha.id, ids)
+
+    def test__publicadas_solo_vigentes(self):
+        """convocatorias_publicadas() excluye las vencidas en el origen."""
+        self._conv(
+            constants.TIPO_EMPLEO, [self.sistemas], titulo="Vencida",
+            fecha_limite=date.today() - timedelta(days=1),
+        )
+        self.assertEqual(services.convocatorias_publicadas().count(), 0)

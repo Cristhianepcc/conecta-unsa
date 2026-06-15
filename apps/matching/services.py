@@ -6,6 +6,9 @@ Tres niveles, todos por reglas transparentes y explicables (sin IA):
 - Layer 3: ranking por afinidad de credenciales + preferencias, con motivo legible.
 """
 
+from django.db.models import Q
+from django.utils import timezone
+
 from apps.core import constants
 from apps.core.models import ReglaElegibilidad
 from apps.convocatorias.models import ESTADO_PUBLICADA, Convocatoria
@@ -78,7 +81,16 @@ def compatibilidad(usuario, conv):
 
 
 def convocatorias_publicadas():
-    return Convocatoria.objects.filter(estado=ESTADO_PUBLICADA)
+    """Publicadas y vigentes: estado publicada y fecha límite no vencida (feature 13).
+
+    Defensa en profundidad: aunque el cron `caducar_vencidas` no haya corrido aún, el
+    egresado nunca ve ni recibe convocatorias vencidas en el feed ni en el resumen
+    (ambos parten de aquí). Sin `fecha_limite` (null) = no expira.
+    """
+    hoy = timezone.localdate()
+    return Convocatoria.objects.filter(estado=ESTADO_PUBLICADA).filter(
+        Q(fecha_limite__gte=hoy) | Q(fecha_limite__isnull=True)
+    )
 
 
 def tipos_elegibles(estado_academico: str) -> set[str]:

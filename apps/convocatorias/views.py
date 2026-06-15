@@ -45,6 +45,8 @@ def postular(request, pk):
 
     conv = get_object_or_404(Convocatoria, pk=pk, estado=ESTADO_PUBLICADA)
     registrar_vista(request.user, conv)
+    if not conv.activa:  # vencida aunque el cron no la haya caducado (feature 13)
+        return redirect("convocatorias:detalle", pk=pk)
     destino = conv.medio_efectivo
     if not destino:
         return redirect("convocatorias:detalle", pk=pk)
