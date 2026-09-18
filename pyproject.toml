@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "conecta-unsa"
+version = "0.1.0"
+description = "Plataforma Conecta UNSA"
+authors = ["rcenaov <rcenaov@unsa.edu.pe>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^5.0"
+psycopg2-binary = "^2.9"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
