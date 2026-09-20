@@ -511,15 +511,21 @@ make down
 6. El uso de una rama independiente permite conservar el historial de cambios y separar el trabajo de la práctica del resto del desarrollo.
 7. El modelo implementado es reproducible: otra persona puede clonar el repositorio y ejecutar los mismos comandos para obtener un entorno equivalente.
 
-## 12. Evidencias recomendadas
-
-Para la presentación o entrega se pueden adjuntar capturas de:
+## 12. Evidencias
 
 1. La rama `practice_03/automated_construction` en GitHub.
+   <img width="1532" height="740" alt="branches" src="https://github.com/user-attachments/assets/27d3d14d-054c-4920-b1bc-829819452b5e" />
 2. La salida de `docker compose config`.
+   <img width="1538" height="755" alt="dockerComposeConfig" src="https://github.com/user-attachments/assets/9fc9fc92-0e6f-4c5e-9e83-8cb8391b2985" />
 3. La salida de `make build`.
+   <img width="1540" height="772" alt="makeBuild" src="https://github.com/user-attachments/assets/a7ad919f-9b1c-44d6-8c95-e7fd7ce8ad59" />
 4. La salida de `docker compose ps`, mostrando PostgreSQL saludable y Django activo.
+   <img width="1540" height="226" alt="dockerComposePs" src="https://github.com/user-attachments/assets/c26fc47d-7061-4de6-9564-3ae9c7453b45" />
 5. La aplicación funcionando en `http://localhost:8000`.
+   <img width="1533" height="822" alt="Interfaz1" src="https://github.com/user-attachments/assets/1b24bd4c-d8db-48ff-8acc-755b551911eb" />
 6. La salida de `make check`.
+   <img width="1540" height="334" alt="makeCheck" src="https://github.com/user-attachments/assets/a1e18527-0f11-4629-8900-1b61647a5c34" />
 7. La salida de `make test`, mostrando `143 passed`.
+   <img width="1540" height="273" alt="makeTest" src="https://github.com/user-attachments/assets/12d5fcd3-0d55-44dc-86f6-7af0a2202e5e" />
 8. El historial de commits de la rama.
+   <img width="1540" height="817" alt="commits" src="https://github.com/user-attachments/assets/ce92cb37-13e6-4f13-9911-6fd58256e5df" />
