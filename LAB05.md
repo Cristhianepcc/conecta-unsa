@@ -39,16 +39,16 @@ El trabajo se distribuyó en un tablero GitHub Projects con las columnas:
 
 | Issue | Responsable simulado | Columna final | Estado del Issue | Commit |
 |---|---|---|---|---|
-| #1 | Ronald Valdez Agüero | Por confirmar | Por confirmar | `8e5bea4` |
-| #2 | Fernando Llosa | Por confirmar | Por confirmar | `e32adeb` |
-| #3 | Christian Taipe | Por confirmar | Por confirmar | `6122b77` |
-| #4 | Luis Morales | Por confirmar | Por confirmar | `f487489` |
-| #5 | Roberto Enao | Por confirmar | Por confirmar | `b3fa9ee` |
-| #6 | Juan Postigo | Por confirmar | Por confirmar | `29dbe0d` |
+| #1 | Ronald Valdez Agüero | DONE | CLOSED | `8e5bea4` |
+| #2 | Fernando Llosa | DONE | CLOSED | `e32adeb` |
+| #3 | Christian Taipe | DONE | CLOSED | `6122b77` |
+| #4 | Luis Morales | DONE | CLOSED | `f487489` |
+| #5 | Roberto Enao | DONE | CLOSED | `b3fa9ee` |
+| #6 | Juan Postigo | DONE | CLOSED | `29dbe0d` |
 
 Cada commit fue realizado separadamente y contiene `Fix #<número>` para
-relacionarlo con su Issue. Las columnas y estados deben confirmarse en GitHub
-Projects antes de presentar el informe.
+relacionarlo con su Issue. El tablero confirma las seis tarjetas en `DONE` y
+las páginas de Issues confirman que están `CLOSED`.
 
 ## 4. Caso implementado: invariantes de `Empresa`
 
