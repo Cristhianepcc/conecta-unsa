@@ -61,7 +61,56 @@ suite `EmpresaInvariantesTests`. Cada prueba sigue el ciclo:
 2. **Act:** ejecutar `full_clean()`.
 3. **Assert:** verificar aceptación o `ValidationError`.
 
-## 5. Ejecución
+## 5. Trabajo simulado de los Issues #2 al #6
+
+### Issue #2 — Servicios de dominio
+
+Se probaron las reglas de `apps.empresas.services`:
+
+- una empresa pendiente no puede publicar;
+- una empresa activa sí puede publicar;
+- `empresa_de` devuelve la empresa vinculada o `None`;
+- activar y rechazar persisten únicamente el campo `estado`.
+
+### Issue #3 — Refactorización y arquitectura
+
+Se revisó la separación existente entre `models.py`, `services.py` y los
+archivos de pruebas. La lógica de negocio ya está aislada en servicios
+reutilizables, por lo que no se introdujo un refactor artificial ni cambios
+de producción sin necesidad funcional. Esta decisión evita modificar
+comportamiento estable únicamente para producir una diferencia en el código.
+
+### Issue #4 — Repositorio e infraestructura
+
+Se verificaron operaciones ORM equivalentes a un repositorio:
+
+- recuperación de una empresa por RUC;
+- unicidad del RUC;
+- protección de una empresa referenciada por una convocatoria.
+
+Estos casos ejercitan la persistencia PostgreSQL usada por Django.
+
+### Issue #5 — Configuración de mocking
+
+El proyecto usa `unittest.mock`, incluido en la biblioteca estándar de Python;
+por tanto no requiere una dependencia adicional. Los dobles se crean con
+`Mock` y las interacciones se verifican con `assert_called_once_with`.
+
+### Issue #6 — Servicios de aplicación con dobles
+
+`EmpresaApplicationServiceTests` reemplaza la entidad colaboradora por un
+`Mock` y verifica que `activar_empresa` y `rechazar_empresa` cambien el estado
+y guarden únicamente ese campo. Así se prueba la coordinación del servicio sin
+acceder a la base de datos.
+
+Los casos están separados por responsabilidad:
+
+- [`test_servicios_lab05.py`](apps/empresas/test_servicios_lab05.py)
+- [`test_repositorio_lab05.py`](apps/empresas/test_repositorio_lab05.py)
+- [`test_mocking_lab05.py`](apps/empresas/test_mocking_lab05.py)
+- [`test_aplicacion_lab05.py`](apps/empresas/test_aplicacion_lab05.py)
+
+## 6. Ejecución
 
 Con Docker iniciado:
 
@@ -84,15 +133,15 @@ incluyendo la cantidad de pruebas aprobadas.
 Resultado verificado en este repositorio:
 
 ```text
-146 passed in 97.65s
-TOTAL  3273  175  95%
+155 passed in 97.51s
+TOTAL  3331  173  95%
 ```
 
 La suite específica del Issue #1 contiene tres casos y cubre la aceptación de
 una entidad válida y el rechazo de los dos valores inválidos definidos en la
 tabla anterior.
 
-## 6. Cobertura
+## 7. Cobertura
 
 Coverage.py está declarado en `requirements.txt` como dependencia del
 entorno de pruebas.
@@ -107,7 +156,7 @@ El informe HTML se genera en `htmlcov/index.html`. La entrega debe incluir el
 porcentaje mostrado por `coverage report` y una captura o referencia al
 reporte HTML generado.
 
-## 7. Dobles de prueba
+## 8. Dobles de prueba
 
 La parte de mocking se implementa en los Issues #5 y #6. Para Python se
 utiliza `unittest.mock`, evitando acceder a la base de datos real cuando se
@@ -125,7 +174,7 @@ repositorio.buscar.return_value = objeto_esperado
 La prueba debe verificar tanto el resultado como la interacción esperada con
 el doble (`assert_called_once_with(...)`).
 
-## 8. Evidencia y cierre
+## 9. Evidencia y cierre
 
 Para cerrar el Issue #1:
 
