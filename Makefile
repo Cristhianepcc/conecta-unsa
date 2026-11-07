@@ -1,4 +1,4 @@
-.PHONY: help build up stop down restart migrate check test collectstatic shell logs clean reset
+.PHONY: help build up stop down restart migrate check test functional-test functional-report collectstatic shell logs clean reset
 
 COMPOSE := docker compose
 WEB := $(COMPOSE) run --rm web
@@ -13,6 +13,8 @@ help:
 	@echo "  make migrate       Ejecuta las migraciones de Django"
 	@echo "  make check         Verifica la configuracion de Django"
 	@echo "  make test          Ejecuta las pruebas automatizadas"
+	@echo "  make functional-test Ejecuta las pruebas funcionales Selenium"
+	@echo "  make functional-report Genera reporte XML de pruebas funcionales"
 	@echo "  make collectstatic Recopila los archivos estaticos"
 	@echo "  make shell         Abre una shell de Django"
 	@echo "  make logs          Muestra los logs de los servicios"
@@ -44,6 +46,13 @@ check:
 test:
 	$(WEB) pytest
 
+functional-test:
+	$(WEB) pytest functional_tests
+
+functional-report:
+	mkdir -p tmp
+	$(WEB) pytest functional_tests --junitxml=tmp/lab06-junit.xml
+
 collectstatic:
 	$(WEB) python manage.py collectstatic --noinput
 
@@ -58,4 +67,3 @@ clean:
 
 reset:
 	$(COMPOSE) down --volumes --remove-orphans
-
