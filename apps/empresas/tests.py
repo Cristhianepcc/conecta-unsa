@@ -1,6 +1,7 @@
 """Tests de la feature 03-empresas (criterios EARS)."""
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -40,6 +41,28 @@ def _datos_registro(ruc="20123456789", username="empresa_acme"):
         "password1": "claveSegura123",
         "password2": "claveSegura123",
     }
+
+
+class EmpresaInvariantesTests(TestCase):
+    def test_entidad_valida_pasa_full_clean(self):
+        empresa = Empresa(ruc="20123456789", razon_social="ACME S.A.C.")
+
+        empresa.full_clean()
+
+        self.assertEqual(empresa.ruc, "20123456789")
+        self.assertEqual(empresa.razon_social, "ACME S.A.C.")
+
+    def test_ruc_con_longitud_distinta_de_11_falla(self):
+        empresa = Empresa(ruc="1234567890", razon_social="ACME S.A.C.")
+
+        with self.assertRaises(ValidationError):
+            empresa.full_clean()
+
+    def test_razon_social_vacia_falla(self):
+        empresa = Empresa(ruc="20123456789", razon_social="")
+
+        with self.assertRaises(ValidationError):
+            empresa.full_clean()
 
 
 class RegistroEmpresaTests(TestCase):
