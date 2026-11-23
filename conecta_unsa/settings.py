@@ -154,8 +154,8 @@ SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],
         "AUTH_PARAMS": {"access_type": "online"},
-        # TODO producción: agregar "hd": "unsa.edu.pe" para restringir el dominio
-        # a la comunidad UNSA (auth-roles.md §3). En demo se acepta cualquier Gmail (CA-7).
+        # Producción: restringir "hd" a "unsa.edu.pe" (auth-roles.md §3).
+        # En demo se acepta cualquier Gmail para permitir la presentación (CA-7).
         "APP": {
             "client_id": os.environ.get("GOOGLE_CLIENT_ID", ""),
             "secret": os.environ.get("GOOGLE_CLIENT_SECRET", ""),

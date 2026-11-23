@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.db import transaction
+from django.views.decorators.http import require_http_methods, require_POST
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.usuarios.decorators import admin_required
@@ -76,7 +77,7 @@ def panel_admin(request):
         duplicados = flujo.detectar_duplicado(conv)
         if duplicados:
             con_duplicado += 1
-        riesgo = "alto" if duplicados else ("medio" if alertas else "ok")
+        riesgo = _nivel_riesgo(duplicados, alertas)
         bandeja.append(
             {
                 "conv": conv,
@@ -133,8 +134,17 @@ def panel_admin(request):
     )
 
 
+def _nivel_riesgo(duplicados, alertas):
+    if duplicados:
+        return "alto"
+    if alertas:
+        return "medio"
+    return "ok"
+
+
 @admin_required
 @transaction.atomic
+@require_POST
 def aprobar_lote(request):
     """Aprueba en lote las convocatorias seleccionadas (solo las sin alertas).
 
@@ -192,6 +202,7 @@ def _destino_bandeja(request):
 
 
 @admin_required
+@require_http_methods(["GET", "POST"])
 def revisar_convocatoria(request, pk):
     """Revisar una convocatoria: aprobar / observar (comentario) / rechazar (CA-2)."""
     from apps.convocatorias import flujo
