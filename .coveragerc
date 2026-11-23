@@ -1,0 +1,13 @@
+[run]
+branch = True
+source =
+    apps
+    conecta_unsa
+relative_files = True
+
+[report]
+omit =
+    */migrations/*
+    */tests.py
+    */test_*.py
+    functional_tests/*
