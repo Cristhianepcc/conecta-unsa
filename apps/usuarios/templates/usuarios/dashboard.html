@@ -54,8 +54,8 @@
     <h3 class="text-lg font-bold text-slate-800">Convocatorias para ti</h3>
     <form method="get" class="flex items-center gap-2">
       {% if tipo %}<input type="hidden" name="tipo" value="{{ tipo }}">{% endif %}
-      <label class="text-xs text-slate-500">Ordenar</label>
-      <select name="orden" onchange="this.form.submit()"
+      <label for="orden-convocatorias" class="text-xs text-slate-500">Ordenar</label>
+      <select id="orden-convocatorias" name="orden" onchange="this.form.submit()"
               class="text-sm border border-slate-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-granate-200">
         <option value="afinidad" {% if orden == 'afinidad' %}selected{% endif %}>Afinidad</option>
         <option value="reciente" {% if orden == 'reciente' %}selected{% endif %}>Más recientes</option>

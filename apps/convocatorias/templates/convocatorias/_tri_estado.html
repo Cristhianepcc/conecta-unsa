@@ -2,9 +2,10 @@
 (reemplaza el <select> de 3 estados). Contexto: field (BoundField del modelo).
 Envía true/false/"" por un input oculto; Django lo mapea a True/False/None.{% endcomment %}
 <div class="campo" x-data="{ v: '{% if field.value == True %}true{% elif field.value == False %}false{% endif %}' }">
-  <label>{{ field.label }}</label>
+  <span class="font-medium">{{ field.label }}</span>
   <input type="hidden" name="{{ field.html_name }}" :value="v">
-  <div class="seg-tri" role="group" aria-label="{{ field.label }}">
+  <fieldset class="seg-tri">
+    <legend class="sr-only">{{ field.label }}</legend>
     <button type="button" @click="v='true'" :aria-pressed="v==='true'" :class="{ 'seg-on': v==='true' }">
       <i data-lucide="check" class="w-3.5 h-3.5"></i> Sí
     </button>
@@ -14,6 +15,6 @@ Envía true/false/"" por un input oculto; Django lo mapea a True/False/None.{% e
     <button type="button" @click="v=''" :aria-pressed="v===''" :class="{ 'seg-on': v==='' }">
       No especificar
     </button>
-  </div>
+  </fieldset>
   {{ field.errors }}
 </div>

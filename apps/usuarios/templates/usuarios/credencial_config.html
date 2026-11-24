@@ -28,9 +28,9 @@
 
     {% if talento.cred_activa %}
     <div class="mt-5" x-data="{ copiado: false, url: window.location.origin + '{% url 'usuarios:credencial_publica' talento.cred_slug %}' }">
-      <label class="text-xs text-slate-400">Tu enlace público</label>
+      <label for="credencial-enlace" class="text-xs text-slate-400">Tu enlace público</label>
       <div class="mt-1 flex items-center gap-2">
-        <input type="text" readonly :value="url"
+        <input id="credencial-enlace" type="text" readonly :value="url"
                class="flex-1 min-w-0 border border-slate-300 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-600">
         <button type="button"
                 @click="navigator.clipboard.writeText(url); copiado=true; setTimeout(()=>copiado=false,1500)"
