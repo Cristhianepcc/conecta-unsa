@@ -22,6 +22,7 @@ services:
     environment:
       DEBUG: "True"
       SECRET_KEY: "dev-secret-key"
+      DEMO_PASSWORD: "${DEMO_PASSWORD:-demo12345}"
       DATABASE_URL: "postgres://conecta:conecta@db:5432/conecta_unsa"
       ALLOWED_HOSTS: "localhost,127.0.0.1"
     volumes:

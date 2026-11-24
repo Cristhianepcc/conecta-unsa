@@ -6,13 +6,14 @@ Crea además un usuario demo por rol (egresado, administrador, empresa) para mos
 los flujos al jurado; en producción cada quien entra con su propio Gmail.
 """
 
+import os
 from datetime import timedelta
 from decimal import Decimal
 
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from apps.convocatorias.models import (
@@ -41,7 +42,9 @@ User = get_user_model()
 ADMIN_DEMO = "bolsa.trabajo@unsa.edu.pe"
 
 # Usuarios por defecto para la demo (uno por rol). Contraseña común para mostrar los flujos.
-PASSWORD_DEMO = "demo12345"
+PASSWORD_DEMO = os.environ.get("DEMO_PASSWORD", "")
+
+CARRERA_INGENIERIA_SISTEMAS = "Ingeniería de Sistemas"
 
 # (ruc, razón social, nombre comercial, registrada?) — empresas reales (Arequipa/Perú).
 # La identidad final (nombre, logo, banner, web) la fija `seed_imagenes`; aquí solo
@@ -60,11 +63,11 @@ EMPRESAS = [
 # (empresa_idx, tipo, titulo, carreras, transparencia_alta?, estado)
 CONVOCATORIAS = [
     (0, constants.TIPO_PRACTICA_PREPROFESIONAL, "Practicante de Desarrollo de Software",
-     ["Ingeniería de Sistemas", "Ciencia de la Computación"], True, ESTADO_PUBLICADA),
+     [CARRERA_INGENIERIA_SISTEMAS, "Ciencia de la Computación"], True, ESTADO_PUBLICADA),
     (0, constants.TIPO_EMPLEO, "Desarrollador Backend Python",
-     ["Ingeniería de Sistemas"], True, ESTADO_PUBLICADA),
+     [CARRERA_INGENIERIA_SISTEMAS], True, ESTADO_PUBLICADA),
     (0, constants.TIPO_TRAINEE, "Trainee de Datos",
-     ["Ingeniería de Sistemas", "Ingeniería Industrial"], False, ESTADO_PUBLICADA),
+     [CARRERA_INGENIERIA_SISTEMAS, "Ingeniería Industrial"], False, ESTADO_PUBLICADA),
     (1, constants.TIPO_PRACTICA_PROFESIONAL, "Asistente de Obra",
      ["Ingeniería Civil"], True, ESTADO_PUBLICADA),
     (1, constants.TIPO_EMPLEO, "Ingeniero Civil Residente",
@@ -96,7 +99,7 @@ CONVOCATORIAS = [
     (7, constants.TIPO_EMPLEO, "Contador Senior",
      ["Contabilidad"], True, ESTADO_PUBLICADA),
     (0, constants.TIPO_EMPLEO, "Analista QA",
-     ["Ingeniería de Sistemas"], False, ESTADO_PENDIENTE),
+     [CARRERA_INGENIERIA_SISTEMAS], False, ESTADO_PENDIENTE),
     (1, constants.TIPO_PRACTICA_PREPROFESIONAL, "Practicante de Arquitectura",
      ["Arquitectura"], False, ESTADO_PENDIENTE),
 ]
@@ -105,15 +108,7 @@ CONVOCATORIAS = [
 class Command(BaseCommand):
     help = "Siembra la demo completa (idempotente)."
 
-    def handle(self, *args, **options):
-        call_command("seed_taxonomia")
-        call_command("seed_config")
-        call_command("seed_elegibilidad")
-
-        AdminAllowlist.objects.get_or_create(
-            email=ADMIN_DEMO, defaults={"nota": "Administrativo de demo"}
-        )
-
+    def _sembrar_empresas(self):
         empresas = []
         for ruc, razon, comercial, registrada in EMPRESAS:
             empresa, _ = Empresa.objects.get_or_create(
@@ -128,72 +123,48 @@ class Command(BaseCommand):
             if registrada and not hasattr(empresa, "reclutador"):
                 username = f"empresa_{ruc[-3:]}"
                 user, creado = User.objects.get_or_create(
-                    username=username, defaults={"email": f"{username}@demo.pe"}
+                    username=username,
+                    defaults={"email": f"{username}@demo.pe"},
                 )
                 if creado:
-                    user.set_password("demo12345")
+                    user.set_password(PASSWORD_DEMO)
                     user.save()
                 perfil = asegurar_perfil(user)
                 perfil.rol = ROL_RECLUTADOR
                 perfil.save(update_fields=["rol"])
                 Reclutador.objects.get_or_create(
                     empresa=empresa,
-                    defaults={"usuario": user, "nombres": "Reclutador",
-                              "ap_paterno": comercial.split()[0]},
+                    defaults={
+                        "usuario": user,
+                        "nombres": "Reclutador",
+                        "ap_paterno": comercial.split()[0],
+                    },
                 )
             empresas.append(empresa)
+        return empresas
 
+    def _sembrar_convocatorias(self, empresas):
         from django.utils.text import slugify
 
         hoy = timezone.localdate()
-        n_conv = 0
         for idx, tipo, titulo, carreras_nombres, alta, estado in CONVOCATORIAS:
             empresa = empresas[idx]
-            creada_por = CREADA_POR_EMPRESA if not empresa.es_referencial else CREADA_POR_ADMIN
-            # Medio de postulación realista: correo de RR.HH. de la empresa (la vista lo
-            # abre como mailto: → funciona en la demo). En producción es la URL/email real.
-            dominio = (slugify(empresa.nombre_comercial or empresa.razon_social) or "empresa") + ".pe"
+            creada_por = (
+                CREADA_POR_EMPRESA
+                if not empresa.es_referencial
+                else CREADA_POR_ADMIN
+            )
+            dominio = (
+                slugify(empresa.nombre_comercial or empresa.razon_social) or "empresa"
+            ) + ".pe"
             email_emp = f"rrhh@{dominio}"
-            datos = {
-                "tipo": tipo,
-                "descripcion": (
-                    "Buscamos talento agustino comprometido. Funciones, requisitos y "
-                    "condiciones detalladas para una postulación informada y transparente."
-                ),
-                "modalidad": "presencial",
-                "ubicacion": "Arequipa",
-                "duracion_estimada": "6 meses",
-                "fecha_limite": hoy + timedelta(days=30),
-                "medio_postulacion": email_emp,
-                "email_contacto": email_emp,
-                "no_discriminacion": True,
-                "regimen": "D.L. 728" if tipo in (
-                    constants.TIPO_EMPLEO, constants.TIPO_TRAINEE) else "",
-                "creada_por": creada_por,
-                "estado": estado,
-            }
-            if tipo == constants.TIPO_PRACTICA_PREPROFESIONAL:
-                datos.update({"requiere_convenio": True, "ciclo_minimo": 6,
-                              "subvencion_remuneracion": Decimal("1200")})
-            elif tipo == constants.TIPO_PRACTICA_PROFESIONAL:
-                datos.update({"requiere_convenio": True, "tiempo_egreso_meses": 12,
-                              "subvencion_remuneracion": Decimal("1200")})
-            elif tipo == constants.TIPO_BECA:
-                datos.update({"entidad_otorgante": "Pronabec"})
-            if tipo not in (constants.TIPO_VOLUNTARIADO,) and tipo in (
-                constants.TIPO_EMPLEO, constants.TIPO_TRAINEE, constants.TIPO_CAS):
-                datos["subvencion_remuneracion"] = Decimal("2500")
-            if alta:
-                datos.update({
-                    "banda_salarial_min": Decimal("2500"),
-                    "banda_salarial_max": Decimal("3800"),
-                    "vacantes": 3,
-                    "beneficios": "EPS, capacitación continua, movilidad.",
-                    "discapacidad": True,
-                })
-
+            datos = self._datos_convocatoria(
+                tipo, estado, creada_por, hoy, email_emp, alta
+            )
             conv, creada = Convocatoria.objects.get_or_create(
-                empresa=empresa, titulo=titulo, defaults=datos
+                empresa=empresa,
+                titulo=titulo,
+                defaults=datos,
             )
             if creada:
                 carreras = Carrera.objects.filter(nombre__in=carreras_nombres)
@@ -202,7 +173,89 @@ class Command(BaseCommand):
                     conv.fecha_publicacion = timezone.now()
                 conv.recalcular_transparencia(guardar=False)
                 conv.save()
-                n_conv += 1
+
+    @staticmethod
+    def _datos_convocatoria(
+        tipo, estado, creada_por, hoy, email_emp, alta
+    ):
+        datos = {
+            "tipo": tipo,
+            "descripcion": (
+                "Buscamos talento agustino comprometido. Funciones, requisitos y "
+                "condiciones detalladas para una postulación informada y transparente."
+            ),
+            "modalidad": "presencial",
+            "ubicacion": "Arequipa",
+            "duracion_estimada": "6 meses",
+            "fecha_limite": hoy + timedelta(days=30),
+            "medio_postulacion": email_emp,
+            "email_contacto": email_emp,
+            "no_discriminacion": True,
+            "regimen": (
+                "D.L. 728"
+                if tipo in (constants.TIPO_EMPLEO, constants.TIPO_TRAINEE)
+                else ""
+            ),
+            "creada_por": creada_por,
+            "estado": estado,
+        }
+        if tipo == constants.TIPO_PRACTICA_PREPROFESIONAL:
+            datos.update(
+                {
+                    "requiere_convenio": True,
+                    "ciclo_minimo": 6,
+                    "subvencion_remuneracion": Decimal("1200"),
+                }
+            )
+        elif tipo == constants.TIPO_PRACTICA_PROFESIONAL:
+            datos.update(
+                {
+                    "requiere_convenio": True,
+                    "tiempo_egreso_meses": 12,
+                    "subvencion_remuneracion": Decimal("1200"),
+                }
+            )
+        elif tipo == constants.TIPO_BECA:
+            datos.update({"entidad_otorgante": "Pronabec"})
+
+        if (
+            tipo not in (constants.TIPO_VOLUNTARIADO,)
+            and tipo in (
+                constants.TIPO_EMPLEO,
+                constants.TIPO_TRAINEE,
+                constants.TIPO_CAS,
+            )
+        ):
+            datos["subvencion_remuneracion"] = Decimal("2500")
+        if alta:
+            datos.update(
+                {
+                    "banda_salarial_min": Decimal("2500"),
+                    "banda_salarial_max": Decimal("3800"),
+                    "vacantes": 3,
+                    "beneficios": "EPS, capacitación continua, movilidad.",
+                    "discapacidad": True,
+                }
+            )
+        return datos
+
+    def handle(self, *args, **options):
+        if not PASSWORD_DEMO:
+            raise CommandError(
+                "DEMO_PASSWORD no está configurada. Define DEMO_PASSWORD en el entorno."
+            )
+
+        call_command("seed_taxonomia")
+        call_command("seed_config")
+        call_command("seed_elegibilidad")
+
+        AdminAllowlist.objects.get_or_create(
+            email=ADMIN_DEMO, defaults={"nota": "Administrativo de demo"}
+        )
+
+        empresas = self._sembrar_empresas()
+
+        self._sembrar_convocatorias(empresas)
 
         self._crear_usuarios_demo()
 
@@ -217,7 +270,7 @@ class Command(BaseCommand):
             f"{Convocatoria.objects.count()} convocatorias, 1 administrativo en allowlist."
         ))
         self.stdout.write(self.style.SUCCESS(
-            "Usuarios por defecto (contraseña «demo12345»): "
+            "Usuarios por defecto (contraseña configurada por DEMO_PASSWORD): "
             "demo_egresado · demo_admin · demo_empresa."
         ))
 

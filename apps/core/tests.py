@@ -5,8 +5,11 @@ import os
 from django.apps import apps
 from django.conf import settings
 from django.contrib import admin
+from django.core.management.base import CommandError
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
+from unittest.mock import patch
 
 from apps.core.models import (
     AdminAllowlist,
@@ -64,6 +67,22 @@ class FundacionTests(TestCase):
         self.assertEqual(PesoTransparencia.objects.get().peso, 30)
         self.assertTrue(ReglaElegibilidad.objects.get().permitido)
         self.assertEqual(AdminAllowlist.objects.get().email, "admin@unsa.edu.pe")
+
+
+class RefactoringCoreTests(TestCase):
+    def test_nivel_riesgo_prioriza_duplicado(self):
+        from apps.core.views import _nivel_riesgo
+
+        self.assertEqual(_nivel_riesgo(True, True), "alto")
+        self.assertEqual(_nivel_riesgo(False, True), "medio")
+        self.assertEqual(_nivel_riesgo(False, False), "ok")
+
+    def test_seed_demo_exige_password_de_entorno(self):
+        from apps.core.management.commands import seed_demo
+
+        with patch.object(seed_demo, "PASSWORD_DEMO", ""):
+            with self.assertRaises(CommandError):
+                call_command("seed_demo")
 
 
 # --- 09 Landing pública -----------------------------------------------------
