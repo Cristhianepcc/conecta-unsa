@@ -123,7 +123,7 @@ class PerfilTalento(models.Model):
     identidad_verificada = models.BooleanField(
         "identidad verificada (padrón UNSA)", default=False
     )
-    dni = models.CharField("DNI", max_length=8, blank=True, null=True)
+    dni = models.CharField("DNI", max_length=8, blank=True, default="")
 
     # Preferencias (afinan el feed; todo funciona sin configurarlas)
     carreras_extra = models.ManyToManyField(

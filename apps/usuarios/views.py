@@ -28,12 +28,16 @@ from .services import (
     revocar_credencial_publica,
 )
 
+POST_LOGIN_URL = "usuarios:post_login"
+PERFIL_URL = "usuarios:perfil"
+
 
 # --- 02 Autenticación -------------------------------------------------------
+@require_http_methods(["GET"])
 def login_view(request):
     """Pantalla de login con las 2 puertas (login.png)."""
     if request.user.is_authenticated:
-        return redirect("usuarios:post_login")
+        return redirect(POST_LOGIN_URL)
     return render(
         request,
         "usuarios/login.html",
@@ -41,6 +45,7 @@ def login_view(request):
     )
 
 
+@require_http_methods(["GET"])
 def demo_login(request, rol):
     """Acceso directo a un dashboard para la DEMO (sin Google). Solo con DEMO_MODE=True.
 
@@ -50,11 +55,11 @@ def demo_login(request, rol):
     if not settings.DEMO_MODE:
         raise Http404("Disponible solo en modo demo.")
 
-    User = get_user_model()
+    user_model = get_user_model()
     if rol == "egresado":
         from apps.taxonomia.models import Carrera
 
-        user, _ = User.objects.get_or_create(
+        user, _ = user_model.objects.get_or_create(
             username="demo_egresado",
             defaults={"email": "demo.egresado@unsa.edu.pe",
                       "first_name": "Demo", "last_name": "Egresado"},
@@ -77,7 +82,7 @@ def demo_login(request, rol):
 
         email = "demo.admin@unsa.edu.pe"
         AdminAllowlist.objects.get_or_create(email=email, defaults={"nota": "Admin demo"})
-        user, _ = User.objects.get_or_create(
+        user, _ = user_model.objects.get_or_create(
             username="demo_admin",
             defaults={"email": email, "first_name": "Demo", "last_name": "Admin"},
         )
@@ -86,7 +91,7 @@ def demo_login(request, rol):
         raise Http404("Rol de demo no válido.")
 
     auth_login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-    return redirect("usuarios:post_login")
+    return redirect(POST_LOGIN_URL)
 
 
 @require_http_methods(["POST"])
@@ -95,7 +100,7 @@ def login_empresa(request):
     form = AuthenticationForm(request, data=request.POST)
     if form.is_valid():
         auth_login(request, form.get_user())
-        return redirect("usuarios:post_login")
+        return redirect(POST_LOGIN_URL)
     # Error contextual dentro de la pestaña «Soy empresa», no como banner global.
     return render(
         request,
@@ -110,17 +115,20 @@ def login_empresa(request):
 
 
 @login_required
+@require_http_methods(["GET"])
 def post_login(request):
     """Destino tras autenticar: enruta según rol (identidad, no pestaña)."""
     return redirect(resolver_rol_y_destino(request.user))
 
 
+@require_http_methods(["GET", "POST"])
 def logout_view(request):
     auth_logout(request)
     return redirect("core:home")
 
 
 @login_required
+@require_http_methods(["GET", "POST"])
 def completar_perfil(request):
     """Primer ingreso del egresado: identidad académica + consentimiento (CA-1 / CA-6).
 
@@ -129,54 +137,63 @@ def completar_perfil(request):
     egresado los autodeclara. El servidor revalida el DNI: no confía en el cliente.
     """
     from apps.integraciones.padron import consultar_dni
-
     perfil = asegurar_perfil(request.user)
     talento = asegurar_perfil_talento(request.user)
     if request.method == "POST":
         form = CompletarPerfilForm(request.POST)
         if form.is_valid():
-            dni = (form.cleaned_data.get("dni") or "").strip()
-            resultado = consultar_dni(dni) if dni else None
-
-            if resultado is not None:
-                # Dato institucional verificado (solo lectura).
-                talento.carrera_id = resultado.carrera_id
-                talento.estado_academico = resultado.estado_academico
-                talento.dni = dni
-                talento.identidad_verificada = True
-            else:
-                # Autodeclarado: la carrera y el estado son obligatorios en este camino.
-                carrera = form.cleaned_data.get("carrera")
-                estado = form.cleaned_data.get("estado_academico")
-                if not carrera or not estado:
-                    messages.error(
-                        request,
-                        "Valida tu DNI con la UNSA o indica tu carrera y estado académico.",
-                    )
-                    return render(request, "usuarios/completar_perfil.html", {"form": form})
-                talento.carrera = carrera
-                talento.estado_academico = estado
-                talento.dni = dni or None
-                talento.identidad_verificada = False
-
-            talento.save(
-                update_fields=["carrera", "estado_academico", "dni", "identidad_verificada"]
+            respuesta = _guardar_perfil_completado(
+                request, form, perfil, talento, consultar_dni
             )
-            registrar_consentimiento(
-                perfil, matching=form.cleaned_data.get("consentimiento_matching", False)
-            )
-            # Credencial pública: opt-in opcional declarado en el modal de consentimiento.
-            if form.cleaned_data.get("consentimiento_credencial_publica"):
-                activar_credencial_publica(talento)
-            perfil.perfil_completo = True
-            perfil.save(update_fields=["perfil_completo"])
-            messages.success(request, "¡Perfil activado! Bienvenido a CONECTA UNSA.")
-            return redirect("usuarios:dashboard")
+            if respuesta:
+                return respuesta
     else:
         form = CompletarPerfilForm(
             initial={"carrera": talento.carrera_id, "estado_academico": talento.estado_academico}
         )
     return render(request, "usuarios/completar_perfil.html", {"form": form})
+
+
+def _guardar_perfil_completado(request, form, perfil, talento, consultar_dni):
+    dni = (form.cleaned_data.get("dni") or "").strip()
+    resultado = consultar_dni(dni) if dni else None
+
+    if resultado is not None:
+        talento.carrera_id = resultado.carrera_id
+        talento.estado_academico = resultado.estado_academico
+        talento.dni = dni
+        talento.identidad_verificada = True
+    else:
+        carrera = form.cleaned_data.get("carrera")
+        estado = form.cleaned_data.get("estado_academico")
+        if not carrera or not estado:
+            messages.error(
+                request,
+                "Valida tu DNI con la UNSA o indica tu carrera y estado académico.",
+            )
+            return render(
+                request,
+                "usuarios/completar_perfil.html",
+                {"form": form},
+            )
+        talento.carrera = carrera
+        talento.estado_academico = estado
+        talento.dni = dni or ""
+        talento.identidad_verificada = False
+
+    talento.save(
+        update_fields=["carrera", "estado_academico", "dni", "identidad_verificada"]
+    )
+    registrar_consentimiento(
+        perfil,
+        matching=form.cleaned_data.get("consentimiento_matching", False),
+    )
+    if form.cleaned_data.get("consentimiento_credencial_publica"):
+        activar_credencial_publica(talento)
+    perfil.perfil_completo = True
+    perfil.save(update_fields=["perfil_completo"])
+    messages.success(request, "¡Perfil activado! Bienvenido a CONECTA UNSA.")
+    return redirect("usuarios:dashboard")
 
 
 @egresado_required
@@ -309,7 +326,37 @@ def ayuda(request):
 
 
 # --- 07 Perfil de talento y credenciales ------------------------------------
+def _guardar_preferencias(request, pref_form, talento):
+    from apps.core import constants
+
+    obj = pref_form.save(commit=False)
+    preferidos = []
+    silenciados = []
+    for value, _label in constants.TIPOS_CONVOCATORIA:
+        estado = request.POST.get(f"tipo_{value}", "normal")
+        if estado == "preferido":
+            preferidos.append(value)
+        elif estado == "silenciado":
+            silenciados.append(value)
+    obj.tipos_preferidos = preferidos
+    obj.categorias_silenciadas = silenciados
+    obj.save()
+    pref_form.save_m2m()
+    messages.success(request, "Preferencias guardadas.")
+    return redirect(PERFIL_URL)
+
+
+def _agregar_credencial(request, cred_form, talento):
+    credencial = cred_form.save(commit=False)
+    credencial.perfil = talento
+    credencial.fuente = FUENTE_AUTODECLARADO
+    credencial.save()
+    messages.success(request, "Credencial agregada.")
+    return redirect(PERFIL_URL)
+
+
 @egresado_required
+@require_http_methods(["GET", "POST"])
 def perfil(request):
     """Edita preferencias y administra credenciales autodeclaradas (CA-2/CA-4)."""
     from apps.core import constants
@@ -319,21 +366,9 @@ def perfil(request):
     if request.method == "POST" and "guardar_preferencias" in request.POST:
         pref_form = PreferenciasForm(request.POST, instance=talento)
         if pref_form.is_valid():
-            obj = pref_form.save(commit=False)
-            # Matriz tri-estado de tipos (preferido / normal / silenciado).
-            preferidos, silenciados = [], []
-            for value, _label in constants.TIPOS_CONVOCATORIA:
-                estado = request.POST.get(f"tipo_{value}", "normal")
-                if estado == "preferido":
-                    preferidos.append(value)
-                elif estado == "silenciado":
-                    silenciados.append(value)
-            obj.tipos_preferidos = preferidos
-            obj.categorias_silenciadas = silenciados
-            obj.save()
-            pref_form.save_m2m()
-            messages.success(request, "Preferencias guardadas.")
-            return redirect("usuarios:perfil")
+            respuesta = _guardar_preferencias(request, pref_form, talento)
+            if respuesta:
+                return respuesta
     else:
         pref_form = PreferenciasForm(instance=talento)
 
@@ -341,12 +376,7 @@ def perfil(request):
     if request.method == "POST" and "agregar_credencial" in request.POST:
         cred_form = CredencialForm(request.POST)
         if cred_form.is_valid():
-            credencial = cred_form.save(commit=False)
-            credencial.perfil = talento
-            credencial.fuente = FUENTE_AUTODECLARADO  # el egresado solo agrega autodeclaradas
-            credencial.save()
-            messages.success(request, "Credencial agregada.")
-            return redirect("usuarios:perfil")
+            return _agregar_credencial(request, cred_form, talento)
 
     preferidos = talento.tipos_preferidos or []
     silenciados = talento.categorias_silenciadas or []
@@ -374,6 +404,7 @@ def perfil(request):
 
 
 @egresado_required
+@require_http_methods(["GET", "POST"])
 def eliminar_credencial(request, credencial_id):
     """Elimina una credencial autodeclarada (las verificadas son solo lectura, CA-3)."""
     talento = asegurar_perfil_talento(request.user)
@@ -383,10 +414,11 @@ def eliminar_credencial(request, credencial_id):
     elif request.method == "POST":
         credencial.delete()
         messages.success(request, "Credencial eliminada.")
-    return redirect("usuarios:perfil")
+    return redirect(PERFIL_URL)
 
 
 @egresado_required
+@require_http_methods(["GET", "POST"])
 def credencial_config(request):
     """Activa / revoca la credencial pública y controla su visibilidad (CA-5/CA-7)."""
     talento = asegurar_perfil_talento(request.user)
@@ -427,6 +459,7 @@ ICONOS_CREDENCIAL = {
 }
 
 
+@require_http_methods(["GET"])
 def credencial_publica(request, slug):
     """Carta de presentación pública verificable: solo lectura, noindex, sin features sociales (CA-6)."""
     import io

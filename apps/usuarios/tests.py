@@ -52,6 +52,10 @@ class RuteoRolTests(TestCase):
 
 
 class LoginEmpresaTests(TestCase):
+    def test_login_empresa_rechaza_get(self):
+        resp = self.client.get(reverse("usuarios:login_empresa"))
+        self.assertEqual(resp.status_code, 405)
+
     def test_ca4__empresa_entra_a_su_dashboard(self):
         """CA-4: empresa con credenciales válidas llega a su dashboard."""
         user = User.objects.create_user("empresa1", password="clave-segura-123")
