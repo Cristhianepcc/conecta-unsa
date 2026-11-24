@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_http_methods
 
 from apps.convocatorias import flujo
 from apps.convocatorias.forms import ConvocatoriaForm
@@ -24,8 +25,10 @@ from .services import (
     registrar_empresa,
 )
 
+DASHBOARD_URL = "empresas:dashboard"
 
 @empresa_required
+@require_http_methods(["GET"])
 def dashboard(request):
     """Inicio de la empresa: métricas propias + mis convocatorias (CA-1/CA-5).
 
@@ -36,6 +39,11 @@ def dashboard(request):
     if empresa is None:
         return render(request, "empresas/dashboard.html", contexto)
 
+    contexto = _contexto_dashboard_empresa(empresa, contexto)
+    return render(request, "empresas/dashboard.html", contexto)
+
+
+def _contexto_dashboard_empresa(empresa, contexto):
     contexto["puede_publicar"] = empresa.puede_publicar
     contexto["completitud"] = completitud_empresa(empresa)
     if empresa.puede_publicar:
@@ -91,7 +99,7 @@ def dashboard(request):
                 "total": len(convs),
                 "criterios": criterios[:4],
             }
-    return render(request, "empresas/dashboard.html", contexto)
+    return contexto
 
 
 def _guardar_y_enviar(request, conv):
@@ -112,12 +120,13 @@ def _guardar_y_enviar(request, conv):
 
 
 @empresa_required
+@require_http_methods(["GET", "POST"])
 def publicar(request):
     """Formulario de publicar (3 bloques, dinámico por tipo). Requiere empresa verificada (CA-2/CA-3)."""
     empresa = empresa_de(request.user)
     if empresa is None or not empresa.puede_publicar:
         messages.error(request, "Tu cuenta aún está en verificación: todavía no puedes publicar.")
-        return redirect("empresas:dashboard")
+        return redirect(DASHBOARD_URL)
 
     if request.method == "POST":
         form = ConvocatoriaForm(request.POST)
@@ -129,7 +138,7 @@ def publicar(request):
             form.save_m2m()
             errores = _guardar_y_enviar(request, conv)
             if not errores:
-                return redirect("empresas:dashboard")
+                return redirect(DASHBOARD_URL)
             for e in errores:
                 messages.error(request, e)
     else:
@@ -142,6 +151,7 @@ def publicar(request):
 
 
 @empresa_required
+@require_http_methods(["GET", "POST"])
 def editar_convocatoria(request, pk):
     """Editar / corregir una convocatoria (incluye observadas con su comentario, CA-4)."""
     empresa = empresa_de(request.user)
@@ -154,7 +164,7 @@ def editar_convocatoria(request, pk):
             errores = _guardar_y_enviar(request, conv)
             if not errores:
                 messages.success(request, "Convocatoria actualizada y reenviada.")
-                return redirect("empresas:dashboard")
+                return redirect(DASHBOARD_URL)
             for e in errores:
                 messages.error(request, e)
     else:
@@ -171,18 +181,19 @@ def editar_convocatoria(request, pk):
 
 
 @empresa_required
+@require_http_methods(["GET", "POST"])
 def editar_perfil(request):
     """Edición del perfil público de la empresa (cierra el ciclo de la completitud)."""
     empresa = empresa_de(request.user)
     if empresa is None:
-        return redirect("empresas:dashboard")
+        return redirect(DASHBOARD_URL)
 
     if request.method == "POST":
         form = EditarEmpresaForm(request.POST, request.FILES, instance=empresa)
         if form.is_valid():
             form.save()
             messages.success(request, "Perfil de empresa actualizado.")
-            return redirect("empresas:dashboard")
+            return redirect(DASHBOARD_URL)
     else:
         form = EditarEmpresaForm(instance=empresa)
     return render(
@@ -192,6 +203,7 @@ def editar_perfil(request):
     )
 
 
+@require_http_methods(["GET", "POST"])
 def registro(request):
     """Auto-registro de empresa: bloque A (empresa) + bloque B (reclutador). CA-1/CA-7 (feature 03)."""
     if request.method == "POST":
@@ -218,6 +230,7 @@ def registro(request):
     )
 
 
+@require_http_methods(["GET"])
 def registro_exito(request):
     """Pantalla de confirmación posterior al registro de empresa (feedback en contexto)."""
     return render(request, "empresas/registro_exito.html")
