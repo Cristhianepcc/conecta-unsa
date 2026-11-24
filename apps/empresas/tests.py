@@ -76,6 +76,20 @@ class SeedCuentasRefactorTests(TestCase):
             with self.assertRaises(CommandError):
                 call_command("seed_cuentas")
 
+    def test_seed_cuentas_crea_reclutador_demo(self):
+        from apps.empresas.management.commands import seed_cuentas
+
+        empresa = Empresa.objects.create(
+            ruc="20100000011",
+            razon_social="Globant Perú S.A.C.",
+            nombre_comercial="Globant",
+        )
+        with patch.object(seed_cuentas, "PASSWORD_DEMO", "clave-demo"):
+            call_command("seed_cuentas")
+
+        empresa.refresh_from_db()
+        self.assertEqual(empresa.reclutador.usuario.email, "talento@globant.com")
+
 
 class SeedImagenesRefactorTests(TestCase):
     def test_mime_png_y_jpeg(self):
@@ -124,6 +138,8 @@ class SeedImagenesRefactorTests(TestCase):
             + (64).to_bytes(4, "big")
         )
         self.assertEqual(_dims(png), (128, 64))
+        self.assertEqual(_dims(b"<svg viewBox='0 0 512 512'>"), (512, 512))
+        self.assertEqual(_dims(b"\x00\x00\x01\x00"), (0, 0))
         self.assertEqual(_dims(b"<svg viewBox='0 0 512 512'>")[0], 512)
 
 

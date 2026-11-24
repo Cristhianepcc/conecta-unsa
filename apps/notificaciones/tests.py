@@ -103,6 +103,15 @@ class ResumenTests(BaseNotif):
 
 
 class InAppTests(BaseNotif):
+    def test_seed_notificaciones_cubre_perfiles_demo(self):
+        User.objects.create_user("demo_egresado", email="demo.egresado@unsa.edu.pe")
+        User.objects.create_user("demo_empresa", email="demo.empresa@unsa.edu.pe")
+        User.objects.create_user("demo_admin", email="demo.admin@unsa.edu.pe")
+
+        call_command("seed_notificaciones")
+
+        self.assertGreater(Notificacion.objects.count(), 0)
+
     def test_lista_rechaza_post(self):
         user = self._egresado()
         self.client.force_login(user)

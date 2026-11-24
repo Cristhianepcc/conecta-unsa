@@ -142,31 +142,50 @@ def _bajar(url: str) -> bytes:
 def _dims(b: bytes) -> tuple[int, int]:
     """Dimensiones de PNG/JPEG/ICO/GIF (sin dependencias externas)."""
     if b[:8] == b"\x89PNG\r\n\x1a\n":
-        return struct.unpack(">II", b[16:24])
+        return _dims_png(b)
     if b[:3] == b"\xff\xd8\xff":
-        i = 2
-        while i < len(b) - 9:
-            if b[i] != 0xFF:
-                i += 1
-                continue
-            if 0xC0 <= b[i + 1] <= 0xC3:
-                h, w = struct.unpack(">HH", b[i + 5:i + 9])
-                return w, h
-            i += 2 + struct.unpack(">H", b[i + 2:i + 4])[0]
-        return 0, 0
-    if b[:4] == b"\x00\x00\x01\x00":  # ICO
-        best = (0, 0)
-        for k in range(b[4]):
-            w = b[6 + k * 16] or 256
-            h = b[7 + k * 16] or 256
-            if w * h > best[0] * best[1]:
-                best = (w, h)
-        return best
+        return _dims_jpeg(b)
+    if b[:4] == b"\x00\x00\x01\x00":
+        return _dims_ico(b)
     if b[:6] in (b"GIF87a", b"GIF89a"):
         return struct.unpack("<HH", b[6:10])
     if b.lstrip()[:4] == b"<svg" or b"<svg" in b[:300]:
-        return 512, 512  # vectorial: tamaño nominal grande
+        return 512, 512
     return 0, 0
+
+
+def _dims_png(data: bytes) -> tuple[int, int]:
+    if len(data) < 24:
+        return 0, 0
+    return struct.unpack(">II", data[16:24])
+
+
+def _dims_jpeg(data: bytes) -> tuple[int, int]:
+    i = 2
+    while i < len(data) - 9:
+        if data[i] != 0xFF:
+            i += 1
+            continue
+        if data[i + 1] in range(0xC0, 0xC4):
+            h, w = struct.unpack(">HH", data[i + 5:i + 9])
+            return w, h
+        i += 2
+    return 0, 0
+
+
+def _dims_ico(data: bytes) -> tuple[int, int]:
+    best = (0, 0)
+    if len(data) < 6:
+        return best
+    for k in range(data[4]):
+        offset = 6 + k * 16
+        if len(data) < offset + 8:
+            break
+        w = data[offset] or 256
+        h = data[offset + 1] or 256
+        if w * h > best[0] * best[1]:
+            best = (w, h)
+    return best
 
 
 def _mime(b: bytes) -> str:

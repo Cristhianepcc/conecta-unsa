@@ -70,6 +70,31 @@ class FundacionTests(TestCase):
 
 
 class RefactoringCoreTests(TestCase):
+    def test_datos_convocatoria_cubre_tipos_especiales(self):
+        from datetime import date
+        from apps.core.management.commands.seed_demo import Command
+        from apps.core import constants
+
+        hoy = date.today()
+        practica = Command._datos_convocatoria(
+            constants.TIPO_PRACTICA_PREPROFESIONAL,
+            "pendiente",
+            "empresa",
+            hoy,
+            "rrhh@example.com",
+            True,
+        )
+        beca = Command._datos_convocatoria(
+            constants.TIPO_BECA,
+            "pendiente",
+            "admin",
+            hoy,
+            "rrhh@example.com",
+            False,
+        )
+        self.assertTrue(practica["requiere_convenio"])
+        self.assertEqual(beca["entidad_otorgante"], "Pronabec")
+
     def test_nivel_riesgo_prioriza_duplicado(self):
         from apps.core.views import _nivel_riesgo
 
