@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.management import call_command
 from django.test import TestCase
+from django.urls import reverse
 
 from apps.core import constants
 from apps.convocatorias.models import ESTADO_PUBLICADA, Convocatoria
@@ -102,6 +103,12 @@ class ResumenTests(BaseNotif):
 
 
 class InAppTests(BaseNotif):
+    def test_lista_rechaza_post(self):
+        user = self._egresado()
+        self.client.force_login(user)
+        resp = self.client.post(reverse("notificaciones:lista"))
+        self.assertEqual(resp.status_code, 405)
+
     def test_ca5__evento_crea_notificacion_inapp(self):
         """CA-5: un evento relevante crea una notificación in-app."""
         user = self._egresado()
