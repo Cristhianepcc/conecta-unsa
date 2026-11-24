@@ -111,39 +111,52 @@ def validar_legal(conv: Convocatoria) -> list[str]:
         errores.append("Tipo de convocatoria no soportado.")
         return errores
 
-    # CA-3: campos Nivel 2 obligatorios según el tipo.
+    errores.extend(_validar_campos_tipo(conv, regla))
+    errores.extend(_validar_pago(conv, regla))
+    errores.extend(_validar_jornada(conv, regla))
+    return errores
+
+
+def _validar_campos_tipo(conv: Convocatoria, regla: dict) -> list[str]:
+    errores = []
     for campo in regla["requeridos"]:
         if not _campo_presente(conv, campo):
             etiqueta = ETIQUETAS_CAMPO.get(campo, campo)
             errores.append(f"Para este tipo es obligatorio: {etiqueta}.")
+    return errores
 
+
+def _validar_pago(conv: Convocatoria, regla: dict) -> list[str]:
+    errores = []
     pago = regla["pago"]
     monto = conv.subvencion_remuneracion
 
-    # CA-5: el voluntariado no admite remuneración.
-    if pago == PAGO_BLOQUEADO:
-        if (monto and monto > 0) or conv.banda_salarial_min or conv.banda_salarial_max:
-            errores.append("El voluntariado no puede ofrecer remuneración.")
-    # CA-4: subvención/remuneración no puede ser menor a la RMV.
-    elif pago in (PAGO_SUBVENCION, PAGO_RMV):
-        if monto is not None:
-            rmv = get_parametro_decimal("rmv", Decimal("0"))
-            if rmv and monto < rmv:
-                errores.append(
-                    f"La subvención/remuneración (S/ {monto}) no puede ser menor a la RMV "
-                    f"vigente (S/ {rmv})."
-                )
-
-    # Tope de jornada por tipo.
-    tope_param = regla["tope_jornada_param"]
-    if tope_param and conv.jornada_horas is not None:
-        tope = get_parametro_int(tope_param, 0)
-        if tope and conv.jornada_horas > tope:
+    if pago == PAGO_BLOQUEADO and (
+        (monto and monto > 0)
+        or conv.banda_salarial_min
+        or conv.banda_salarial_max
+    ):
+        errores.append("El voluntariado no puede ofrecer remuneración.")
+    if pago in (PAGO_SUBVENCION, PAGO_RMV) and monto is not None:
+        rmv = get_parametro_decimal("rmv", Decimal("0"))
+        if rmv and monto < rmv:
             errores.append(
-                f"La jornada ({conv.jornada_horas} h/sem) excede el tope legal de {tope} h/sem."
+                f"La subvención/remuneración (S/ {monto}) no puede ser menor a la RMV "
+                f"vigente (S/ {rmv})."
             )
-
     return errores
+
+
+def _validar_jornada(conv: Convocatoria, regla: dict) -> list[str]:
+    tope_param = regla["tope_jornada_param"]
+    if not tope_param or conv.jornada_horas is None:
+        return []
+    tope = get_parametro_int(tope_param, 0)
+    if tope and conv.jornada_horas > tope:
+        return [
+            f"La jornada ({conv.jornada_horas} h/sem) excede el tope legal de {tope} h/sem."
+        ]
+    return []
 
 
 # --- Transparencia ----------------------------------------------------------

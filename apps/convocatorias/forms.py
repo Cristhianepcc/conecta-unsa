@@ -13,9 +13,15 @@ class ConvocatoriaForm(forms.ModelForm):
     class Meta:
         model = Convocatoria
         # empresa, creada_por y estado los fija la vista; los calculados no se editan.
-        exclude = [
-            "empresa", "creada_por", "estado", "transparencia_pct",
-            "comentario_revision", "fecha_publicacion", "creada_en", "actualizada_en",
+        fields = [
+            "tipo", "titulo", "descripcion", "modalidad", "ubicacion",
+            "duracion_estimada", "fecha_limite", "medio_postulacion",
+            "email_contacto", "no_discriminacion", "subvencion_remuneracion",
+            "jornada_horas", "requiere_convenio", "ciclo_minimo",
+            "tiempo_egreso_meses", "regimen", "bases_url", "cronograma",
+            "entidad_otorgante", "no_vinculo", "incluye_seguro",
+            "banda_salarial_min", "banda_salarial_max", "salario_confidencial",
+            "vacantes", "beneficios", "discapacidad", "carreras_objetivo",
         ]
         widgets = {
             "fecha_limite": forms.DateInput(attrs={"type": "date"}),
