@@ -238,41 +238,57 @@ class Command(BaseCommand):
 
         bajados = actualizadas = 0
         for ruc, (sector, dominio, datos) in EMPRESAS.items():
-            empresa = Empresa.objects.filter(ruc=ruc).first()
-            if not empresa:
-                self.stdout.write(self.style.WARNING(f"  RUC {ruc} no existe; omito."))
+            resultado = self._actualizar_empresa(ruc, sector, dominio, datos, force)
+            if resultado is None:
                 continue
-
-            banner_file = DEST / f"{ruc}-banner.jpg"
-            logo_file = DEST / f"{ruc}-logo.svg"
-            banner_url = f"https://images.unsplash.com/{BANNER[sector]}?w=1200&h=400&fit=crop&q=72"
-
-            try:
-                if _descargar_banner(banner_url, banner_file, force):
-                    bajados += 1
-                if force or not (logo_file.exists() and logo_file.stat().st_size > 0):
-                    logo = _mejor_logo(dominio)
-                    if not logo:
-                        raise RuntimeError(f"sin logo para {dominio}")
-                    logo_file.write_text(_tarjeta_svg(logo), encoding="utf-8")
-                    bajados += 1
-            except Exception as exc:  # noqa: BLE001
-                self.stdout.write(self.style.ERROR(f"  {datos['nombre_comercial']}: error ({exc})"))
-                continue
-
-            # Fija identidad real + rutas de imagen (sobrescribe los datos ficticios).
-            datos = {
-                **datos,
-                "logo_url": f"{STATIC_PREFIX}/{logo_file.name}",
-                "banner_url": f"{STATIC_PREFIX}/{banner_file.name}",
-            }
-            for campo, valor in datos.items():
-                setattr(empresa, campo, valor)
-            empresa.save()
-            actualizadas += 1
-            self.stdout.write(f"  ✓ {empresa.nombre_comercial} ({sector})")
+            bajados += resultado["bajados"]
+            actualizadas += resultado["actualizada"]
 
         self.stdout.write(self.style.SUCCESS(
             f"Empresas reales listas: {actualizadas} actualizadas, "
             f"{bajados} archivos descargados en {DEST}."
         ))
+
+    def _actualizar_empresa(self, ruc, sector, dominio, datos, force):
+        empresa = Empresa.objects.filter(ruc=ruc).first()
+        if not empresa:
+            self.stdout.write(self.style.WARNING(f"  RUC {ruc} no existe; omito."))
+            return None
+
+        banner_file = DEST / f"{ruc}-banner.jpg"
+        logo_file = DEST / f"{ruc}-logo.svg"
+        banner_url = f"https://images.unsplash.com/{BANNER[sector]}?w=1200&h=400&fit=crop&q=72"
+
+        try:
+            bajados = self._descargar_imagenes(
+                banner_url, banner_file, logo_file, dominio, force
+            )
+        except Exception as exc:  # noqa: BLE001
+            self.stdout.write(self.style.ERROR(
+                f"  {datos['nombre_comercial']}: error ({exc})"
+            ))
+            return None
+
+        identidad = {
+            **datos,
+            "logo_url": f"{STATIC_PREFIX}/{logo_file.name}",
+            "banner_url": f"{STATIC_PREFIX}/{banner_file.name}",
+        }
+        for campo, valor in identidad.items():
+            setattr(empresa, campo, valor)
+        empresa.save()
+        self.stdout.write(f"  ✓ {empresa.nombre_comercial} ({sector})")
+        return {"bajados": bajados, "actualizada": 1}
+
+    @staticmethod
+    def _descargar_imagenes(banner_url, banner_file, logo_file, dominio, force):
+        bajados = 0
+        if _descargar_banner(banner_url, banner_file, force):
+            bajados += 1
+        if force or not (logo_file.exists() and logo_file.stat().st_size > 0):
+            logo = _mejor_logo(dominio)
+            if not logo:
+                raise RuntimeError(f"sin logo para {dominio}")
+            logo_file.write_text(_tarjeta_svg(logo), encoding="utf-8")
+            bajados += 1
+        return bajados

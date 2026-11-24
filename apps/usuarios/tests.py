@@ -20,6 +20,25 @@ from apps.usuarios.services import resolver_rol, resolver_rol_y_destino
 User = get_user_model()
 
 
+class RefactoringUsuariosTests(TestCase):
+    def test_tipos_estado_calcula_preferido_silenciado_normal(self):
+        from apps.usuarios.views import _tipos_estado
+
+        user = User.objects.create_user("tipos_estado", password="x")
+        talento = user.perfil_talento if hasattr(user, "perfil_talento") else None
+        if talento is None:
+            from apps.usuarios.models import PerfilTalento
+            talento = PerfilTalento.objects.create(usuario=user)
+
+        talento.tipos_preferidos = ["empleo"]
+        talento.categorias_silenciadas = ["beca"]
+
+        estados = {item["value"]: item["estado"] for item in _tipos_estado(talento)}
+        self.assertEqual(estados["empleo"], "preferido")
+        self.assertEqual(estados["beca"], "silenciado")
+        self.assertEqual(estados["voluntariado"], "normal")
+
+
 class RuteoRolTests(TestCase):
     def test_ca3__correo_en_allowlist_es_admin(self):
         """CA-3: un correo en AdminAllowlist se enruta al panel admin."""

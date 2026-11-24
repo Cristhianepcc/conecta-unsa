@@ -3,6 +3,7 @@
   <button type="button" @click="open = !open" :aria-expanded="open" aria-haspopup="true"
           class="relative inline-flex items-center text-slate-500 hover:text-granate-700" aria-label="Notificaciones">
     <i data-lucide="bell" class="w-5 h-5"></i>
+    <span class="sr-only">Notificaciones</span>
     {% if notificaciones_no_leidas %}
     <span class="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-dorado text-granate-900 text-[10px] font-bold h-4 min-w-4 px-1">
       {{ notificaciones_no_leidas }}

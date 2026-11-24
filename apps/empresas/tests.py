@@ -77,6 +77,56 @@ class SeedCuentasRefactorTests(TestCase):
                 call_command("seed_cuentas")
 
 
+class SeedImagenesRefactorTests(TestCase):
+    def test_mime_png_y_jpeg(self):
+        from apps.empresas.management.commands.seed_imagenes import _mime
+
+        self.assertEqual(_mime(b"\x89PNG\r\n\x1a\n" + b"0" * 24), "image/png")
+        self.assertEqual(_mime(b"\xff\xd8\xff" + b"0" * 24), "image/jpeg")
+
+    def test_tarjeta_svg_contiene_logo(self):
+        from apps.empresas.management.commands.seed_imagenes import _tarjeta_svg
+
+        svg = _tarjeta_svg(b"\x89PNG\r\n\x1a\n" + b"0" * 24)
+        self.assertIn("<svg", svg)
+        self.assertIn("data:image/png;base64,", svg)
+
+    def test_resumen_transparencia_sin_convocatorias(self):
+        from apps.empresas.views import _resumen_transparencia
+
+        self.assertIsNone(_resumen_transparencia([], 0, {}))
+
+    def test_resumen_atencion_separa_observadas_y_por_vencer(self):
+        from datetime import timedelta
+        from apps.empresas.views import _resumen_atencion
+
+        class Conv:
+            estado = ESTADO_PENDIENTE
+            dias_restantes = None
+
+        observada = Conv()
+        observada.estado = "observada"
+        por_vencer = Conv()
+        por_vencer.estado = "publicada"
+        por_vencer.dias_restantes = 3
+
+        resumen = _resumen_atencion([observada, por_vencer])
+        self.assertEqual(resumen["observadas"], 1)
+        self.assertEqual(resumen["por_vencer"], 1)
+
+    def test_dims_png_y_svg(self):
+        from apps.empresas.management.commands.seed_imagenes import _dims
+
+        png = (
+            b"\x89PNG\r\n\x1a\n"
+            + b"\x00" * 8
+            + (128).to_bytes(4, "big")
+            + (64).to_bytes(4, "big")
+        )
+        self.assertEqual(_dims(png), (128, 64))
+        self.assertEqual(_dims(b"<svg viewBox='0 0 512 512'>")[0], 512)
+
+
 class RegistroEmpresaTests(TestCase):
     def test_registro_rechaza_metodos_distintos(self):
         resp = self.client.put(reverse("empresas:registro"))
