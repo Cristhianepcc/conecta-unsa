@@ -1,11 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.views.decorators.http import require_http_methods
 
 from .models import TIPO_GENERAL
 from .services import marcar_leidas
 
 
 @login_required
+@require_http_methods(["GET"])
 def lista(request):
     """Centro de notificaciones (campana). Al abrirlo se marcan como leídas."""
     notificaciones = list(request.user.notificaciones.all()[:50])
@@ -19,6 +21,7 @@ def lista(request):
 
 
 @login_required
+@require_http_methods(["GET"])
 def institucionales(request):
     """Bandeja de mensajes institucionales (comunicados oficiales de la UNSA).
 
@@ -35,7 +38,7 @@ def institucionales(request):
 
 
 @login_required
+@require_http_methods(["POST"])
 def marcar_todas_leidas(request):
-    if request.method == "POST":
-        marcar_leidas(request.user)
+    marcar_leidas(request.user)
     return redirect("notificaciones:lista")

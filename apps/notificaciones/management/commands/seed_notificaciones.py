@@ -40,64 +40,103 @@ class Command(BaseCommand):
         ahora = timezone.now()
         total = 0
 
-        # ---- Egresado: convocatorias pertinentes + fecha límite + resumen ----
-        egresado = User.objects.filter(username="demo_egresado").first()
-        if egresado:
-            pub = Convocatoria.objects.filter(estado=ESTADO_PUBLICADA)
-            # Convocatorias concretas para enlazar (caen a cualquiera publicada si faltan).
-            c_datos = pub.filter(titulo__icontains="Trainee de Datos").first() or pub.first()
-            c_mkt = pub.filter(titulo__icontains="Marketing").first() or pub.last()
-            c_fin = pub.filter(titulo__icontains="Finanzas").first() or pub.first()
-
-            avisos = [
-                # (tipo, mensaje, url, leido, hace)
-                (TIPO_NUEVA_PERTINENTE,
-                 f"Nueva convocatoria para tu perfil: «{c_datos.titulo}» en {c_datos.empresa}." if c_datos else "Nueva convocatoria pertinente para tu perfil.",
-                 _url_conv(c_datos), False, timedelta(minutes=35)),
-                (TIPO_NUEVA_PERTINENTE,
-                 f"«{c_mkt.titulo}» podría interesarte ({c_mkt.empresa})." if c_mkt else "Una nueva convocatoria coincide con tus intereses.",
-                 _url_conv(c_mkt), False, timedelta(hours=5)),
-                (TIPO_FECHA_LIMITE,
-                 f"Última semana para postular a «{c_fin.titulo}»." if c_fin else "Una convocatoria guardada cierra pronto.",
-                 _url_conv(c_fin), False, timedelta(hours=20)),
-                (TIPO_RESUMEN,
-                 "Tu resumen semanal de oportunidades ya está disponible.",
-                 reverse("notificaciones:lista"), True, timedelta(days=2)),
-                (TIPO_GENERAL,
-                 "Completa tu credencial pública para que las empresas te encuentren.",
-                 reverse("usuarios:dashboard"), True, timedelta(days=4)),
-            ]
-            total += self._sembrar(egresado, avisos, ahora)
-
-        # ---- Empresa: convocatoria observada + bienvenida ----
-        empresa_user = User.objects.filter(username="demo_empresa").first()
-        if empresa_user:
-            avisos = [
-                (TIPO_OBSERVADA,
-                 "Tu convocatoria fue observada: ajusta la subvención y vuelve a enviarla.",
-                 reverse("empresas:dashboard"), False, timedelta(hours=8)),
-                (TIPO_GENERAL,
-                 "Bienvenido a CONECTA UNSA. Ya puedes publicar tu primera convocatoria.",
-                 reverse("empresas:dashboard"), True, timedelta(days=3)),
-            ]
-            total += self._sembrar(empresa_user, avisos, ahora)
-
-        # ---- Admin: cola de revisión ----
-        admin_user = User.objects.filter(username="demo_admin").first()
-        if admin_user:
-            pendientes = Convocatoria.objects.filter(estado="pendiente").count()
-            avisos = [
-                (TIPO_GENERAL,
-                 f"Tienes {pendientes} convocatoria(s) pendientes de revisión." if pendientes
-                 else "No hay convocatorias pendientes de revisión.",
-                 reverse("core:panel_admin") if _url_existe("core:panel_admin") else "",
-                 False, timedelta(hours=2)),
-            ]
-            total += self._sembrar(admin_user, avisos, ahora)
+        total += self._sembrar_egresado(ahora)
+        total += self._sembrar_empresa(ahora)
+        total += self._sembrar_admin(ahora)
 
         self.stdout.write(self.style.SUCCESS(
             f"Notificaciones sembradas/aseguradas: {total} (en {Notificacion.objects.count()} totales)."
         ))
+
+    def _sembrar_egresado(self, ahora):
+        egresado = User.objects.filter(username="demo_egresado").first()
+        if egresado is None:
+            return 0
+
+        pub = Convocatoria.objects.filter(estado=ESTADO_PUBLICADA)
+        c_datos = pub.filter(titulo__icontains="Trainee de Datos").first() or pub.first()
+        c_mkt = pub.filter(titulo__icontains="Marketing").first() or pub.last()
+        c_fin = pub.filter(titulo__icontains="Finanzas").first() or pub.first()
+        avisos = [
+            (
+                TIPO_NUEVA_PERTINENTE,
+                f"Nueva convocatoria para tu perfil: «{c_datos.titulo}» en {c_datos.empresa}."
+                if c_datos else "Nueva convocatoria pertinente para tu perfil.",
+                _url_conv(c_datos),
+                False,
+                timedelta(minutes=35),
+            ),
+            (
+                TIPO_NUEVA_PERTINENTE,
+                f"«{c_mkt.titulo}» podría interesarte ({c_mkt.empresa})."
+                if c_mkt else "Una nueva convocatoria coincide con tus intereses.",
+                _url_conv(c_mkt),
+                False,
+                timedelta(hours=5),
+            ),
+            (
+                TIPO_FECHA_LIMITE,
+                f"Última semana para postular a «{c_fin.titulo}»."
+                if c_fin else "Una convocatoria guardada cierra pronto.",
+                _url_conv(c_fin),
+                False,
+                timedelta(hours=20),
+            ),
+            (
+                TIPO_RESUMEN,
+                "Tu resumen semanal de oportunidades ya está disponible.",
+                reverse("notificaciones:lista"),
+                True,
+                timedelta(days=2),
+            ),
+            (
+                TIPO_GENERAL,
+                "Completa tu credencial pública para que las empresas te encuentren.",
+                reverse("usuarios:dashboard"),
+                True,
+                timedelta(days=4),
+            ),
+        ]
+        return self._sembrar(egresado, avisos, ahora)
+
+    def _sembrar_empresa(self, ahora):
+        usuario = User.objects.filter(username="demo_empresa").first()
+        if usuario is None:
+            return 0
+        avisos = [
+            (
+                TIPO_OBSERVADA,
+                "Tu convocatoria fue observada: ajusta la subvención y vuelve a enviarla.",
+                reverse("empresas:dashboard"),
+                False,
+                timedelta(hours=8),
+            ),
+            (
+                TIPO_GENERAL,
+                "Bienvenido a CONECTA UNSA. Ya puedes publicar tu primera convocatoria.",
+                reverse("empresas:dashboard"),
+                True,
+                timedelta(days=3),
+            ),
+        ]
+        return self._sembrar(usuario, avisos, ahora)
+
+    def _sembrar_admin(self, ahora):
+        usuario = User.objects.filter(username="demo_admin").first()
+        if usuario is None:
+            return 0
+        pendientes = Convocatoria.objects.filter(estado="pendiente").count()
+        avisos = [
+            (
+                TIPO_GENERAL,
+                f"Tienes {pendientes} convocatoria(s) pendientes de revisión."
+                if pendientes else "No hay convocatorias pendientes de revisión.",
+                reverse("core:panel_admin") if _url_existe("core:panel_admin") else "",
+                False,
+                timedelta(hours=2),
+            ),
+        ]
+        return self._sembrar(usuario, avisos, ahora)
 
     def _sembrar(self, usuario, avisos, ahora):
         n = 0
