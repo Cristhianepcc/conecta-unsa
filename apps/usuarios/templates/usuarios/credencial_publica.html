@@ -13,26 +13,26 @@
   /* ===== PDF / impresión: constancia A4 limpia ===== */
   @media print {
     @page { size: A4 portrait; margin: 14mm; }
-    html, body { background: #fff !important; }
+    html, body { background: #fff; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .no-print { display: none !important; }
-    .print-only { display: block !important; }
+    .no-print { display: none; }
+    .print-only { display: block; }
 
     /* Membrete fijo y sin sticky/sombra */
-    header { position: static !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
-    main { padding: 0 !important; max-width: 100% !important; }
+    header { position: static; border: 0; box-shadow: none; padding: 0; }
+    main { padding: 0; max-width: 100%; }
 
     /* Una sola columna, apilada y compacta */
-    main > .grid { display: block !important; }
-    main > .grid > * { width: 100% !important; }
+    main > .grid { display: block; }
+    main > .grid > * { width: 100%; }
     aside { margin-top: 1rem; }
 
     /* Tarjetas: sin sombra, sin corte entre páginas */
-    [class*="rounded-2xl"], [class*="rounded-xl"] { box-shadow: none !important; }
+    [class*="rounded-2xl"], [class*="rounded-xl"] { box-shadow: none; }
     section, aside > div, .group { break-inside: avoid; page-break-inside: avoid; }
 
     /* QR un poco más chico en papel */
-    [data-qr] { height: 34mm !important; width: 34mm !important; }
+    [data-qr] { height: 34mm; width: 34mm; }
   }
 </style>
 {% endblock %}

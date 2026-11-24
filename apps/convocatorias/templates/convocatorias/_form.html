@@ -283,7 +283,7 @@ este parcial, para que el botón "Enviar" —fuera de este div— pueda leer lis
           descripcion_completa: this._v('descripcion').length >= 80,
           duracion: !!this._v('duracion_estimada'),
           modalidad_ubicacion: !!(this._v('modalidad') && this._v('ubicacion')),
-          vacantes: parseInt(this._v('vacantes') || '0', 10) > 0,
+          vacantes: Number.parseInt(this._v('vacantes') || '0', 10) > 0,
           beneficios: !!this._v('beneficios'),
           contacto: !!(this._v('email_contacto') || this._v('medio_postulacion')),
           discapacidad: this._chk('discapacidad'),

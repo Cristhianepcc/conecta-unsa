@@ -17,9 +17,9 @@
     <!-- Modal de consentimiento (Eje 5 · Ley 29733): autorizar el uso de datos
          para el matching ANTES de entrar. Es obligatorio: no se cierra hasta
          aceptar los consentimientos obligatorios. -->
-    <div x-show="consentAbierto" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4"
-         role="dialog" aria-modal="true" aria-labelledby="consent_titulo">
+    <dialog x-show="consentAbierto" x-cloak open
+            class="fixed inset-0 z-50 m-auto w-full max-w-md p-0"
+            aria-modal="true" aria-labelledby="consent_titulo">
       <div class="absolute inset-0 bg-slate-900/50"></div>
       <div x-transition class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <div class="flex items-center gap-2 text-granate-700">
@@ -63,7 +63,7 @@
           Acepto y continuar
         </button>
       </div>
-    </div>
+    </dialog>
 
     <!-- DNI con validación en tiempo real (Eje 2 · interoperabilidad) -->
     <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -83,7 +83,7 @@
       </div>
 
       <!-- Mensajes de estado -->
-      <p id="dni_estado" class="mt-2 text-xs" role="status" aria-live="polite">
+      <output id="dni_estado" class="block mt-2 text-xs" aria-live="polite">
         <span x-show="estado === ''" class="text-slate-400">Escribe los 8 dígitos de tu DNI.</span>
         <span x-show="estado === 'validando'" x-cloak class="text-slate-500">Validando con la base académica de la UNSA…</span>
         <template x-if="estado === 'validado'">
@@ -97,7 +97,7 @@
         <span x-show="estado === 'formato'" x-cloak class="text-alerta">
           ⚠️ El DNI debe tener 8 dígitos.
         </span>
-      </p>
+      </output>
     </div>
 
     <!-- Carrera y estado: se autocompletan y bloquean si el DNI valida -->
@@ -186,7 +186,8 @@
             this.estado = 'no_encontrado';
             this._bloquear(false);
           }
-        } catch (e) {
+        } catch (error) {
+          console.error("No se pudo validar el DNI.", error);
           this.estado = '';
           this._bloquear(false);
         }
