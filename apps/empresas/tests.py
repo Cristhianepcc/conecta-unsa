@@ -2,8 +2,11 @@
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import TestCase
 from django.urls import reverse
+from unittest.mock import patch
 
 from apps.usuarios.models import ROL_RECLUTADOR
 
@@ -65,7 +68,20 @@ class EmpresaInvariantesTests(TestCase):
             empresa.full_clean()
 
 
+class SeedCuentasRefactorTests(TestCase):
+    def test_seed_cuentas_exige_password_de_entorno(self):
+        from apps.empresas.management.commands import seed_cuentas
+
+        with patch.object(seed_cuentas, "PASSWORD_DEMO", ""):
+            with self.assertRaises(CommandError):
+                call_command("seed_cuentas")
+
+
 class RegistroEmpresaTests(TestCase):
+    def test_registro_rechaza_metodos_distintos(self):
+        resp = self.client.put(reverse("empresas:registro"))
+        self.assertEqual(resp.status_code, 405)
+
     def test_ca1__registro_crea_empresa_pendiente(self):
         """CA-1: el registro crea la empresa en estado pendiente."""
         resp = self.client.post(reverse("empresas:registro"), _datos_registro())

@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from .models import Empresa, Reclutador
 
 User = get_user_model()
+IMAGE_ACCEPT = "image/*"
 
 
 class EmpresaForm(forms.ModelForm):
@@ -17,8 +18,8 @@ class EmpresaForm(forms.ModelForm):
             "logo_img", "banner_img", "video_url", "descripcion",
         ]
         widgets = {
-            "logo_img": forms.ClearableFileInput(attrs={"accept": "image/*"}),
-            "banner_img": forms.ClearableFileInput(attrs={"accept": "image/*"}),
+            "logo_img": forms.ClearableFileInput(attrs={"accept": IMAGE_ACCEPT}),
+            "banner_img": forms.ClearableFileInput(attrs={"accept": IMAGE_ACCEPT}),
         }
 
 
@@ -33,8 +34,8 @@ class EditarEmpresaForm(forms.ModelForm):
             "logo_img", "banner_img", "video_url", "descripcion",
         ]
         widgets = {
-            "logo_img": forms.ClearableFileInput(attrs={"accept": "image/*"}),
-            "banner_img": forms.ClearableFileInput(attrs={"accept": "image/*"}),
+            "logo_img": forms.ClearableFileInput(attrs={"accept": IMAGE_ACCEPT}),
+            "banner_img": forms.ClearableFileInput(attrs={"accept": IMAGE_ACCEPT}),
         }
 
 

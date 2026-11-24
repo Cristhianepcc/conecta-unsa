@@ -14,9 +14,11 @@ Uso:
     python manage.py seed_cuentas
 """
 
+import os
+
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from apps.empresas.models import ESTADO_ACTIVA, Empresa, Reclutador
 from apps.usuarios.models import ROL_RECLUTADOR
@@ -24,7 +26,7 @@ from apps.usuarios.services import asegurar_perfil
 
 User = get_user_model()
 
-PASSWORD_DEMO = "demo12345"
+PASSWORD_DEMO = os.environ.get("DEMO_PASSWORD", "")
 
 # ruc -> (email_login, nombres, ap_paterno, ap_materno, cargo, dni, telefono)
 # Emails con el dominio real de cada empresa (ver seed_imagenes). Demo: cualquiera
@@ -55,6 +57,10 @@ class Command(BaseCommand):
     help = "Crea una cuenta de reclutador (login por email) para cada empresa de la demo."
 
     def handle(self, *args, **options):
+        if not PASSWORD_DEMO:
+            raise CommandError(
+                "DEMO_PASSWORD no está configurada. Define DEMO_PASSWORD en el entorno."
+            )
         filas = []
         for ruc, datos in RECLUTADORES.items():
             email, nombres, ap_pat, ap_mat, cargo, dni, tel = datos
