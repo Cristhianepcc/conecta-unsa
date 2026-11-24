@@ -73,33 +73,45 @@ def _contexto_dashboard_empresa(empresa, contexto):
                     a["cumplen"] += 1
         contexto["convocatorias"] = convs
         contexto["conteos"] = conteos
-        # Banda de atención: lo accionable primero (observadas / por vencer ≤7 días).
-        observadas = [c for c in convs if c.estado == ESTADO_OBSERVADA]
-        por_vencer = [
-            c
-            for c in convs
-            if c.estado == "publicada"
-            and c.dias_restantes is not None
-            and 0 <= c.dias_restantes <= 7
-        ]
-        contexto["atencion"] = {
-            "observadas": len(observadas),
-            "obs_unica": observadas[0] if len(observadas) == 1 else None,
-            "por_vencer": len(por_vencer),
-        }
-        if convs:
-            criterios = sorted(
-                agg.values(), key=lambda a: (a["cumplen"] / len(convs), -a["puntos"])
-            )
-            for a in criterios:
-                a["total"] = len(convs)
-                a["falta"] = len(convs) - a["cumplen"]
-            contexto["transparencia_resumen"] = {
-                "promedio": round(suma_pct / len(convs)),
-                "total": len(convs),
-                "criterios": criterios[:4],
-            }
+        contexto["atencion"] = _resumen_atencion(convs)
+        contexto["transparencia_resumen"] = _resumen_transparencia(
+            convs, suma_pct, agg
+        )
     return contexto
+
+
+def _resumen_atencion(convs):
+    observadas = [conv for conv in convs if conv.estado == ESTADO_OBSERVADA]
+    por_vencer = [
+        conv
+        for conv in convs
+        if conv.estado == "publicada"
+        and conv.dias_restantes is not None
+        and 0 <= conv.dias_restantes <= 7
+    ]
+    return {
+        "observadas": len(observadas),
+        "obs_unica": observadas[0] if len(observadas) == 1 else None,
+        "por_vencer": len(por_vencer),
+    }
+
+
+def _resumen_transparencia(convs, suma_pct, agg):
+    if not convs:
+        return None
+    total = len(convs)
+    criterios = sorted(
+        agg.values(),
+        key=lambda item: (item["cumplen"] / total, -item["puntos"]),
+    )
+    for item in criterios:
+        item["total"] = total
+        item["falta"] = total - item["cumplen"]
+    return {
+        "promedio": round(suma_pct / total),
+        "total": total,
+        "criterios": criterios[:4],
+    }
 
 
 def _guardar_y_enviar(request, conv):

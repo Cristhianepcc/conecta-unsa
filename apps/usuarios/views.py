@@ -326,7 +326,7 @@ def ayuda(request):
 
 
 # --- 07 Perfil de talento y credenciales ------------------------------------
-def _guardar_preferencias(request, pref_form, talento):
+def _guardar_preferencias(request, pref_form):
     from apps.core import constants
 
     obj = pref_form.save(commit=False)
@@ -355,6 +355,27 @@ def _agregar_credencial(request, cred_form, talento):
     return redirect(PERFIL_URL)
 
 
+def _tipos_estado(talento):
+    from apps.core import constants
+
+    preferidos = talento.tipos_preferidos or []
+    silenciados = talento.categorias_silenciadas or []
+    return [
+        {
+            "value": value,
+            "label": label,
+            "estado": (
+                "preferido"
+                if value in preferidos
+                else "silenciado"
+                if value in silenciados
+                else "normal"
+            ),
+        }
+        for value, label in constants.TIPOS_CONVOCATORIA
+    ]
+
+
 @egresado_required
 @require_http_methods(["GET", "POST"])
 def perfil(request):
@@ -366,7 +387,7 @@ def perfil(request):
     if request.method == "POST" and "guardar_preferencias" in request.POST:
         pref_form = PreferenciasForm(request.POST, instance=talento)
         if pref_form.is_valid():
-            respuesta = _guardar_preferencias(request, pref_form, talento)
+            respuesta = _guardar_preferencias(request, pref_form)
             if respuesta:
                 return respuesta
     else:
@@ -378,16 +399,7 @@ def perfil(request):
         if cred_form.is_valid():
             return _agregar_credencial(request, cred_form, talento)
 
-    preferidos = talento.tipos_preferidos or []
-    silenciados = talento.categorias_silenciadas or []
-    tipos_estado = [
-        {
-            "value": v,
-            "label": label,
-            "estado": "preferido" if v in preferidos else ("silenciado" if v in silenciados else "normal"),
-        }
-        for v, label in constants.TIPOS_CONVOCATORIA
-    ]
+    tipos_estado = _tipos_estado(talento)
 
     return render(
         request,

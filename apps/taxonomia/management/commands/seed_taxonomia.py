@@ -17,6 +17,9 @@ from django.db import transaction
 
 from apps.taxonomia.models import Area, Carrera, Facultad, GrupoAfin
 
+ENFERMERIA = "Enfermería"
+ADMINISTRACION = "Administración"
+
 # Estructura canónica: Área -> Facultad -> [Carreras]
 TAXONOMIA = {
     "Ingenierías y Ciencias Básicas": {
@@ -54,7 +57,7 @@ TAXONOMIA = {
     },
     "Biomédicas": {
         "Medicina": ["Medicina"],
-        "Enfermería": ["Enfermería"],
+        ENFERMERIA: [ENFERMERIA],
         "Ciencias Biológicas y Agropecuarias": [
             "Biología",
             "Agronomía",
@@ -63,8 +66,8 @@ TAXONOMIA = {
         ],
     },
     "Ciencias Sociales y Humanidades": {
-        "Administración": [
-            "Administración",
+        ADMINISTRACION: [
+            ADMINISTRACION,
             "Marketing",
             "Gestión",
         ],

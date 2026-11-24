@@ -12,7 +12,9 @@ from .services import (
     resumen_semanal_landing,
 )
 
+REVISAR_CONVOCATORIA_URL = "core:revisar_convocatoria"
 
+@require_http_methods(["GET"])
 def home(request):
     """Landing pública institucional con métricas honestas (feature 09)."""
     return render(
@@ -27,19 +29,23 @@ def home(request):
     )
 
 
+@require_http_methods(["GET"])
 def como_funciona(request):
     return render(request, "core/como_funciona.html")
 
 
+@require_http_methods(["GET"])
 def privacidad(request):
     return render(request, "core/privacidad.html")
 
 
+@require_http_methods(["GET"])
 def terminos(request):
     return render(request, "core/terminos.html")
 
 
 @admin_required
+@require_http_methods(["GET"])
 def panel_admin(request):
     """Bandeja priorizada + métricas para la Bolsa de Trabajo (feature 12)."""
     from django.db.models import Avg, Q
@@ -219,7 +225,7 @@ def revisar_convocatoria(request, pk):
             elif accion == "observar":
                 if not comentario:
                     messages.error(request, "Debes escribir un comentario para observar.")
-                    return redirect("core:revisar_convocatoria", pk=pk)
+                    return redirect(REVISAR_CONVOCATORIA_URL, pk=pk)
                 flujo.observar(conv, comentario)
                 messages.success(request, "Convocatoria observada y notificada a la empresa.")
             elif accion == "rechazar":
@@ -227,10 +233,10 @@ def revisar_convocatoria(request, pk):
                 messages.success(request, "Convocatoria rechazada.")
             else:
                 messages.error(request, "Acción no válida.")
-                return redirect("core:revisar_convocatoria", pk=pk)
+                return redirect(REVISAR_CONVOCATORIA_URL, pk=pk)
         except flujo.TransicionInvalida as e:
             messages.error(request, str(e))
-            return redirect("core:revisar_convocatoria", pk=pk)
+            return redirect(REVISAR_CONVOCATORIA_URL, pk=pk)
         return redirect(_destino_bandeja(request))
 
     from apps.convocatorias.services import faltantes_nivel_1
