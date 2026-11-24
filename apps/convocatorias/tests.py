@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from django.core.management import call_command
 from django.test import TestCase
+from django.urls import reverse
 
 from apps.core import constants
 from apps.empresas.models import ESTADO_ACTIVA, Empresa
@@ -55,6 +56,22 @@ class BaseConvocatoria(TestCase):
 
 
 class TiposTests(BaseConvocatoria):
+    def test_formulario_no_usa_exclude(self):
+        from .forms import ConvocatoriaForm
+
+        self.assertFalse(hasattr(ConvocatoriaForm._meta, "exclude") and ConvocatoriaForm._meta.exclude)
+        self.assertIn("titulo", ConvocatoriaForm._meta.fields)
+        self.assertNotIn("estado", ConvocatoriaForm._meta.fields)
+
+    def test_detalle_rechaza_post(self):
+        from django.contrib.auth import get_user_model
+
+        user = get_user_model().objects.create_user("conv-user", password="x")
+        conv = self._conv()
+        self.client.force_login(user)
+        resp = self.client.post(reverse("convocatorias:detalle", args=[conv.pk]))
+        self.assertEqual(resp.status_code, 405)
+
     def test_ca1__ocho_tipos(self):
         """CA-1: existen 8 tipos de convocatoria soportados."""
         self.assertEqual(len(constants.TIPOS_CONVOCATORIA), 8)

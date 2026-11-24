@@ -14,8 +14,10 @@ from apps.matching.services import compatibilidad, puntuar
 from .interacciones import alternar_guardada, esta_guardada, registrar_vista
 from .models import ESTADO_PUBLICADA, Convocatoria
 
+DETALLE_URL = "convocatorias:detalle"
 
 @login_required
+@require_http_methods(["GET"])
 def detalle(request, pk):
     """Detalle de la convocatoria; registra la vista (CA-3)."""
     conv = get_object_or_404(Convocatoria, pk=pk)
@@ -36,6 +38,7 @@ def detalle(request, pk):
 
 
 @login_required
+@require_http_methods(["GET"])
 def postular(request, pk):
     """Registra la vista y redirige al medio de postulación externo (CA-3).
 
@@ -46,10 +49,10 @@ def postular(request, pk):
     conv = get_object_or_404(Convocatoria, pk=pk, estado=ESTADO_PUBLICADA)
     registrar_vista(request.user, conv)
     if not conv.activa:  # vencida aunque el cron no la haya caducado (feature 13)
-        return redirect("convocatorias:detalle", pk=pk)
+        return redirect(DETALLE_URL, pk=pk)
     destino = conv.medio_efectivo
     if not destino:
-        return redirect("convocatorias:detalle", pk=pk)
+        return redirect(DETALLE_URL, pk=pk)
     if conv.medio_es_correo:
         # Caso común: la empresa solo deja un correo para enviar el CV.
         # Abrimos un borrador con el asunto pre-llenado (adjuntar CV lo hace el postulante).
@@ -71,4 +74,4 @@ def guardar(request, pk):
     destino = request.POST.get("next")
     if destino:
         return redirect(destino)
-    return redirect("convocatorias:detalle", pk=pk)
+    return redirect(DETALLE_URL, pk=pk)
